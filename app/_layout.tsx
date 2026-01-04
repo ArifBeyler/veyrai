@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Colors } from '../src/ui/theme';
 import { usePushNotifications } from '../src/hooks/usePushNotifications';
 import { useSessionStore } from '../src/state/useSessionStore';
+import { useRevenueCat } from '../src/hooks/useRevenueCat';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -33,6 +34,9 @@ const RootLayout = () => {
 
   // Initialize push notifications
   usePushNotifications();
+  
+  // Initialize RevenueCat
+  useRevenueCat();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -67,6 +71,7 @@ const RootLayout = () => {
             <Stack.Screen name="welcome" />
             <Stack.Screen name="auth" />
             <Stack.Screen name="onboarding" />
+            <Stack.Screen name="onboarding-video" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
               name="create"

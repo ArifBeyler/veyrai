@@ -89,7 +89,8 @@ const CreateScreen = () => {
   const clearSelectedGarments = useSessionStore((s) => s.clearSelectedGarments);
   const setStyleNote = useSessionStore((s) => s.setStyleNote);
 
-  const hasCredits = !freeCreditsUsed || isPremium;
+  // Trial logic: First generation is free, then show paywall
+  const shouldShowPaywall = freeCreditsUsed && !isPremium;
 
   const selectedProfile = useMemo(
     () => profiles.find((p) => p.id === selectedProfileId),
@@ -362,7 +363,8 @@ const CreateScreen = () => {
   };
 
   const handleGenerate = async () => {
-    if (!hasCredits) {
+    // Check if user should see paywall (2nd generation and not premium)
+    if (shouldShowPaywall) {
       router.push('/paywall');
       return;
     }
@@ -426,7 +428,7 @@ const CreateScreen = () => {
           <StepDot active={step === 'garment'} completed={step === 'confirm'} />
           <StepDot active={step === 'confirm'} />
         </View>
-        {hasCredits && (
+        {!shouldShowPaywall && (
           <View style={styles.creditBadge}>
             <Image
               source={require('../../full3dicons/images/sparkle.png')}
@@ -434,7 +436,7 @@ const CreateScreen = () => {
               resizeMode="contain"
             />
             <LabelSmall color="accent">
-              {isPremium ? '∞' : '1'}
+              {isPremium ? '∞' : freeCreditsUsed ? '0' : '1'}
             </LabelSmall>
           </View>
         )}

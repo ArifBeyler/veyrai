@@ -395,8 +395,28 @@ export const useSessionStore = create<SessionState>()(
       sampleGarmentsLoaded: false,
       loadSampleGarments: () => {
         const state = get();
-        if (state.sampleGarmentsLoaded) return;
         
+        // Önce Unsplash görsellerini temizle
+        const filteredGarments = state.garments.filter(garment => {
+          if (garment.imageUri && (
+            garment.imageUri.includes('unsplash.com') ||
+            garment.imageUri.includes('unsplash') ||
+            garment.imageUri.includes('images.unsplash')
+          )) {
+            return false;
+          }
+          return true;
+        });
+        
+        if (state.sampleGarmentsLoaded) {
+          // Zaten yüklendiyse sadece Unsplash görsellerini temizle
+          set({
+            garments: filteredGarments,
+          });
+          return;
+        }
+        
+        // İlk yükleme - yeni sample garments ekle
         const sampleGarments = SAMPLE_GARMENTS.map((garment, index) => ({
           ...garment,
           id: `sample-${index + 1}-${Date.now()}`,
@@ -404,7 +424,7 @@ export const useSessionStore = create<SessionState>()(
         }));
         
         set({
-          garments: [...state.garments, ...sampleGarments],
+          garments: [...filteredGarments, ...sampleGarments],
           sampleGarmentsLoaded: true,
         });
       },

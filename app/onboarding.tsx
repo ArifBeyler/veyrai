@@ -12,10 +12,6 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolateColor,
   FadeIn,
   FadeInDown,
 } from 'react-native-reanimated';
@@ -23,41 +19,20 @@ import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
 import {
   DisplaySmall,
-  HeadlineMedium,
+  HeadlineLarge,
   BodyLarge,
   BodyMedium,
   LabelMedium,
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { GlassCard } from '../src/ui/GlassCard';
-import { useSessionStore } from '../src/state/useSessionStore';
 
 const { width, height } = Dimensions.get('window');
-
-type StyleOption = {
-  id: string;
-  label: string;
-  icon: any;
-};
-
-const STYLE_OPTIONS: StyleOption[] = [
-  { id: 'minimal', label: 'Minimal', icon: require('../full3dicons/images/t-shirt.png') },
-  { id: 'street', label: 'Street', icon: require('../full3dicons/images/clothes-hanger.png') },
-  { id: 'oldmoney', label: 'Old Money', icon: require('../full3dicons/images/polo-shirt.png') },
-  { id: 'techwear', label: 'Techwear', icon: require('../full3dicons/images/wardrobe.png') },
-  { id: 'casual', label: 'Casual', icon: require('../full3dicons/images/flannel-shirt.png') },
-  { id: 'formal', label: 'Formal', icon: require('../full3dicons/images/button-down-shirt.png') },
-];
 
 const OnboardingScreen = () => {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedStyle, setSelectedStyle] = useState('casual');
-  const [backgroundMode, setBackgroundMode] = useState<'original' | 'studio'>('original');
-
-  const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
-  const setPreferences = useSessionStore((s) => s.setPreferences);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
@@ -76,24 +51,14 @@ const OnboardingScreen = () => {
     if (currentStep < 2) {
       goToStep(currentStep + 1);
     } else {
+      // Last step -> go to video screen
       handleComplete();
     }
   };
 
   const handleComplete = () => {
-    setPreferences({
-      style: selectedStyle as any,
-      backgroundMode,
-      quality: 'normal',
-    });
-    setHasCompletedOnboarding(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/(tabs)/home');
-  };
-
-  const handleStyleSelect = (id: string) => {
-    setSelectedStyle(id);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.replace('/onboarding-video');
   };
 
   return (
@@ -127,214 +92,113 @@ const OnboardingScreen = () => {
         scrollEventThrottle={16}
         bounces={false}
       >
-        {/* Step 1: Photo Guide */}
+        {/* Step 1: "Kombin denemek artık saniyeler" */}
         <View style={styles.stepContainer}>
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
             <View style={styles.stepHeader}>
-              <LabelMedium color="accent">ADIM 1/3</LabelMedium>
               <DisplaySmall style={styles.stepTitle}>
-                Fotoğraf Rehberi
+                Kombin denemek{'\n'}artık saniyeler
               </DisplaySmall>
-              <BodyMedium color="secondary" style={styles.stepDescription}>
-                En iyi sonuç için 3 farklı açıdan fotoğraf çek
-              </BodyMedium>
+              <BodyLarge color="secondary" style={styles.stepDescription}>
+                Fotoğrafını yükle, istediğin parçaları seç, sonucu gör.
+              </BodyLarge>
             </View>
 
-            <GlassCard style={styles.photoGuideCard}>
-              <View style={styles.photoGuideContent}>
-                <View style={styles.poseItem}>
-                  <View style={styles.poseIconContainer}>
-                    <Image
-                      source={require('../full3dicons/images/profile.png')}
-                      style={styles.poseIcon}
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <LabelMedium>Önden</LabelMedium>
-                </View>
-                <View style={styles.poseItem}>
-                  <View style={styles.poseIconContainer}>
-                    <Image
-                      source={require('../full3dicons/images/profile-icon.png')}
-                      style={styles.poseIcon}
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <LabelMedium>Yandan</LabelMedium>
-                </View>
-                <View style={styles.poseItem}>
-                  <View style={styles.poseIconContainer}>
-                    <Image
-                      source={require('../full3dicons/images/camera.png')}
-                      style={styles.poseIcon}
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <LabelMedium>Açılı</LabelMedium>
-                </View>
-              </View>
-
-              <View style={styles.tipContainer}>
-                <Image
-                  source={require('../full3dicons/images/ai-sparkle.png')}
-                  style={styles.tipIcon}
-                  resizeMode="contain"
-                />
-                <BodyMedium color="secondary">
-                  Omuz hizasında, iyi aydınlatılmış ortamda çek
-                </BodyMedium>
-              </View>
-            </GlassCard>
+            <View style={styles.illustrationContainer}>
+              <Image
+                source={require('../full3dicons/images/t-shirts.png')}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
+            </View>
           </Animated.View>
         </View>
 
-        {/* Step 2: Style Preferences */}
+        {/* Step 2: "Tek parça değil, komple kombin" */}
         <View style={styles.stepContainer}>
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
             <View style={styles.stepHeader}>
-              <LabelMedium color="accent">ADIM 2/3</LabelMedium>
               <DisplaySmall style={styles.stepTitle}>
-                Stil Tercihin
+                Tek parça değil,{'\n'}komple kombin
               </DisplaySmall>
-              <BodyMedium color="secondary" style={styles.stepDescription}>
-                Tarzını seç, daha uyumlu öneriler al
-              </BodyMedium>
+              <BodyLarge color="secondary" style={styles.stepDescription}>
+                Etek, bluz, ayakkabı, çanta... İstediğin kadar parça seç
+              </BodyLarge>
             </View>
 
-            <View style={styles.styleGrid}>
-              {STYLE_OPTIONS.map((option) => (
-                <GlassCard
-                  key={option.id}
-                  style={[
-                    styles.styleCard,
-                    selectedStyle === option.id && styles.styleCardSelected,
-                  ]}
-                  onPress={() => handleStyleSelect(option.id)}
-                  variant={selectedStyle === option.id ? 'elevated' : 'default'}
-                >
+            <View style={styles.multiItemContainer}>
+              <View style={styles.itemStack}>
+                <GlassCard style={styles.itemCard}>
                   <Image
-                    source={option.icon}
-                    style={styles.styleIcon}
+                    source={require('../full3dicons/images/t-shirt.png')}
+                    style={styles.itemIcon}
                     resizeMode="contain"
                   />
-                  <LabelMedium
-                    color={selectedStyle === option.id ? 'accent' : 'primary'}
-                  >
-                    {option.label}
-                  </LabelMedium>
                 </GlassCard>
-              ))}
-            </View>
-
-            <View style={styles.backgroundSection}>
-              <HeadlineMedium style={styles.sectionTitle}>
-                Arka Plan
-              </HeadlineMedium>
-              <View style={styles.backgroundOptions}>
-                <GlassCard
-                  style={[
-                    styles.backgroundCard,
-                    backgroundMode === 'original' && styles.backgroundCardSelected,
-                  ]}
-                  onPress={() => setBackgroundMode('original')}
-                >
+                <GlassCard style={[styles.itemCard, styles.itemCard2]}>
                   <Image
-                    source={require('../full3dicons/images/photo.png')}
-                    style={styles.backgroundIcon}
+                    source={require('../full3dicons/images/polo-shirt.png')}
+                    style={styles.itemIcon}
                     resizeMode="contain"
                   />
-                  <LabelMedium
-                    color={backgroundMode === 'original' ? 'accent' : 'primary'}
-                  >
-                    Orijinal
-                  </LabelMedium>
                 </GlassCard>
-                <GlassCard
-                  style={[
-                    styles.backgroundCard,
-                    backgroundMode === 'studio' && styles.backgroundCardSelected,
-                  ]}
-                  onPress={() => setBackgroundMode('studio')}
-                >
+                <GlassCard style={[styles.itemCard, styles.itemCard3]}>
                   <Image
-                    source={require('../full3dicons/images/home.png')}
-                    style={styles.backgroundIcon}
+                    source={require('../full3dicons/images/button-down-shirt.png')}
+                    style={styles.itemIcon}
                     resizeMode="contain"
                   />
-                  <LabelMedium
-                    color={backgroundMode === 'studio' ? 'accent' : 'primary'}
-                  >
-                    Stüdyo
-                  </LabelMedium>
+                </GlassCard>
+                <GlassCard style={[styles.itemCard, styles.itemCard4]}>
+                  <Image
+                    source={require('../full3dicons/images/flannel-shirt.png')}
+                    style={styles.itemIcon}
+                    resizeMode="contain"
+                  />
                 </GlassCard>
               </View>
             </View>
           </Animated.View>
         </View>
 
-        {/* Step 3: Free Trial */}
+        {/* Step 3: "Sonuç + Kaydet/Paylaş" */}
         <View style={styles.stepContainer}>
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
             <View style={styles.stepHeader}>
-              <LabelMedium color="accent">ADIM 3/3</LabelMedium>
               <DisplaySmall style={styles.stepTitle}>
-                Ücretsiz Dene
+                Ürettiğin sonucu{'\n'}kaydet, tekrar dene
               </DisplaySmall>
-              <BodyMedium color="secondary" style={styles.stepDescription}>
-                İlk denemende ne alacaksın?
-              </BodyMedium>
+              <BodyLarge color="secondary" style={styles.stepDescription}>
+                Sonucu kaydet, paylaş veya yeni kombinler dene
+              </BodyLarge>
             </View>
 
-            <GlassCard style={styles.freeTrialCard}>
-              <View style={styles.freeTrialBadge}>
+            <View style={styles.resultContainer}>
+              <GlassCard style={styles.resultCard}>
                 <Image
-                  source={require('../full3dicons/images/sparkle.png')}
-                  style={styles.freeTrialIcon}
+                  source={require('../full3dicons/images/photo.png')}
+                  style={styles.resultIcon}
                   resizeMode="contain"
                 />
-                <HeadlineMedium color="accent">1 ÜCRETSİZ DENEME</HeadlineMedium>
-              </View>
-
-              <View style={styles.benefitsList}>
-                <BenefitItem
-                  icon={require('../full3dicons/images/t-shirt.png')}
-                  text="1 kıyafet denemesi"
-                />
-                <BenefitItem
-                  icon={require('../full3dicons/images/ai-sparkle.png')}
-                  text="AI ile gerçekçi sonuç"
-                />
-                <BenefitItem
-                  icon={require('../full3dicons/images/photo.png')}
-                  text="Sonucu kaydet ve paylaş"
-                />
-              </View>
-            </GlassCard>
-
-            <View style={styles.beforeAfterContainer}>
-              <View style={styles.beforeAfterItem}>
-                <Image
-                  source={require('../full3dicons/images/profile.png')}
-                  style={styles.beforeAfterImage}
-                  resizeMode="contain"
-                />
-                <LabelMedium color="secondary">Önce</LabelMedium>
-              </View>
-              <View style={styles.arrowContainer}>
-                <Image
-                  source={require('../full3dicons/images/sparkle.png')}
-                  style={styles.arrowIcon}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.beforeAfterItem}>
-                <Image
-                  source={require('../full3dicons/images/t-shirts.png')}
-                  style={styles.beforeAfterImage}
-                  resizeMode="contain"
-                />
-                <LabelMedium color="secondary">Sonra</LabelMedium>
-              </View>
+                <View style={styles.resultActions}>
+                  <View style={styles.actionButton}>
+                    <Image
+                      source={require('../full3dicons/images/sparkle.png')}
+                      style={styles.actionIcon}
+                      resizeMode="contain"
+                    />
+                    <LabelMedium>Kaydet</LabelMedium>
+                  </View>
+                  <View style={styles.actionButton}>
+                    <Image
+                      source={require('../full3dicons/images/ai-sparkle.png')}
+                      style={styles.actionIcon}
+                      resizeMode="contain"
+                    />
+                    <LabelMedium>Paylaş</LabelMedium>
+                  </View>
+                </View>
+              </GlassCard>
             </View>
           </Animated.View>
         </View>
@@ -343,32 +207,13 @@ const OnboardingScreen = () => {
       {/* Bottom CTA */}
       <View style={[styles.bottomContainer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
-          title={currentStep === 2 ? 'İlk Denemeni Yap' : 'Devam Et'}
+          title={currentStep === 2 ? 'Başlayalım' : 'Devam'}
           onPress={handleNext}
         />
-        {currentStep < 2 && (
-          <PrimaryButton
-            title="Atla"
-            variant="ghost"
-            onPress={() => goToStep(2)}
-          />
-        )}
       </View>
     </View>
   );
 };
-
-type BenefitItemProps = {
-  icon: any;
-  text: string;
-};
-
-const BenefitItem: React.FC<BenefitItemProps> = ({ icon, text }) => (
-  <View style={styles.benefitItem}>
-    <Image source={icon} style={styles.benefitIcon} resizeMode="contain" />
-    <BodyMedium>{text}</BodyMedium>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
@@ -380,6 +225,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingHorizontal: Spacing.page,
+    paddingBottom: 16,
   },
   progressDot: {
     width: 8,
@@ -401,157 +247,109 @@ const styles = StyleSheet.create({
   stepContent: {
     flex: 1,
     paddingTop: 32,
+    justifyContent: 'center',
   },
   stepHeader: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 48,
   },
   stepTitle: {
-    marginTop: 8,
     textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 48,
   },
   stepDescription: {
-    marginTop: 8,
     textAlign: 'center',
+    paddingHorizontal: Spacing.page,
+    lineHeight: 28,
   },
-  photoGuideCard: {
-    padding: 24,
-  },
-  photoGuideContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 24,
-  },
-  poseItem: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  poseIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.dark.surface,
+  illustrationContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.strokeLight,
+    paddingVertical: 48,
   },
-  poseIcon: {
-    width: 44,
-    height: 44,
+  illustration: {
+    width: width * 0.6,
+    height: width * 0.6,
   },
-  tipContainer: {
+  multiItemContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  itemStack: {
+    width: 200,
+    height: 200,
+    position: 'relative',
+  },
+  itemCard: {
+    width: 120,
+    height: 120,
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.dark.surface,
+  },
+  itemCard2: {
+    top: 20,
+    left: 40,
+    zIndex: 1,
+  },
+  itemCard3: {
+    top: 40,
+    left: 80,
+    zIndex: 2,
+  },
+  itemCard4: {
+    top: 60,
+    left: 120,
+    zIndex: 3,
+  },
+  itemIcon: {
+    width: 64,
+    height: 64,
+  },
+  resultContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  resultCard: {
+    width: width * 0.8,
+    aspectRatio: 0.75,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 24,
+  },
+  resultIcon: {
+    width: 120,
+    height: 120,
+  },
+  resultActions: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    padding: 16,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: Colors.accent.primaryDim,
     borderRadius: BorderRadius.md,
   },
-  tipIcon: {
-    width: 24,
-    height: 24,
-  },
-  styleGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-  },
-  styleCard: {
-    width: (width - Spacing.page * 2 - 24) / 3,
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  styleCardSelected: {
-    borderColor: Colors.accent.primary,
-  },
-  styleIcon: {
-    width: 36,
-    height: 36,
-  },
-  backgroundSection: {
-    marginTop: 32,
-  },
-  sectionTitle: {
-    marginBottom: 16,
-  },
-  backgroundOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  backgroundCard: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 16,
-  },
-  backgroundCardSelected: {
-    borderColor: Colors.accent.primary,
-  },
-  backgroundIcon: {
-    width: 28,
-    height: 28,
-  },
-  freeTrialCard: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  freeTrialBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 24,
-  },
-  freeTrialIcon: {
-    width: 32,
-    height: 32,
-  },
-  benefitsList: {
-    width: '100%',
-    gap: 16,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  benefitIcon: {
-    width: 32,
-    height: 32,
-  },
-  beforeAfterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 32,
-    gap: 16,
-  },
-  beforeAfterItem: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  beforeAfterImage: {
-    width: 80,
-    height: 80,
-  },
-  arrowContainer: {
-    padding: 8,
-  },
-  arrowIcon: {
-    width: 32,
-    height: 32,
-    tintColor: Colors.accent.primary,
+  actionIcon: {
+    width: 20,
+    height: 20,
   },
   bottomContainer: {
     paddingHorizontal: Spacing.page,
-    gap: 8,
+    paddingTop: 20,
   },
 });
 
 export default OnboardingScreen;
-

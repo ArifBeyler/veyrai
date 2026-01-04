@@ -21,9 +21,17 @@ const SplashScreen = () => {
   const [isChecking, setIsChecking] = useState(true);
 
   const setDeviceHash = useSessionStore((s) => s.setDeviceHash);
+  const hasCompletedOnboarding = useSessionStore((s) => s.hasCompletedOnboarding);
 
   const navigateToNext = async () => {
     try {
+      // Check onboarding status first
+      if (!hasCompletedOnboarding) {
+        // User hasn't seen onboarding -> go to onboarding
+        router.replace('/onboarding');
+        return;
+      }
+
       // Check if user is authenticated
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -59,13 +67,14 @@ const SplashScreen = () => {
     scale.value = withTiming(1, { duration: 600 });
     textOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
 
-    // Navigate after delay
+    // Navigate after delay (0.8-1.5s as per docs)
+    const splashDuration = 1200; // 1.2s
     const timeout = setTimeout(() => {
       setIsChecking(false);
       opacity.value = withTiming(0, { duration: 300 }, () => {
         runOnJS(navigateToNext)();
       });
-    }, 1800);
+    }, splashDuration);
 
     return () => clearTimeout(timeout);
   }, []);

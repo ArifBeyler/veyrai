@@ -112,11 +112,23 @@ const AuthScreen = () => {
         
         console.log('Signup success:', data.user?.email);
         
-        // Supabase may require email confirmation
-        if (data.user && !data.session) {
-          Alert.alert('Başarılı', 'Kayıt tamamlandı! Email adresinizi doğrulayın veya giriş yapın.');
-          setIsLogin(true);
-        } else if (data.session) {
+        // Email doğrulama yok - direkt otomatik giriş
+        if (data.user && data.session) {
+          clearUserData();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setHasCompletedOnboarding(true);
+          router.replace('/(tabs)/home');
+        } else if (data.user) {
+          // User created but no session - try to sign in
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: email.trim().toLowerCase(),
+            password,
+          });
+          
+          if (signInError) {
+            throw signInError;
+          }
+          
           clearUserData();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setHasCompletedOnboarding(true);
@@ -126,10 +138,11 @@ const AuthScreen = () => {
     } catch (error: any) {
       console.error('Auth error:', error);
       let msg = 'Bir hata oluştu';
-      if (error.message?.includes('Invalid login')) {
+      if (error.message?.includes('Invalid login') || error.message?.includes('Invalid credentials')) {
         msg = 'Email veya şifre hatalı';
-      } else if (error.message?.includes('already registered')) {
-        msg = 'Bu email zaten kayıtlı';
+      } else if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
+        msg = 'Bu email zaten kayıtlı. Giriş yapmayı deneyin.';
+        setIsLogin(true); // Switch to login tab
       } else if (error.message) {
         msg = error.message;
       }

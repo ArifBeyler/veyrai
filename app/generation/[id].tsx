@@ -8,6 +8,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Pressable,
   Share,
   StyleSheet,
   View,
@@ -85,6 +86,7 @@ const GenerationScreen = () => {
   const isPremium = useSessionStore((s) => s.isPremium);
   const setFreeCreditsUsed = useSessionStore((s) => s.setFreeCreditsUsed);
   const addJob = useSessionStore((s) => s.addJob);
+  const removeJob = useSessionStore((s) => s.removeJob);
 
   // Animation values
   const shimmerPosition = useSharedValue(-width);
@@ -314,6 +316,30 @@ const GenerationScreen = () => {
     router.replace('/create');
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Görseli Sil',
+      'Bu görseli silmek istediğinize emin misiniz?',
+      [
+        {
+          text: 'İptal',
+          style: 'cancel',
+        },
+        {
+          text: 'Sil',
+          style: 'destructive',
+          onPress: () => {
+            if (params.id) {
+              removeJob(params.id);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              router.replace('/(tabs)/home');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const currentMessage = messages[currentMessageIndex];
 
   return (
@@ -332,7 +358,12 @@ const GenerationScreen = () => {
           variant="glass"
           size="sm"
         />
-        <View style={{ width: 36 }} />
+        {state === 'success' && resultImageUrl && (
+          <Pressable onPress={handleDelete} style={styles.deleteButton}>
+            <LabelMedium color="error">Sil</LabelMedium>
+          </Pressable>
+        )}
+        {state !== 'success' && <View style={{ width: 36 }} />}
       </View>
 
       {/* Content */}
@@ -521,6 +552,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.page,
     paddingBottom: 16,
+  },
+  deleteButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.dark.surface,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
   },
   content: {
     flex: 1,

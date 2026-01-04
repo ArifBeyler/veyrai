@@ -6,6 +6,7 @@ import {
   Image,
   Dimensions,
   Pressable,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,19 +35,26 @@ import {
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { IconButton } from '../src/ui/IconButton';
-import { useSessionStore } from '../src/state/useSessionStore';
+import { useRevenueCat } from '../src/hooks/useRevenueCat';
+import type { PurchasesPackage } from 'react-native-purchases';
 
 const { width, height } = Dimensions.get('window');
 
-type Plan = 'monthly' | 'yearly';
+type Plan = 'monthly' | 'yearly' | 'lifetime';
 
 const PaywallScreen = () => {
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<Plan>('yearly');
   const [showClose, setShowClose] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const setIsPremium = useSessionStore((s) => s.setIsPremium);
+  
+  const {
+    isLoading,
+    offerings,
+    purchase,
+    restore,
+    getPackage,
+    refreshOfferings,
+  } = useRevenueCat();
 
   // Show close button after 2 seconds
   useEffect(() => {
@@ -55,6 +63,11 @@ const PaywallScreen = () => {
     }, 2000);
     return () => clearTimeout(timeout);
   }, []);
+
+  // Refresh offerings on mount
+  useEffect(() => {
+    refreshOfferings();
+  }, [refreshOfferings]);
 
   const closeOpacity = useSharedValue(0);
 
@@ -79,20 +92,61 @@ const PaywallScreen = () => {
   };
 
   const handleSubscribe = async () => {
-    setIsLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-    // Simulate subscription process
-    setTimeout(() => {
-      setIsPremium(true);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      
+      // Get package from offerings
+      const packageToPurchase = getPackage(selectedPlan);
+      
+      if (!packageToPurchase) {
+        Alert.alert('Hata', 'Seçilen plan bulunamadı. Lütfen daha sonra tekrar deneyin.');
+        return;
+      }
+      
+      // Purchase package
+      await purchase(packageToPurchase);
+      
+      // Success - navigate back
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
-    }, 1500);
+    } catch (error: any) {
+      // Error is already handled in hook
+      console.error('Purchase error:', error);
+    }
   };
 
-  const handleRestorePurchases = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Restore purchases via RevenueCat
+  const handleRestorePurchases = async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await restore();
+    } catch (error: any) {
+      // Error is already handled in hook
+      console.error('Restore error:', error);
+    }
+  };
+
+  // Get package pricing
+  const getPackagePrice = (plan: Plan): string => {
+    const packageToCheck = getPackage(plan);
+    if (packageToCheck?.product?.priceString) {
+      return packageToCheck.product.priceString;
+    }
+    // Fallback prices
+    switch (plan) {
+      case 'monthly':
+        return '₺49.99/ay';
+      case 'yearly':
+        return '₺299.99/yıl';
+      case 'lifetime':
+        return '₺999.99';
+      default:
+        return '';
+    }
+  };
+
+  // Check if package is available
+  const isPackageAvailable = (plan: Plan): boolean => {
+    return getPackage(plan) !== null;
   };
 
   return (
@@ -151,11 +205,11 @@ const PaywallScreen = () => {
             resizeMode="contain"
           />
           <DisplaySmall style={styles.headerTitle}>
-            Premium'a{'\n'}
-            <DisplaySmall color="accent">Yükselt</DisplaySmall>
+            Unlimited{'\n'}
+            <DisplaySmall color="accent">Combos</DisplaySmall>
           </DisplaySmall>
           <BodyLarge color="secondary" style={styles.headerSubtitle}>
-            Sınırsız deneme ve özel özellikler
+            Sınırsız kombin üretimi + yüksek kalite
           </BodyLarge>
         </Animated.View>
 
@@ -189,82 +243,122 @@ const PaywallScreen = () => {
 
           <View style={styles.plansContainer}>
             {/* Yearly Plan */}
-            <Pressable onPress={() => handleSelectPlan('yearly')}>
-              <GlassCard
-                style={[
-                  styles.planCard,
-                  selectedPlan === 'yearly' && styles.planCardSelected,
-                ]}
-              >
-                {/* Best value badge */}
-                <View style={styles.bestValueBadge}>
-                  <LabelSmall style={styles.bestValueText}>En Avantajlı</LabelSmall>
-                </View>
-
-                <View style={styles.planHeader}>
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      selectedPlan === 'yearly' && styles.radioOuterSelected,
-                    ]}
-                  >
-                    {selectedPlan === 'yearly' && <View style={styles.radioInner} />}
+            {isPackageAvailable('yearly') && (
+              <Pressable onPress={() => handleSelectPlan('yearly')}>
+                <GlassCard
+                  style={[
+                    styles.planCard,
+                    selectedPlan === 'yearly' && styles.planCardSelected,
+                  ]}
+                >
+                  {/* Best value badge */}
+                  <View style={styles.bestValueBadge}>
+                    <LabelSmall style={styles.bestValueText}>En Avantajlı</LabelSmall>
                   </View>
-                  <View style={styles.planInfo}>
-                    <HeadlineMedium>Yıllık</HeadlineMedium>
-                    <BodySmall color="secondary">12 aylık erişim</BodySmall>
+
+                  <View style={styles.planHeader}>
+                    <View
+                      style={[
+                        styles.radioOuter,
+                        selectedPlan === 'yearly' && styles.radioOuterSelected,
+                      ]}
+                    >
+                      {selectedPlan === 'yearly' && <View style={styles.radioInner} />}
+                    </View>
+                    <View style={styles.planInfo}>
+                      <HeadlineMedium>Yıllık</HeadlineMedium>
+                      <BodySmall color="secondary">12 aylık erişim</BodySmall>
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.planPricing}>
-                  <HeadlineSmall color="accent">₺299.99</HeadlineSmall>
-                  <BodySmall color="tertiary">/yıl</BodySmall>
-                </View>
+                  <View style={styles.planPricing}>
+                    <HeadlineSmall color="accent">{getPackagePrice('yearly').split('/')[0]}</HeadlineSmall>
+                    {getPackagePrice('yearly').includes('/') && (
+                      <BodySmall color="tertiary">/{getPackagePrice('yearly').split('/')[1]}</BodySmall>
+                    )}
+                  </View>
 
-                <View style={styles.savingsBadge}>
-                  <LabelSmall color="success">%50 Tasarruf</LabelSmall>
-                </View>
-              </GlassCard>
-            </Pressable>
+                  <View style={styles.savingsBadge}>
+                    <LabelSmall color="success">%50 Tasarruf</LabelSmall>
+                  </View>
+                </GlassCard>
+              </Pressable>
+            )}
 
             {/* Monthly Plan */}
-            <Pressable onPress={() => handleSelectPlan('monthly')}>
-              <GlassCard
-                style={[
-                  styles.planCard,
-                  selectedPlan === 'monthly' && styles.planCardSelected,
-                ]}
-              >
-                <View style={styles.planHeader}>
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      selectedPlan === 'monthly' && styles.radioOuterSelected,
-                    ]}
-                  >
-                    {selectedPlan === 'monthly' && <View style={styles.radioInner} />}
+            {isPackageAvailable('monthly') && (
+              <Pressable onPress={() => handleSelectPlan('monthly')}>
+                <GlassCard
+                  style={[
+                    styles.planCard,
+                    selectedPlan === 'monthly' && styles.planCardSelected,
+                  ]}
+                >
+                  <View style={styles.planHeader}>
+                    <View
+                      style={[
+                        styles.radioOuter,
+                        selectedPlan === 'monthly' && styles.radioOuterSelected,
+                      ]}
+                    >
+                      {selectedPlan === 'monthly' && <View style={styles.radioInner} />}
+                    </View>
+                    <View style={styles.planInfo}>
+                      <HeadlineMedium>Aylık</HeadlineMedium>
+                      <BodySmall color="secondary">1 aylık erişim</BodySmall>
+                    </View>
                   </View>
-                  <View style={styles.planInfo}>
-                    <HeadlineMedium>Aylık</HeadlineMedium>
-                    <BodySmall color="secondary">1 aylık erişim</BodySmall>
-                  </View>
-                </View>
 
-                <View style={styles.planPricing}>
-                  <HeadlineSmall color="accent">₺49.99</HeadlineSmall>
-                  <BodySmall color="tertiary">/ay</BodySmall>
-                </View>
-              </GlassCard>
-            </Pressable>
+                  <View style={styles.planPricing}>
+                    <HeadlineSmall color="accent">{getPackagePrice('monthly').split('/')[0]}</HeadlineSmall>
+                    {getPackagePrice('monthly').includes('/') && (
+                      <BodySmall color="tertiary">/{getPackagePrice('monthly').split('/')[1]}</BodySmall>
+                    )}
+                  </View>
+                </GlassCard>
+              </Pressable>
+            )}
+
+            {/* Lifetime Plan */}
+            {isPackageAvailable('lifetime') && (
+              <Pressable onPress={() => handleSelectPlan('lifetime')}>
+                <GlassCard
+                  style={[
+                    styles.planCard,
+                    selectedPlan === 'lifetime' && styles.planCardSelected,
+                  ]}
+                >
+                  <View style={styles.planHeader}>
+                    <View
+                      style={[
+                        styles.radioOuter,
+                        selectedPlan === 'lifetime' && styles.radioOuterSelected,
+                      ]}
+                    >
+                      {selectedPlan === 'lifetime' && <View style={styles.radioInner} />}
+                    </View>
+                    <View style={styles.planInfo}>
+                      <HeadlineMedium>Ömür Boyu</HeadlineMedium>
+                      <BodySmall color="secondary">Tek seferlik ödeme</BodySmall>
+                    </View>
+                  </View>
+
+                  <View style={styles.planPricing}>
+                    <HeadlineSmall color="accent">{getPackagePrice('lifetime')}</HeadlineSmall>
+                  </View>
+                </GlassCard>
+              </Pressable>
+            )}
           </View>
         </Animated.View>
 
         {/* Subscribe button */}
         <Animated.View entering={SlideInUp.delay(400).springify()} style={styles.subscribeSection}>
           <PrimaryButton
-            title={`Premium Ol - ${selectedPlan === 'yearly' ? '₺299.99/yıl' : '₺49.99/ay'}`}
+            title={`Satın Al - ${getPackagePrice(selectedPlan)}`}
             onPress={handleSubscribe}
             loading={isLoading}
+            disabled={!isPackageAvailable(selectedPlan)}
           />
 
           <Pressable onPress={handleRestorePurchases} style={styles.restoreButton}>
@@ -474,4 +568,3 @@ const styles = StyleSheet.create({
 });
 
 export default PaywallScreen;
-
