@@ -59,15 +59,27 @@ export const uploadImage = async (
   uri: string,
   userId: string
 ): Promise<string> => {
+  console.log('Upload starting - bucket:', bucket, 'uri:', uri.substring(0, 100));
+
+  // Check if image is already on Supabase - no need to upload again
+  const supabaseUrl = 'https://gclvocafkllnosnbuzvw.supabase.co';
+  if (uri.startsWith(supabaseUrl)) {
+    // Extract relative path from full URL
+    // URL format: https://xxx.supabase.co/storage/v1/object/public/garment-images/samples/xxx.jpg
+    const pathMatch = uri.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)$/);
+    if (pathMatch) {
+      console.log('Image already on Supabase, using existing path:', pathMatch[1]);
+      return pathMatch[1];
+    }
+  }
+
   const fileName = `${Date.now()}.jpg`;
   const filePath = `${userId}/${fileName}`;
 
-  console.log('Upload starting - bucket:', bucket, 'uri:', uri.substring(0, 100));
-
   try {
-    // Ensure URI has proper format
+    // Ensure URI has proper format for local files
     let fileUri = uri;
-    if (!uri.startsWith('file://') && !uri.startsWith('content://')) {
+    if (!uri.startsWith('file://') && !uri.startsWith('content://') && !uri.startsWith('http')) {
       fileUri = `file://${uri}`;
     }
 
@@ -117,26 +129,85 @@ export const uploadImage = async (
   }
 };
 
+// Kategori isimlerini Türkçe'den İngilizce'ye çevir
+const categoryToEnglish: Record<string, string> = {
+  tops: 'top/shirt',
+  bottoms: 'pants/trousers',
+  onepiece: 'dress/jumpsuit',
+  outerwear: 'jacket/coat',
+  footwear: 'shoes',
+  bags: 'bag',
+  accessories: 'accessory',
+};
+
 /**
- * Create a try-on job using fal.ai FASHN
- * Takes user photo + garment photo -> generates real try-on result
+ * Build AI prompt based on selected garments
+ */
+const buildOutfitPrompt = (garmentCategories: string[]): string => {
+  if (garmentCategories.length === 0) return 'Put this clothing item on the person';
+  
+  if (garmentCategories.length === 1) {
+    const category = categoryToEnglish[garmentCategories[0]] || 'clothing item';
+    return `Put this ${category} on the person`;
+  }
+  
+  // Multiple items - build outfit description
+  const englishCategories = garmentCategories
+    .map(cat => categoryToEnglish[cat] || cat)
+    .filter(Boolean);
+  
+  if (englishCategories.length === 2) {
+    return `Dress the person in this complete outfit: ${englishCategories[0]} and ${englishCategories[1]}`;
+  }
+  
+  // 3+ items
+  const lastItem = englishCategories.pop();
+  return `Dress the person in this complete outfit: ${englishCategories.join(', ')}, and ${lastItem}`;
+};
+
+/**
+ * Create a try-on job with support for multiple garments
+ * Takes user photo + one or more garment photos -> generates real try-on result
  */
 export const createTryOnJob = async (
   humanImagePath: string,
-  garmentImagePath: string,
-  _modelPhotoUrl?: string // unused for now
+  garmentImagePaths: string | string[],
+  garmentCategories?: string[],
+  styleNote?: string,
+  _modelPhotoUrl?: string
 ): Promise<CreateTryOnResponse> => {
-  // Get public URLs for images
   const supabaseUrl = 'https://gclvocafkllnosnbuzvw.supabase.co';
   const userPhotoUrl = `${supabaseUrl}/storage/v1/object/public/human-images/${humanImagePath}`;
-  const garmentUrl = `${supabaseUrl}/storage/v1/object/public/garment-images/${garmentImagePath}`;
+  
+  // Handle single or multiple garments
+  const paths = Array.isArray(garmentImagePaths) ? garmentImagePaths : [garmentImagePaths];
+  const garmentUrls = paths.map(path => 
+    `${supabaseUrl}/storage/v1/object/public/garment-images/${path}`
+  );
 
-  console.log('Calling fal.ai FASHN try-on with:', { userPhotoUrl, garmentUrl });
+  // Build prompt based on categories
+  const categories = garmentCategories || [];
+  let prompt = buildOutfitPrompt(categories);
+  
+  // Add style note if provided
+  if (styleNote && styleNote.trim()) {
+    prompt += `. Style: ${styleNote.trim()}`;
+  }
+
+  console.log('Creating try-on with:', { 
+    userPhotoUrl, 
+    garmentUrls, 
+    categories,
+    prompt 
+  });
 
   const response = await supabase.functions.invoke('imagen-tryon', {
     body: {
       userPhotoUrl,
-      garmentUrl,
+      garmentUrls, // Now supports array
+      garmentUrl: garmentUrls[0], // Backwards compatibility
+      prompt,
+      categories,
     },
   });
 

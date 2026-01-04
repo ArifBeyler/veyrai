@@ -34,13 +34,15 @@ const getCategoryIcon = (category: Category) => {
   switch (category) {
     case 'tops':
       return require('../../full3dicons/images/t-shirt.png');
-    case 'pants':
+    case 'bottoms':
       return require('../../full3dicons/images/clothes-hanger.png');
-    case 'dresses':
+    case 'onepiece':
       return require('../../full3dicons/images/clothes-hanger.png');
     case 'outerwear':
       return require('../../full3dicons/images/flannel-shirt.png');
-    case 'shoes':
+    case 'footwear':
+      return require('../../full3dicons/images/clothes-hanger.png');
+    case 'bags':
       return require('../../full3dicons/images/clothes-hanger.png');
     case 'accessories':
       return require('../../full3dicons/images/clothes-hanger.png');
@@ -52,10 +54,11 @@ const getCategoryIcon = (category: Category) => {
 const CATEGORIES: { key: Category; label: string }[] = [
   { key: 'all', label: 'Tümü' },
   { key: 'tops', label: 'Üst' },
-  { key: 'pants', label: 'Alt' },
-  { key: 'dresses', label: 'Elbise' },
-  { key: 'outerwear', label: 'Dış' },
-  { key: 'shoes', label: 'Ayakkabı' },
+  { key: 'bottoms', label: 'Alt' },
+  { key: 'onepiece', label: 'Elbise' },
+  { key: 'outerwear', label: 'Dış Giyim' },
+  { key: 'footwear', label: 'Ayakkabı' },
+  { key: 'bags', label: 'Çanta' },
   { key: 'accessories', label: 'Aksesuar' },
 ];
 
@@ -78,10 +81,11 @@ const WardrobeScreen = () => {
     const counts: Record<Category, number> = {
       all: garments.length,
       tops: 0,
-      pants: 0,
-      dresses: 0,
+      bottoms: 0,
+      onepiece: 0,
       outerwear: 0,
-      shoes: 0,
+      footwear: 0,
+      bags: 0,
       accessories: 0,
     };
     garments.forEach((g) => {
@@ -295,6 +299,15 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
               resizeMode="contain"
             />
           )}
+          {/* Dene butonu - görsel içinde */}
+          <View style={styles.tryOnBadge}>
+            <Image
+              source={require('../../full3dicons/images/ai-sparkle.png')}
+              style={styles.tryOnIcon}
+              resizeMode="contain"
+            />
+            <LabelSmall style={styles.tryOnText}>Dene</LabelSmall>
+          </View>
         </View>
         <View style={styles.garmentInfo}>
           <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
@@ -302,14 +315,6 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
             <LabelSmall color="secondary">{garment.brand}</LabelSmall>
           )}
         </View>
-        <View style={styles.tryOnBadge}>
-          <LabelSmall color="accent">Dene</LabelSmall>
-        </View>
-        {garment.isUserAdded && (
-          <View style={styles.userAddedBadge}>
-            <LabelSmall color="primary">👤</LabelSmall>
-          </View>
-        )}
       </GlassCard>
     </Pressable>
   </Animated.View>
@@ -424,23 +429,29 @@ const styles = StyleSheet.create({
   },
   tryOnBadge: {
     position: 'absolute',
-    top: 8,
+    bottom: 8,
     right: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: Colors.accent.primaryDim,
-    borderRadius: BorderRadius.sm,
-  },
-  userAddedBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.surfaceElevated,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(163, 230, 53, 0.95)',
+    borderRadius: BorderRadius.pill,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  tryOnIcon: {
+    width: 14,
+    height: 14,
+    tintColor: '#0B0B0C',
+  },
+  tryOnText: {
+    color: '#0B0B0C',
+    fontWeight: '700',
   },
   emptyCard: {
     alignItems: 'center',

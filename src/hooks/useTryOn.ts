@@ -60,7 +60,7 @@ export const useUserCredits = () => {
 
 /**
  * Hook to create a new try-on job
- * Now supports model photo URL for enhanced face swap + try-on flow
+ * Now supports multiple garments for outfit creation
  */
 export const useCreateTryOn = () => {
   const queryClient = useQueryClient();
@@ -68,21 +68,29 @@ export const useCreateTryOn = () => {
   return useMutation({
     mutationFn: async ({
       humanImageUri,
-      garmentImageUri,
+      garmentImageUris,
+      garmentCategories,
+      styleNote,
       userId,
       modelPhotoUrl,
     }: {
       humanImageUri: string;
-      garmentImageUri: string;
+      garmentImageUris: string[];
+      garmentCategories?: string[];
+      styleNote?: string;
       userId: string;
       modelPhotoUrl?: string;
     }) => {
-      // Upload images first
+      // Upload human image
       const humanImagePath = await uploadImage('human-images', humanImageUri, userId);
-      const garmentImagePath = await uploadImage('garment-images', garmentImageUri, userId);
+      
+      // Upload all garment images
+      const garmentImagePaths = await Promise.all(
+        garmentImageUris.map(uri => uploadImage('garment-images', uri, userId))
+      );
 
-      // Create the job with optional model photo
-      return createTryOnJob(humanImagePath, garmentImagePath, modelPhotoUrl);
+      // Create the job with multiple garments
+      return createTryOnJob(humanImagePath, garmentImagePaths, garmentCategories, styleNote, modelPhotoUrl);
     },
     onSuccess: () => {
       // Invalidate related queries
@@ -210,6 +218,7 @@ export const useJobPolling = (jobId: string | null, enabled: boolean = true) => 
 /**
  * Combined hook for the full try-on flow
  * Uses sync mode - result returns immediately from create (NO POLLING)
+ * Now supports multiple garments for outfit creation
  */
 export const useTryOnFlow = () => {
   const createTryOn = useCreateTryOn();
@@ -222,18 +231,25 @@ export const useTryOnFlow = () => {
   const startTryOn = useCallback(
     async (
       humanImageUri: string,
-      garmentImageUri: string,
+      garmentImageUris: string | string[],
       userId: string,
-      modelPhotoUrl?: string
+      modelPhotoUrl?: string,
+      garmentCategories?: string[],
+      styleNote?: string
     ) => {
       try {
         setSyncResult(null);
         setSyncStatus('IN_PROGRESS');
         setError(null);
         
+        // Normalize to array
+        const uris = Array.isArray(garmentImageUris) ? garmentImageUris : [garmentImageUris];
+        
         const response = await createTryOn.mutateAsync({
           humanImageUri,
-          garmentImageUri,
+          garmentImageUris: uris,
+          garmentCategories,
+          styleNote,
           userId,
           modelPhotoUrl,
         });

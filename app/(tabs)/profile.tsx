@@ -5,11 +5,22 @@ import {
   ScrollView,
   Image,
   Alert,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { 
+  FadeInDown, 
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withRepeat,
+  withTiming,
+  interpolate,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, BorderRadius } from '../../src/ui/theme';
 import {
@@ -25,34 +36,41 @@ import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
 
+const { width } = Dimensions.get('window');
+
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const isPremium = useSessionStore((s) => s.isPremium);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
-  const userPhotos = useSessionStore((s) => s.userPhotos);
+  const profiles = useSessionStore((s) => s.profiles);
   const generations = useSessionStore((s) => s.generations);
-  const preferences = useSessionStore((s) => s.preferences);
-  const clearUserPhotos = useSessionStore((s) => s.clearUserPhotos);
+  const garments = useSessionStore((s) => s.garments);
+  const clearUserData = useSessionStore((s) => s.clearUserData);
+  const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
 
   const hasCredits = !freeCreditsUsed || isPremium;
+  const totalPhotos = profiles.reduce((acc, p) => acc + p.photos.length, 0);
+  const completedGenerations = generations.filter((g) => g.status === 'completed').length;
 
   const handleUpgrade = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/paywall');
   };
 
-  const handleDeletePhotos = () => {
+  const handleLogout = () => {
     Alert.alert(
-      'Fotoğrafları Sil',
-      'Tüm fotoğraflarınız silinecek. Emin misiniz?',
+      'Çıkış Yap',
+      'Tüm verileriniz silinecek ve başlangıç ekranına yönlendirileceksiniz. Emin misiniz?',
       [
         { text: 'İptal', style: 'cancel' },
         {
-          text: 'Sil',
+          text: 'Çıkış Yap',
           style: 'destructive',
           onPress: () => {
-            clearUserPhotos();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            clearUserData();
+            setHasCompletedOnboarding(false);
+            router.replace('/welcome');
           },
         },
       ]
@@ -60,13 +78,13 @@ const ProfileScreen = () => {
   };
 
   const handlePrivacy = () => {
-    // TODO: Open privacy policy
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // TODO: Open privacy policy URL
   };
 
   const handleSupport = () => {
-    // TODO: Open support
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // TODO: Open support URL
   };
 
   return (
@@ -137,98 +155,108 @@ const ProfileScreen = () => {
           </GlassCard>
         </Animated.View>
 
-        {/* Stats */}
+        {/* Stats - Redesigned */}
         <Animated.View
           entering={FadeInDown.delay(300).springify()}
-          style={styles.statsRow}
+          style={styles.statsContainer}
         >
-          <GlassCard style={styles.statCard}>
-            <Image
-              source={require('../../full3dicons/images/camera.png')}
-              style={styles.statIcon}
-              resizeMode="contain"
+          <HeadlineSmall style={styles.sectionTitle}>İstatistikler</HeadlineSmall>
+          
+          <View style={styles.statsGrid}>
+            <StatCard 
+              icon={require('../../full3dicons/images/profile-icon.png')}
+              value={profiles.length}
+              label="Profil"
+              color="#A855F7"
+              delay={350}
             />
-            <HeadlineSmall color="accent">{userPhotos.length}</HeadlineSmall>
-            <LabelSmall color="secondary">Fotoğraf</LabelSmall>
-          </GlassCard>
-
-          <GlassCard style={styles.statCard}>
-            <Image
-              source={require('../../full3dicons/images/ai-sparkle.png')}
-              style={styles.statIcon}
-              resizeMode="contain"
-            />
-            <HeadlineSmall color="accent">{generations.length}</HeadlineSmall>
-            <LabelSmall color="secondary">Deneme</LabelSmall>
-          </GlassCard>
-
-          <GlassCard style={styles.statCard}>
-            <Image
-              source={require('../../full3dicons/images/photo.png')}
-              style={styles.statIcon}
-              resizeMode="contain"
-            />
-            <HeadlineSmall color="accent">
-              {generations.filter((g) => g.status === 'completed').length}
-            </HeadlineSmall>
-            <LabelSmall color="secondary">Başarılı</LabelSmall>
-          </GlassCard>
-        </Animated.View>
-
-        {/* Preferences */}
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
-          <HeadlineSmall style={styles.sectionTitle}>Tercihler</HeadlineSmall>
-          <GlassCard style={styles.preferencesCard}>
-            <PreferenceItem
-              label="Stil"
-              value={preferences.style.charAt(0).toUpperCase() + preferences.style.slice(1)}
-            />
-            <View style={styles.divider} />
-            <PreferenceItem
-              label="Arka Plan"
-              value={preferences.backgroundMode === 'original' ? 'Orijinal' : 'Stüdyo'}
-            />
-            <View style={styles.divider} />
-            <PreferenceItem
-              label="Kalite"
-              value={preferences.quality === 'normal' ? 'Normal' : 'HD'}
-              isPremium={preferences.quality === 'hd'}
-            />
-          </GlassCard>
-        </Animated.View>
-
-        {/* Settings */}
-        <Animated.View entering={FadeInDown.delay(500).springify()}>
-          <HeadlineSmall style={styles.sectionTitle}>Ayarlar</HeadlineSmall>
-
-          <GlassCard style={styles.settingsCard}>
-            <SettingsItem
+            <StatCard 
               icon={require('../../full3dicons/images/camera.png')}
-              title="Fotoğrafları Yönet"
-              subtitle={`${userPhotos.length} fotoğraf`}
-              onPress={handleDeletePhotos}
-              destructive
+              value={totalPhotos}
+              label="Fotoğraf"
+              color="#06B6D4"
+              delay={400}
+            />
+            <StatCard 
+              icon={require('../../full3dicons/images/ai-sparkle.png')}
+              value={generations.length}
+              label="Deneme"
+              color="#F59E0B"
+              delay={450}
+            />
+            <StatCard 
+              icon={require('../../full3dicons/images/photo.png')}
+              value={completedGenerations}
+              label="Başarılı"
+              color="#10B981"
+              delay={500}
+            />
+          </View>
+        </Animated.View>
+
+        {/* Quick Actions */}
+        <Animated.View entering={FadeInDown.delay(550).springify()}>
+          <HeadlineSmall style={styles.sectionTitle}>Hızlı İşlemler</HeadlineSmall>
+          
+          <GlassCard style={styles.actionsCard}>
+            <ActionItem
+              icon={require('../../full3dicons/images/profile-icon.png')}
+              title="Profilleri Yönet"
+              subtitle={`${profiles.length} profil`}
+              onPress={() => router.push('/select-profile')}
+            />
+            <View style={styles.divider} />
+            <ActionItem
+              icon={require('../../full3dicons/images/photo.png')}
+              title="Galeriye Git"
+              subtitle={`${completedGenerations} görsel`}
+              onPress={() => router.push('/(tabs)/gallery')}
             />
           </GlassCard>
+        </Animated.View>
+
+        {/* Support */}
+        <Animated.View entering={FadeInDown.delay(600).springify()}>
+          <HeadlineSmall style={styles.sectionTitle}>Destek</HeadlineSmall>
 
           <GlassCard style={styles.settingsCard}>
-            <SettingsItem
+            <ActionItem
+              icon={require('../../full3dicons/images/sparkle.png')}
+              title="Yardım ve Destek"
+              onPress={handleSupport}
+            />
+            <View style={styles.divider} />
+            <ActionItem
               icon={require('../../full3dicons/images/profile-icon.png')}
               title="Gizlilik Politikası"
               onPress={handlePrivacy}
             />
-            <View style={styles.divider} />
-            <SettingsItem
-              icon={require('../../full3dicons/images/sparkle.png')}
-              title="Destek"
-              onPress={handleSupport}
-            />
           </GlassCard>
+        </Animated.View>
+
+        {/* Logout Button */}
+        <Animated.View entering={FadeInDown.delay(700).springify()}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={['rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.05)']}
+              style={styles.logoutGradient}
+            />
+            <Image
+              source={require('../../full3dicons/images/home.png')}
+              style={styles.logoutIcon}
+              resizeMode="contain"
+            />
+            <LabelMedium color="error">Çıkış Yap</LabelMedium>
+          </TouchableOpacity>
         </Animated.View>
 
         {/* Version */}
         <Animated.View
-          entering={FadeInDown.delay(600).springify()}
+          entering={FadeInDown.delay(800).springify()}
           style={styles.versionContainer}
         >
           <BodySmall color="tertiary">FIT-SWAP v1.0.0</BodySmall>
@@ -238,60 +266,87 @@ const ProfileScreen = () => {
   );
 };
 
-type PreferenceItemProps = {
+type StatCardProps = {
+  icon: any;
+  value: number;
   label: string;
-  value: string;
-  isPremium?: boolean;
+  color: string;
+  delay: number;
 };
 
-const PreferenceItem: React.FC<PreferenceItemProps> = ({
-  label,
-  value,
-  isPremium,
-}) => (
-  <View style={styles.preferenceItem}>
-    <LabelMedium color="secondary">{label}</LabelMedium>
-    <View style={styles.preferenceValue}>
-      <LabelMedium>{value}</LabelMedium>
-      {isPremium && (
-        <View style={styles.premiumBadge}>
-          <LabelSmall color="accent">Premium</LabelSmall>
-        </View>
-      )}
-    </View>
-  </View>
-);
+const StatCard: React.FC<StatCardProps> = ({ icon, value, label, color, delay }) => {
+  const scale = useSharedValue(1);
+  
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
-type SettingsItemProps = {
+  const handlePress = () => {
+    scale.value = withSpring(0.95, {}, () => {
+      scale.value = withSpring(1);
+    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  return (
+    <Animated.View 
+      entering={FadeInDown.delay(delay).springify()}
+      style={[animatedStyle]}
+    >
+      <TouchableOpacity 
+        onPress={handlePress}
+        activeOpacity={0.9}
+        style={styles.statCardTouchable}
+      >
+        <LinearGradient
+          colors={[`${color}20`, `${color}05`]}
+          style={styles.statCardGradient}
+        />
+        <View style={[styles.statIconContainer, { backgroundColor: `${color}15` }]}>
+          <Image
+            source={icon}
+            style={styles.statIcon}
+            resizeMode="contain"
+          />
+        </View>
+        <HeadlineMedium style={{ color }}>{value}</HeadlineMedium>
+        <LabelSmall color="secondary">{label}</LabelSmall>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+type ActionItemProps = {
   icon: any;
   title: string;
   subtitle?: string;
   onPress: () => void;
-  destructive?: boolean;
 };
 
-const SettingsItem: React.FC<SettingsItemProps> = ({
+const ActionItem: React.FC<ActionItemProps> = ({
   icon,
   title,
   subtitle,
   onPress,
-  destructive,
 }) => (
-  <GlassCard
-    style={styles.settingsItem}
+  <TouchableOpacity
+    style={styles.actionItem}
     onPress={onPress}
-    variant="default"
+    activeOpacity={0.7}
   >
     <Image
       source={icon}
-      style={[styles.settingsIcon, destructive && styles.destructiveIcon]}
+      style={styles.actionIcon}
       resizeMode="contain"
     />
-    <View style={styles.settingsText}>
-      <LabelMedium color={destructive ? 'error' : 'primary'}>{title}</LabelMedium>
+    <View style={styles.actionText}>
+      <LabelMedium>{title}</LabelMedium>
       {subtitle && <LabelSmall color="secondary">{subtitle}</LabelSmall>}
     </View>
-  </GlassCard>
+    <View style={styles.actionArrow}>
+      <BodySmall color="secondary">›</BodySmall>
+    </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
@@ -304,7 +359,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.page,
-    gap: 20,
+    gap: 24,
   },
   header: {
     marginBottom: 8,
@@ -332,43 +387,64 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 16,
-    gap: 4,
-  },
-  statIcon: {
-    width: 28,
-    height: 28,
-    marginBottom: 4,
-  },
   sectionTitle: {
     marginBottom: 12,
   },
-  preferencesCard: {
-    padding: 0,
+  statsContainer: {
+    gap: 0,
   },
-  preferenceItem: {
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  statCardTouchable: {
+    width: (width - Spacing.page * 2 - 12) / 2,
+    backgroundColor: Colors.dark.surfaceDim,
+    borderRadius: BorderRadius.lg,
     padding: 16,
-  },
-  preferenceValue: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.dark.strokeLight,
+    overflow: 'hidden',
   },
-  premiumBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    backgroundColor: Colors.accent.primaryDim,
-    borderRadius: BorderRadius.sm,
+  statCardGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  statIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  statIcon: {
+    width: 32,
+    height: 32,
+  },
+  actionsCard: {
+    padding: 0,
+  },
+  actionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 16,
+  },
+  actionIcon: {
+    width: 24,
+    height: 24,
+    opacity: 0.8,
+  },
+  actionText: {
+    flex: 1,
+    gap: 2,
+  },
+  actionArrow: {
+    width: 24,
+    alignItems: 'center',
   },
   divider: {
     height: 1,
@@ -377,33 +453,30 @@ const styles = StyleSheet.create({
   },
   settingsCard: {
     padding: 0,
-    marginBottom: 12,
   },
-  settingsItem: {
+  logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
     padding: 16,
-    gap: 16,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    overflow: 'hidden',
   },
-  settingsIcon: {
-    width: 24,
-    height: 24,
-    opacity: 0.7,
+  logoutGradient: {
+    ...StyleSheet.absoluteFillObject,
   },
-  destructiveIcon: {
+  logoutIcon: {
+    width: 20,
+    height: 20,
     tintColor: Colors.status.error,
-  },
-  settingsText: {
-    flex: 1,
-    gap: 2,
   },
   versionContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 12,
   },
 });
 
 export default ProfileScreen;
-

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SAMPLE_GARMENTS } from '../data/sampleGarments';
 
 // Types
 export type UserPhoto = {
@@ -10,16 +11,67 @@ export type UserPhoto = {
   createdAt: Date;
 };
 
-export type GarmentCategory = 'tops' | 'pants' | 'shoes' | 'accessories' | 'dresses' | 'outerwear';
+// Kategori grupları (almostfinal2.md'ye göre)
+export type GarmentCategory = 
+  | 'tops'        // Üst: t-shirt, gömlek, sweatshirt, ceket, blazer
+  | 'bottoms'     // Alt: pantolon, şort, etek
+  | 'onepiece'    // Tek parça: elbise, tulum
+  | 'outerwear'   // Dış giyim: mont, kaban
+  | 'footwear'    // Ayakkabı: sneaker, bot, topuklu
+  | 'bags'        // Çanta: el çantası, sırt çantası
+  | 'accessories'; // Aksesuar: şapka, gözlük, saat, takı, kemer
+
+// Alt kategori tipleri
+export type GarmentSubCategory = 
+  // Tops
+  | 'tshirt' | 'shirt' | 'sweatshirt' | 'blazer' | 'cardigan'
+  // Bottoms
+  | 'pants' | 'shorts' | 'skirt' | 'jeans'
+  // One-piece
+  | 'dress' | 'jumpsuit'
+  // Outerwear
+  | 'coat' | 'jacket' | 'parka'
+  // Footwear
+  | 'sneakers' | 'boots' | 'heels' | 'sandals' | 'loafers'
+  // Bags
+  | 'handbag' | 'backpack' | 'clutch' | 'tote'
+  // Accessories
+  | 'hat' | 'glasses' | 'watch' | 'jewelry' | 'belt' | 'scarf';
+
+// Stil etiketleri
+export type GarmentTag = 
+  | 'streetwear' | 'formal' | 'minimal' | 'vintage' | 'sporty' 
+  | 'casual' | 'elegant' | 'summer' | 'winter' | 'boho';
+
+// Katman önceliği (düşük = altta, yüksek = üstte)
+export const LAYER_PRIORITY: Record<GarmentCategory, number> = {
+  bottoms: 1,
+  onepiece: 1,
+  tops: 2,
+  outerwear: 3,
+  footwear: 4,
+  bags: 5,
+  accessories: 6,
+};
+
+// Kategorinin çoklu seçime izin verip vermediği
+export const MULTI_SELECT_CATEGORIES: GarmentCategory[] = ['accessories'];
+
+// Tek seçim kategorileri
+export const SINGLE_SELECT_CATEGORIES: GarmentCategory[] = ['tops', 'bottoms', 'onepiece', 'outerwear', 'footwear', 'bags'];
 
 export type Garment = {
   id: string;
   title: string;
   category: GarmentCategory;
+  subCategory?: GarmentSubCategory;
   imageUri: string;
   brand?: string;
   sourceUrl?: string;
-  isUserAdded: boolean;
+  isUserAdded?: boolean;
+  tags?: GarmentTag[];
+  layerPriority?: number; // Manuel override için
+  colorHint?: string; // Renk ipucu
   createdAt: Date;
 };
 
@@ -28,7 +80,8 @@ export type TryOnJobStatus = 'queued' | 'processing' | 'completed' | 'failed';
 export type TryOnJob = {
   id: string;
   userPhotoId: string;
-  garmentId: string;
+  garmentId: string; // Tek kıyafet için (geriye uyumluluk)
+  garmentIds?: string[]; // Çoklu kıyafet için (kombin)
   status: TryOnJobStatus;
   outputUri?: string;
   thumbUri?: string;
@@ -38,8 +91,11 @@ export type TryOnJob = {
   completedAt?: Date;
   params?: {
     style?: string;
+    styleNote?: string; // Kullanıcı stil notu
     backgroundMode?: 'original' | 'studio';
     quality?: 'normal' | 'hd';
+    layerMode?: 'auto' | 'manual';
+    fullOutfitMode?: boolean;
   };
 };
 
@@ -90,6 +146,18 @@ type SessionState = {
   setSelectedGarmentId: (id: string | null) => void;
   selectedProfileId: string | null;
   setSelectedProfileId: (id: string | null) => void;
+  
+  // Multi-select için kombin seçimi
+  selectedGarmentIds: string[];
+  addSelectedGarment: (id: string) => void;
+  removeSelectedGarment: (id: string) => void;
+  toggleSelectedGarment: (id: string, category: GarmentCategory) => void;
+  clearSelectedGarments: () => void;
+  setSelectedGarments: (ids: string[]) => void;
+  
+  // Stil notu
+  styleNote: string;
+  setStyleNote: (note: string) => void;
 
   // Try-on jobs (generations)
   jobs: TryOnJob[];
@@ -125,6 +193,10 @@ type SessionState = {
 
   // Clear all user data (on logout/account switch)
   clearUserData: () => void;
+
+  // Sample garments
+  sampleGarmentsLoaded: boolean;
+  loadSampleGarments: () => void;
 };
 
 export const useSessionStore = create<SessionState>()(
@@ -188,6 +260,74 @@ export const useSessionStore = create<SessionState>()(
       setSelectedGarmentId: (id) => set({ selectedGarmentId: id }),
       selectedProfileId: null,
       setSelectedProfileId: (id) => set({ selectedProfileId: id }),
+      
+      // Multi-select kombin seçimi
+      selectedGarmentIds: [],
+      addSelectedGarment: (id) =>
+        set((state) => ({
+          selectedGarmentIds: [...state.selectedGarmentIds, id],
+        })),
+      removeSelectedGarment: (id) =>
+        set((state) => ({
+          selectedGarmentIds: state.selectedGarmentIds.filter((gId) => gId !== id),
+        })),
+      toggleSelectedGarment: (id, category) =>
+        set((state) => {
+          const garment = state.garments.find(g => g.id === id);
+          if (!garment) return state;
+          
+          const isSelected = state.selectedGarmentIds.includes(id);
+          
+          // Aksesuar kategorisi çoklu seçim
+          if (category === 'accessories') {
+            if (isSelected) {
+              return { selectedGarmentIds: state.selectedGarmentIds.filter((gId) => gId !== id) };
+            } else {
+              // Maksimum 8 parça
+              if (state.selectedGarmentIds.length >= 8) return state;
+              return { selectedGarmentIds: [...state.selectedGarmentIds, id] };
+            }
+          }
+          
+          // Tek seçim kategorileri - aynı kategorideki önceki seçimi kaldır
+          const otherGarmentIds = state.selectedGarmentIds.filter((gId) => {
+            const g = state.garments.find(gar => gar.id === gId);
+            return g?.category !== category;
+          });
+          
+          if (isSelected) {
+            return { selectedGarmentIds: otherGarmentIds };
+          } else {
+            // Maksimum 8 parça
+            if (otherGarmentIds.length >= 8) return state;
+            
+            // One-piece seçilirse bottoms'u kaldır
+            if (category === 'onepiece') {
+              const filtered = otherGarmentIds.filter((gId) => {
+                const g = state.garments.find(gar => gar.id === gId);
+                return g?.category !== 'bottoms';
+              });
+              return { selectedGarmentIds: [...filtered, id] };
+            }
+            
+            // Bottoms seçilirse one-piece'i kaldır
+            if (category === 'bottoms') {
+              const filtered = otherGarmentIds.filter((gId) => {
+                const g = state.garments.find(gar => gar.id === gId);
+                return g?.category !== 'onepiece';
+              });
+              return { selectedGarmentIds: [...filtered, id] };
+            }
+            
+            return { selectedGarmentIds: [...otherGarmentIds, id] };
+          }
+        }),
+      clearSelectedGarments: () => set({ selectedGarmentIds: [] }),
+      setSelectedGarments: (ids) => set({ selectedGarmentIds: ids }),
+      
+      // Stil notu
+      styleNote: '',
+      setStyleNote: (note) => set({ styleNote: note }),
 
       // Try-on jobs
       jobs: [],
@@ -245,8 +385,29 @@ export const useSessionStore = create<SessionState>()(
         selectedPhotoId: null,
         selectedGarmentId: null,
         selectedProfileId: null,
+        selectedGarmentIds: [],
+        styleNote: '',
         freeCreditsUsed: false,
+        sampleGarmentsLoaded: false, // Örnek kıyafetlerin yeniden yüklenmesi için
       }),
+
+      // Sample garments
+      sampleGarmentsLoaded: false,
+      loadSampleGarments: () => {
+        const state = get();
+        if (state.sampleGarmentsLoaded) return;
+        
+        const sampleGarments = SAMPLE_GARMENTS.map((garment, index) => ({
+          ...garment,
+          id: `sample-${index + 1}-${Date.now()}`,
+          createdAt: new Date(),
+        }));
+        
+        set({
+          garments: [...state.garments, ...sampleGarments],
+          sampleGarmentsLoaded: true,
+        });
+      },
     }),
     {
       name: 'fit-swap-session',
@@ -263,6 +424,7 @@ export const useSessionStore = create<SessionState>()(
         isPremium: state.isPremium,
         deviceHash: state.deviceHash,
         pushToken: state.pushToken,
+        sampleGarmentsLoaded: state.sampleGarmentsLoaded,
       }),
     }
   )

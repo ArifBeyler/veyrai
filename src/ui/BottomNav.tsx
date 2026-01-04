@@ -1,20 +1,20 @@
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import React from 'react';
 import {
-  View,
-  StyleSheet,
-  Pressable,
   Image,
   ImageSourcePropType,
+  Pressable,
+  StyleSheet,
+  View,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { Colors, BorderRadius, Shadows, Spacing, Animation } from './theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Animation, BorderRadius, Colors, Shadows, Spacing } from './theme';
 
 type NavItem = {
   key: string;
@@ -101,7 +101,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + 10 }]}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 12) + -10 }]}>
       <View style={styles.navWrapper}>
         <BlurView
           intensity={70}

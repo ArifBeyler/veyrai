@@ -65,8 +65,10 @@ const GenerationScreen = () => {
     id: string;
     imageUrl?: string;
     humanImageUri?: string;
-    garmentImageUri?: string;
+    garmentImageUris?: string; // Multiple URIs separated by |||
+    garmentCategories?: string; // Categories separated by ,
     gender?: string;
+    styleNote?: string;
     wantFullOutfit?: string;
     templateId?: string;
   }>();
@@ -107,7 +109,7 @@ const GenerationScreen = () => {
     const startGeneration = async () => {
       if (hasStartedRef.current) return;
       if (params.imageUrl) return; // Already have result
-      if (!params.humanImageUri || !params.garmentImageUri) return;
+      if (!params.humanImageUri || !params.garmentImageUris) return;
 
       hasStartedRef.current = true;
 
@@ -121,19 +123,34 @@ const GenerationScreen = () => {
         }
 
         const humanImageUri = decodeURIComponent(params.humanImageUri);
-        const garmentImageUri = decodeURIComponent(params.garmentImageUri);
+        
+        // Parse multiple garment URIs (separated by |||)
+        const garmentImageUris = params.garmentImageUris
+          .split('|||')
+          .map(uri => decodeURIComponent(uri));
+        
+        // Parse garment categories
+        const garmentCategories = params.garmentCategories
+          ? params.garmentCategories.split(',')
+          : [];
+        
+        const styleNote = params.styleNote || '';
         const gender = params.gender || 'male';
 
         // Get model photo
         const modelPhoto = getRandomModelPhoto(gender as 'male' | 'female');
         console.log('Using model:', modelPhoto.name);
+        console.log('Garment count:', garmentImageUris.length);
+        console.log('Categories:', garmentCategories);
 
-        // Start try-on
+        // Start try-on with all garments
         const { jobId, result } = await startTryOn(
           humanImageUri,
-          garmentImageUri,
+          garmentImageUris,
           user.id,
-          modelPhoto.imageUrl
+          modelPhoto.imageUrl,
+          garmentCategories,
+          styleNote
         );
 
         if (result?.imageUrl) {
@@ -152,10 +169,15 @@ const GenerationScreen = () => {
             userPhotoId: '',
             garmentId: '',
             status: 'completed',
-            resultImageUrl: result.imageUrl, // Sonuç URL'ini kaydet
+            resultImageUrl: result.imageUrl,
             createdAt: new Date(),
             completedAt: new Date(),
-            params: { backgroundMode: 'original', quality: 'normal' },
+            params: { 
+              backgroundMode: 'original', 
+              quality: 'normal',
+              garmentCount: garmentImageUris.length,
+              categories: garmentCategories,
+            },
           });
         } else {
           throw new Error('Sonuç alınamadı');
@@ -169,7 +191,7 @@ const GenerationScreen = () => {
     };
 
     startGeneration();
-  }, [params.humanImageUri, params.garmentImageUri, params.imageUrl]);
+  }, [params.humanImageUri, params.garmentImageUris, params.imageUrl]);
 
   // Rotate through loading messages
   useEffect(() => {

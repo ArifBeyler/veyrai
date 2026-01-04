@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 52,
   },
   primaryContainer: {
     ...Shadows.glow(Colors.accent.primary),

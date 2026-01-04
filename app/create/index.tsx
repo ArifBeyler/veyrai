@@ -12,11 +12,24 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, SlideInRight } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInRight,
+  SlideInRight
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Garment, UserProfile, useSessionStore } from '../../src/state/useSessionStore';
+import {
+  Garment,
+  GarmentCategory,
+  LAYER_PRIORITY,
+  MULTI_SELECT_CATEGORIES,
+  UserProfile,
+  useSessionStore
+} from '../../src/state/useSessionStore';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { IconButton } from '../../src/ui/IconButton';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -33,12 +46,35 @@ const { width } = Dimensions.get('window');
 
 type Step = 'profile' | 'garment' | 'confirm';
 
+// Kategori tanımları
+const CATEGORIES: { key: GarmentCategory | 'all'; label: string; icon: any }[] = [
+  { key: 'all', label: 'Tümü', icon: require('../../full3dicons/images/wardrobe.png') },
+  { key: 'tops', label: 'Üst', icon: require('../../full3dicons/images/t-shirt.png') },
+  { key: 'bottoms', label: 'Alt', icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'onepiece', label: 'Elbise', icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'outerwear', label: 'Dış', icon: require('../../full3dicons/images/flannel-shirt.png') },
+  { key: 'footwear', label: 'Ayakkabı', icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'bags', label: 'Çanta', icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'accessories', label: 'Aksesuar', icon: require('../../full3dicons/images/clothes-hanger.png') },
+];
+
+// Kategori renkleri
+const CATEGORY_COLORS: Record<GarmentCategory, string> = {
+  tops: '#3B82F6',
+  bottoms: '#8B5CF6',
+  onepiece: '#EC4899',
+  outerwear: '#F59E0B',
+  footwear: '#10B981',
+  bags: '#06B6D4',
+  accessories: '#EF4444',
+};
+
 const CreateScreen = () => {
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>('profile');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const [selectedGarmentId, setSelectedGarmentId] = useState<string | null>(null);
-  
+  const [selectedCategory, setSelectedCategory] = useState<GarmentCategory | 'all'>('all');
+  const [styleNoteInput, setStyleNoteInput] = useState('');
 
   const profiles = useSessionStore((s) => s.profiles);
   const garments = useSessionStore((s) => s.garments);
@@ -46,6 +82,12 @@ const CreateScreen = () => {
   const addGarment = useSessionStore((s) => s.addGarment);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const isPremium = useSessionStore((s) => s.isPremium);
+  
+  // Multi-select state
+  const selectedGarmentIds = useSessionStore((s) => s.selectedGarmentIds);
+  const toggleSelectedGarment = useSessionStore((s) => s.toggleSelectedGarment);
+  const clearSelectedGarments = useSessionStore((s) => s.clearSelectedGarments);
+  const setStyleNote = useSessionStore((s) => s.setStyleNote);
 
   const hasCredits = !freeCreditsUsed || isPremium;
 
@@ -54,12 +96,35 @@ const CreateScreen = () => {
     [profiles, selectedProfileId]
   );
 
-  const selectedGarment = useMemo(
-    () => garments.find((g) => g.id === selectedGarmentId),
-    [garments, selectedGarmentId]
-  );
+  // Seçili kıyafetler (katman sırasına göre sıralı)
+  const selectedGarments = useMemo(() => {
+    const selected = garments.filter((g) => selectedGarmentIds.includes(g.id));
+    return selected.sort((a, b) => {
+      const priorityA = a.layerPriority ?? LAYER_PRIORITY[a.category] ?? 0;
+      const priorityB = b.layerPriority ?? LAYER_PRIORITY[b.category] ?? 0;
+      return priorityA - priorityB;
+    });
+  }, [garments, selectedGarmentIds]);
+
+  // Filtrelenmiş kıyafetler
+  const filteredGarments = useMemo(() => {
+    if (selectedCategory === 'all') return garments;
+    return garments.filter((g) => g.category === selectedCategory);
+  }, [garments, selectedCategory]);
+
+  // Kategori bazlı sayılar
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: garments.length };
+    CATEGORIES.forEach((cat) => {
+      if (cat.key !== 'all') {
+        counts[cat.key] = garments.filter((g) => g.category === cat.key).length;
+      }
+    });
+    return counts;
+  }, [garments]);
 
   const handleClose = () => {
+    clearSelectedGarments();
     router.back();
   };
 
@@ -68,12 +133,20 @@ const CreateScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const handleSelectGarment = (garment: Garment) => {
-    setSelectedGarmentId(garment.id);
+  const handleToggleGarment = (garment: Garment) => {
+    toggleSelectedGarment(garment.id, garment.category);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  // Profil ekleme - direkt galeri/kamera seçimi
+  const handleRemoveGarment = (garmentId: string) => {
+    const garment = garments.find((g) => g.id === garmentId);
+    if (garment) {
+      toggleSelectedGarment(garmentId, garment.category);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
+  // Profil ekleme
   const handleAddProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
@@ -107,7 +180,7 @@ const CreateScreen = () => {
   const pickProfileFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('İzin Gerekli', 'Kamera izni vermeniz gerekiyor.');
+      Alert.alert('İzin Gerekli', 'Kamera izni gerekli');
       return;
     }
 
@@ -143,7 +216,7 @@ const CreateScreen = () => {
       photos: [
         {
           id: Date.now().toString(),
-          uri: uri,
+          uri,
           kind: 'front',
           createdAt: new Date(),
         },
@@ -157,7 +230,7 @@ const CreateScreen = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  // Kıyafet ekleme - direkt galeri/kamera seçimi
+  // Kıyafet ekleme
   const handleAddGarment = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
@@ -177,7 +250,7 @@ const CreateScreen = () => {
       );
     } else {
       Alert.alert(
-        'Kıyafet Fotoğrafı',
+        'Kıyafet Ekle',
         'Nasıl eklemek istersin?',
         [
           { text: 'İptal', style: 'cancel' },
@@ -191,7 +264,7 @@ const CreateScreen = () => {
   const pickGarmentFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('İzin Gerekli', 'Kamera izni vermeniz gerekiyor.');
+      Alert.alert('İzin Gerekli', 'Kamera izni gerekli');
       return;
     }
 
@@ -202,7 +275,7 @@ const CreateScreen = () => {
     });
 
     if (!result.canceled && result.assets[0]) {
-      createGarmentFromUri(result.assets[0].uri);
+      showCategoryPicker(result.assets[0].uri);
     }
   };
 
@@ -215,23 +288,54 @@ const CreateScreen = () => {
     });
 
     if (!result.canceled && result.assets[0]) {
-      createGarmentFromUri(result.assets[0].uri);
+      showCategoryPicker(result.assets[0].uri);
     }
   };
 
-  const createGarmentFromUri = (uri: string) => {
+  const showCategoryPicker = (uri: string) => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: 'Kategori Seç',
+          options: ['İptal', 'Üst', 'Alt', 'Elbise/Tulum', 'Dış Giyim', 'Ayakkabı', 'Çanta', 'Aksesuar'],
+          cancelButtonIndex: 0,
+        },
+        (buttonIndex) => {
+          const categories: GarmentCategory[] = ['tops', 'bottoms', 'onepiece', 'outerwear', 'footwear', 'bags', 'accessories'];
+          if (buttonIndex > 0 && buttonIndex <= categories.length) {
+            createGarmentFromUri(uri, categories[buttonIndex - 1]);
+          }
+        }
+      );
+    } else {
+      // Android için basit tops kategorisi
+      createGarmentFromUri(uri, 'tops');
+    }
+  };
+
+  const createGarmentFromUri = (uri: string, category: GarmentCategory) => {
     const newGarmentId = Date.now().toString();
+    const categoryLabels: Record<GarmentCategory, string> = {
+      tops: 'Üst',
+      bottoms: 'Alt',
+      onepiece: 'Elbise',
+      outerwear: 'Dış Giyim',
+      footwear: 'Ayakkabı',
+      bags: 'Çanta',
+      accessories: 'Aksesuar',
+    };
+    
     const newGarment: Garment = {
       id: newGarmentId,
-      title: `Kıyafet ${garments.length + 1}`,
+      title: `${categoryLabels[category]} ${garments.filter(g => g.category === category).length + 1}`,
       imageUri: uri,
-      category: 'tops',
+      category,
       isUserAdded: true,
       createdAt: new Date(),
     };
 
     addGarment(newGarment);
-    setSelectedGarmentId(newGarmentId);
+    toggleSelectedGarment(newGarmentId, category);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
@@ -240,11 +344,12 @@ const CreateScreen = () => {
     if (step === 'profile' && selectedProfileId) {
       setStep('garment');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } else if (step === 'garment' && selectedGarmentId) {
+    } else if (step === 'garment' && selectedGarmentIds.length > 0) {
       setStep('confirm');
+      setStyleNote(styleNoteInput);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  }, [step, selectedProfileId, selectedGarmentId]);
+  }, [step, selectedProfileId, selectedGarmentIds.length, styleNoteInput]);
 
   const handlePrevStep = () => {
     if (step === 'garment') {
@@ -262,14 +367,19 @@ const CreateScreen = () => {
       return;
     }
 
-    if (!selectedProfileId || !selectedGarmentId || !selectedProfile || !selectedGarment) return;
+    if (!selectedProfileId || selectedGarmentIds.length === 0 || !selectedProfile) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     const humanImageUri = selectedProfile.photos[0]?.uri;
-    const garmentImageUri = selectedGarment.imageUri;
+    
+    // Tüm seçili kıyafetlerin URI'lerini al
+    const garmentImageUris = selectedGarments.map(g => g.imageUri);
+    
+    // Tüm seçili kıyafetlerin kategorilerini al
+    const garmentCategories = selectedGarments.map(g => g.category);
 
-    if (!humanImageUri || !garmentImageUri) {
+    if (!humanImageUri || garmentImageUris.length === 0) {
       Alert.alert('Hata', 'Görsel bulunamadı');
       return;
     }
@@ -280,15 +390,19 @@ const CreateScreen = () => {
       params: {
         id: jobId,
         humanImageUri: encodeURIComponent(humanImageUri),
-        garmentImageUri: encodeURIComponent(garmentImageUri),
+        // Tüm kıyafet URI'lerini virgülle ayırarak gönder
+        garmentImageUris: garmentImageUris.map(uri => encodeURIComponent(uri)).join('|||'),
+        garmentCategories: garmentCategories.join(','),
         gender: selectedProfile.gender || 'male',
+        garmentIds: selectedGarmentIds.join(','),
+        styleNote: styleNoteInput,
       },
     });
   };
 
   const canProceed =
     (step === 'profile' && selectedProfileId) ||
-    (step === 'garment' && selectedGarmentId) ||
+    (step === 'garment' && selectedGarmentIds.length > 0) ||
     step === 'confirm';
 
   return (
@@ -316,7 +430,7 @@ const CreateScreen = () => {
           <View style={styles.creditBadge}>
             <Image
               source={require('../../full3dicons/images/sparkle.png')}
-              style={styles.creditIcon}
+              style={styles.creditBadgeIcon}
               resizeMode="contain"
             />
             <LabelSmall color="accent">
@@ -405,15 +519,94 @@ const CreateScreen = () => {
           </Animated.View>
         )}
 
-        {/* Step 2: Garment Selection */}
+        {/* Step 2: Garment Selection - Multi-Select */}
         {step === 'garment' && (
           <Animated.View entering={SlideInRight}>
             <View style={styles.stepHeader}>
-              <HeadlineMedium>Kıyafet Seç</HeadlineMedium>
+              <HeadlineMedium>Kombin Oluştur</HeadlineMedium>
               <BodyMedium color="secondary">
-                Denemek istediğin kıyafeti seç
+                Denemek istediğin parçaları seç
               </BodyMedium>
             </View>
+
+            {/* Selected Tray */}
+            {selectedGarmentIds.length > 0 && (
+              <Animated.View entering={FadeInDown} style={styles.selectedTray}>
+                <View style={styles.selectedTrayHeader}>
+                  <LabelMedium>Seçilen Kombinim</LabelMedium>
+                  <LabelSmall color="secondary">{selectedGarmentIds.length}/8 parça</LabelSmall>
+                </View>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.selectedTrayScroll}
+                >
+                  {selectedGarments.map((garment, index) => (
+                    <Animated.View 
+                      key={garment.id} 
+                      entering={FadeInRight.delay(index * 50)}
+                      style={styles.selectedChip}
+                    >
+                      <Image
+                        source={{ uri: garment.imageUri }}
+                        style={styles.selectedChipImage}
+                        resizeMode="cover"
+                      />
+                      <View style={[
+                        styles.selectedChipCategory,
+                        { backgroundColor: CATEGORY_COLORS[garment.category] }
+                      ]}>
+                        <LabelSmall style={styles.selectedChipCategoryText}>
+                          {CATEGORIES.find(c => c.key === garment.category)?.label}
+                        </LabelSmall>
+                      </View>
+                      <Pressable
+                        style={styles.selectedChipRemove}
+                        onPress={() => handleRemoveGarment(garment.id)}
+                      >
+                        <LabelSmall style={styles.removeText}>×</LabelSmall>
+                      </Pressable>
+                    </Animated.View>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+            )}
+
+            {/* Category Tabs */}
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryTabs}
+            >
+              {CATEGORIES.map((cat) => (
+                <Pressable
+                  key={cat.key}
+                  onPress={() => {
+                    setSelectedCategory(cat.key);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                  style={[
+                    styles.categoryTab,
+                    selectedCategory === cat.key && styles.categoryTabActive,
+                  ]}
+                >
+                  <Image source={cat.icon} style={styles.categoryTabIcon} resizeMode="contain" />
+                  <LabelSmall color={selectedCategory === cat.key ? 'accent' : 'secondary'}>
+                    {cat.label}
+                  </LabelSmall>
+                  {categoryCounts[cat.key] > 0 && (
+                    <View style={[
+                      styles.categoryCount,
+                      selectedCategory === cat.key && styles.categoryCountActive
+                    ]}>
+                      <LabelSmall style={styles.categoryCountText}>
+                        {categoryCounts[cat.key]}
+                      </LabelSmall>
+                    </View>
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
 
             {/* Add Garment */}
             <GlassCard style={styles.addCard} onPress={handleAddGarment}>
@@ -426,43 +619,65 @@ const CreateScreen = () => {
             </GlassCard>
 
             {/* Garment Grid */}
-            {garments.length > 0 ? (
+            {filteredGarments.length > 0 ? (
               <View style={styles.garmentGrid}>
-                {garments.map((garment) => (
-                  <Pressable
-                    key={garment.id}
-                    onPress={() => handleSelectGarment(garment)}
-                  >
-                    <GlassCard
-                      style={StyleSheet.flatten([
-                        styles.garmentCard,
-                        selectedGarmentId === garment.id ? styles.selectedCard : {},
-                      ])}
+                {filteredGarments.map((garment) => {
+                  const isSelected = selectedGarmentIds.includes(garment.id);
+                  const isMultiSelect = MULTI_SELECT_CATEGORIES.includes(garment.category);
+                  
+                  return (
+                    <Pressable
+                      key={garment.id}
+                      onPress={() => handleToggleGarment(garment)}
                     >
-                      <View style={styles.garmentImageContainer}>
-                        {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
-                          <Image
-                            source={{ uri: garment.imageUri }}
-                            style={styles.garmentImage}
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <Image
-                            source={require('../../full3dicons/images/t-shirt.png')}
-                            style={styles.placeholderImage}
-                            resizeMode="contain"
-                          />
-                        )}
-                      </View>
-                      <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
-                      {selectedGarmentId === garment.id && (
-                        <View style={styles.checkBadge}>
-                          <LabelSmall color="inverse">✓</LabelSmall>
+                      <GlassCard
+                        style={StyleSheet.flatten([
+                          styles.garmentCard,
+                          isSelected ? styles.selectedCard : {},
+                        ])}
+                      >
+                        <View style={styles.garmentImageContainer}>
+                          {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
+                            <Image
+                              source={{ uri: garment.imageUri }}
+                              style={styles.garmentImage}
+                              resizeMode="cover"
+                            />
+                          ) : (
+                            <Image
+                              source={require('../../full3dicons/images/t-shirt.png')}
+                              style={styles.placeholderImage}
+                              resizeMode="contain"
+                            />
+                          )}
+                          
+                          {/* Category Badge */}
+                          <View style={[
+                            styles.garmentCategoryBadge,
+                            { backgroundColor: CATEGORY_COLORS[garment.category] }
+                          ]}>
+                            <LabelSmall style={styles.garmentCategoryText}>
+                              {CATEGORIES.find(c => c.key === garment.category)?.label}
+                            </LabelSmall>
+                          </View>
                         </View>
-                      )}
-                    </GlassCard>
-                  </Pressable>
-                ))}
+                        
+                        <View style={styles.garmentInfo}>
+                          <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
+                          {isMultiSelect && (
+                            <LabelSmall color="tertiary">Çoklu seçim</LabelSmall>
+                          )}
+                        </View>
+                        
+                        {isSelected && (
+                          <View style={styles.checkBadge}>
+                            <LabelSmall color="inverse">✓</LabelSmall>
+                          </View>
+                        )}
+                      </GlassCard>
+                    </Pressable>
+                  );
+                })}
               </View>
             ) : (
               <GlassCard style={styles.emptyCard}>
@@ -472,124 +687,143 @@ const CreateScreen = () => {
                   resizeMode="contain"
                 />
                 <BodyMedium color="secondary" style={styles.emptyText}>
-                  Gardrop boş. Kıyafet ekleyerek başla.
+                  {selectedCategory === 'all' 
+                    ? 'Gardrop boş. Kıyafet ekleyerek başla.'
+                    : 'Bu kategoride kıyafet yok.'}
                 </BodyMedium>
               </GlassCard>
             )}
+
+            {/* Style Note Input */}
+            <View style={styles.styleNoteSection}>
+              <LabelMedium style={styles.styleNoteLabel}>Stil Notu (Opsiyonel)</LabelMedium>
+              <GlassCard style={styles.styleNoteCard}>
+                <TextInput
+                  style={styles.styleNoteInput}
+                  placeholder="örn: minimal, siyah ağırlıklı, smart casual..."
+                  placeholderTextColor={Colors.text.tertiary}
+                  value={styleNoteInput}
+                  onChangeText={setStyleNoteInput}
+                  multiline
+                  maxLength={150}
+                />
+              </GlassCard>
+              <LabelSmall color="tertiary" style={styles.styleNoteHint}>
+                AI'a stil ipuçları vererek daha iyi sonuçlar alabilirsin
+              </LabelSmall>
+            </View>
           </Animated.View>
         )}
 
         {/* Step 3: Confirm */}
         {step === 'confirm' && (
           <Animated.View entering={SlideInRight} style={styles.confirmContainer}>
-            {/* Header */}
-            <View style={styles.confirmHeader}>
-              <HeadlineMedium style={styles.confirmTitle}>Hazır! ✨</HeadlineMedium>
-              <BodyMedium color="secondary" style={styles.confirmSubtitle}>
-                Seçimlerini kontrol et ve başlat
-              </BodyMedium>
-            </View>
-
-            {/* Big Cards Section */}
-            <View style={styles.bigCardsSection}>
-              {/* Profile Big Card */}
-              <Pressable 
-                style={styles.bigCardWrapper}
-                onPress={() => setStep('profile')}
-              >
-                <GlassCard style={styles.bigCard}>
-                  <View style={styles.bigCardImageContainer}>
-                    {selectedProfile?.photos[0] ? (
-                      <Image
-                        source={{ uri: selectedProfile.photos[0].uri }}
-                        style={styles.bigCardImage}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <Image
-                        source={require('../../full3dicons/images/profile.png')}
-                        style={styles.bigCardPlaceholder}
-                        resizeMode="contain"
-                      />
-                    )}
-                  </View>
-                  <View style={styles.bigCardInfo}>
-                    <LabelSmall color="secondary">PROFİL</LabelSmall>
-                    <LabelMedium numberOfLines={1}>{selectedProfile?.name}</LabelMedium>
-                  </View>
-                  <View style={styles.changeButton}>
+            {/* Large Profile Photo */}
+            <Animated.View entering={FadeIn.delay(100)} style={styles.confirmProfileSection}>
+              <Pressable onPress={() => setStep('profile')} style={styles.confirmProfileCard}>
+                {selectedProfile?.photos[0] && (
+                  <Image
+                    source={{ uri: selectedProfile.photos[0].uri }}
+                    style={styles.confirmProfileImage}
+                    resizeMode="cover"
+                  />
+                )}
+                <LinearGradient
+                  colors={['transparent', 'rgba(0,0,0,0.8)']}
+                  style={styles.confirmProfileGradient}
+                >
+                  <View style={styles.confirmProfileInfo}>
+                    <LabelMedium style={styles.confirmProfileName}>
+                      {selectedProfile?.name}
+                    </LabelMedium>
                     <LabelSmall color="accent">Değiştir</LabelSmall>
                   </View>
-                </GlassCard>
+                </LinearGradient>
               </Pressable>
+            </Animated.View>
 
-              {/* Spark Icon */}
-              <View style={styles.sparkContainer}>
+            {/* Selected Garments Row */}
+            <Animated.View entering={FadeIn.delay(200)} style={styles.confirmGarmentsSection}>
+              <View style={styles.confirmGarmentsHeader}>
+                <LabelMedium>Seçilen Parçalar</LabelMedium>
+                <Pressable onPress={() => setStep('garment')}>
+                  <LabelSmall color="accent">Düzenle</LabelSmall>
+                </Pressable>
+              </View>
+              
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.confirmGarmentsScroll}
+              >
+                {selectedGarments.map((garment, index) => (
+                  <Animated.View 
+                    key={garment.id}
+                    entering={FadeInRight.delay(300 + index * 80)}
+                    style={styles.confirmGarmentCard}
+                  >
+                    <Image
+                      source={{ uri: garment.imageUri }}
+                      style={styles.confirmGarmentImage}
+                      resizeMode="cover"
+                    />
+                    <View style={[
+                      styles.confirmGarmentBadge,
+                      { backgroundColor: CATEGORY_COLORS[garment.category] }
+                    ]}>
+                      <LabelSmall style={styles.confirmGarmentBadgeText}>
+                        {CATEGORIES.find(c => c.key === garment.category)?.label}
+                      </LabelSmall>
+                    </View>
+                  </Animated.View>
+                ))}
+              </ScrollView>
+            </Animated.View>
+
+            {/* Style Note (if exists) */}
+            {styleNoteInput ? (
+              <Animated.View entering={FadeIn.delay(400)}>
+                <GlassCard style={styles.confirmStyleNote}>
+                  <LabelSmall color="secondary">💬 Stil Notu</LabelSmall>
+                  <BodySmall style={styles.confirmStyleNoteText}>"{styleNoteInput}"</BodySmall>
+                </GlassCard>
+              </Animated.View>
+            ) : null}
+
+            {/* AI Generation Preview */}
+            <Animated.View entering={FadeIn.delay(500)} style={styles.confirmAISection}>
+              <View style={styles.confirmAIBox}>
                 <Image
                   source={require('../../full3dicons/images/ai-sparkle.png')}
-                  style={styles.sparkIcon}
+                  style={styles.confirmAIIcon}
                   resizeMode="contain"
                 />
+                <View style={styles.confirmAIText}>
+                  <LabelMedium>AI ile Kombin Oluştur</LabelMedium>
+                  <LabelSmall color="secondary">
+                    Profil fotoğrafın üzerinde kıyafetleri deneyeceksin
+                  </LabelSmall>
+                </View>
               </View>
-
-              {/* Garment Big Card */}
-              <Pressable 
-                style={styles.bigCardWrapper}
-                onPress={() => setStep('garment')}
-              >
-                <GlassCard style={styles.bigCard}>
-                  <View style={styles.bigCardImageContainer}>
-                    {selectedGarment && (selectedGarment.imageUri.startsWith('file') || selectedGarment.imageUri.startsWith('http')) ? (
-                      <Image
-                        source={{ uri: selectedGarment.imageUri }}
-                        style={styles.bigCardImage}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <Image
-                        source={require('../../full3dicons/images/t-shirt.png')}
-                        style={styles.bigCardPlaceholder}
-                        resizeMode="contain"
-                      />
-                    )}
-                  </View>
-                  <View style={styles.bigCardInfo}>
-                    <LabelSmall color="secondary">KİYAFET</LabelSmall>
-                    <LabelMedium numberOfLines={1}>{selectedGarment?.title}</LabelMedium>
-                  </View>
-                  <View style={styles.changeButton}>
-                    <LabelSmall color="accent">Değiştir</LabelSmall>
-                  </View>
-                </GlassCard>
-              </Pressable>
-            </View>
-
-            {/* Credit Info */}
-            <GlassCard style={styles.creditInfoCard}>
-              <Image
-                source={require('../../full3dicons/images/sparkle.png')}
-                style={styles.creditInfoIcon}
-                resizeMode="contain"
-              />
-              <View style={styles.creditInfoText}>
-                <LabelMedium>
-                  {hasCredits 
-                    ? (isPremium ? 'Sınırsız deneme hakkın var' : '1 ücretsiz deneme hakkın var')
-                    : 'Kredi kalmadı'}
-                </LabelMedium>
-                {!hasCredits && (
-                  <BodySmall color="secondary">
-                    Premium'a yükselterek sınırsız deneme yapabilirsin
-                  </BodySmall>
-                )}
+              
+              {/* Credit Info */}
+              <View style={styles.confirmCreditRow}>
+                <Image
+                  source={require('../../full3dicons/images/sparkle.png')}
+                  style={styles.confirmCreditIcon}
+                  resizeMode="contain"
+                />
+                <LabelSmall color={isPremium ? 'accent' : 'tertiary'}>
+                  {isPremium ? 'Premium Üye - Sınırsız Deneme' : '1 Kredi Kullanılacak'}
+                </LabelSmall>
               </View>
-            </GlassCard>
+            </Animated.View>
           </Animated.View>
         )}
       </ScrollView>
 
       {/* Bottom actions */}
-      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + 16 }]}>
+      <View style={[styles.bottomActions, { paddingBottom: Math.max(insets.bottom, 34) + 16 }]}>
         {step === 'profile' ? (
           <PrimaryButton
             title="Devam"
@@ -607,9 +841,9 @@ const CreateScreen = () => {
               style={styles.backButton}
             />
             <PrimaryButton
-              title="Devam"
+              title={`Devam (${selectedGarmentIds.length})`}
               onPress={handleNextStep}
-              disabled={!canProceed}
+              disabled={selectedGarmentIds.length === 0}
               style={styles.nextButton}
             />
           </>
@@ -623,24 +857,22 @@ const CreateScreen = () => {
               style={styles.backButton}
             />
             <PrimaryButton
-              title={hasCredits ? 'Oluştur ✨' : "Premium'a Yükselt"}
+              title="Oluştur"
               onPress={handleGenerate}
               style={styles.generateButton}
             />
           </>
         )}
       </View>
-
     </View>
   );
 };
 
-type StepDotProps = {
-  active: boolean;
-  completed?: boolean;
-};
-
-const StepDot: React.FC<StepDotProps> = ({ active, completed }) => (
+// Step Indicator Dot
+const StepDot: React.FC<{ active: boolean; completed?: boolean }> = ({
+  active,
+  completed,
+}) => (
   <View
     style={[
       styles.stepDot,
@@ -670,7 +902,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.dark.surface,
+    backgroundColor: Colors.dark.strokeLight,
   },
   stepDotActive: {
     width: 24,
@@ -683,93 +915,74 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     backgroundColor: Colors.accent.primaryDim,
     borderRadius: BorderRadius.pill,
   },
-  creditIcon: {
-    width: 14,
-    height: 14,
+  creditBadgeIcon: {
+    width: 16,
+    height: 16,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: Spacing.page,
-    paddingBottom: 100,
+    paddingBottom: 120,
+    gap: 16,
   },
   stepHeader: {
-    marginBottom: 24,
-    gap: 8,
+    gap: 4,
+    marginBottom: 8,
   },
   addCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    gap: 12,
-    marginBottom: 20,
+    padding: 14,
+    gap: 10,
+    marginBottom: 12,
   },
   addIcon: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
   },
   profileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
   },
   profileCard: {
-    width: (width - Spacing.page * 2 - 12) / 2,
-    padding: 10,
-    gap: 8,
+    width: (width - Spacing.page * 2 - 10) / 2,
+    padding: 8,
   },
   profileImageContainer: {
-    aspectRatio: 0.8,
+    aspectRatio: 0.85,
     backgroundColor: Colors.dark.surface,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
+    marginBottom: 6,
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-  },
-  garmentGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  garmentCard: {
-    width: (width - Spacing.page * 2 - 12) / 2,
-    padding: 10,
-    gap: 8,
-  },
-  garmentImageContainer: {
-    aspectRatio: 1,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: BorderRadius.md,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  garmentImage: {
     width: '100%',
     height: '100%',
   },
   placeholderImage: {
     width: '50%',
     height: '50%',
+    alignSelf: 'center',
+    marginTop: '25%',
     opacity: 0.4,
   },
   selectedCard: {
     borderColor: Colors.accent.primary,
-    backgroundColor: Colors.accent.primaryDim,
+    borderWidth: 2,
   },
   checkBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 16,
+    right: 16,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -779,7 +992,7 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     alignItems: 'center',
-    padding: 32,
+    padding: 40,
     gap: 12,
   },
   emptyIcon: {
@@ -790,136 +1003,295 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
   },
-  // Confirm Step
-  confirmContainer: {
-    flex: 1,
-  },
-  confirmHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-    gap: 8,
-  },
-  confirmTitle: {
-    fontSize: 28,
-    textAlign: 'center',
-  },
-  confirmSubtitle: {
-    textAlign: 'center',
-  },
-  bigCardsSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 24,
-  },
-  bigCardWrapper: {
-    flex: 1,
-    maxWidth: (width - Spacing.page * 2 - 60) / 2,
-  },
-  bigCard: {
-    padding: 8,
-    alignItems: 'center',
-    gap: 8,
-  },
-  bigCardImageContainer: {
-    width: '100%',
-    aspectRatio: 0.75,
+  // Selected Tray
+  selectedTray: {
     backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.lg,
+    padding: 12,
+    marginBottom: 12,
+  },
+  selectedTrayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  selectedTrayScroll: {
+    gap: 10,
+  },
+  selectedChip: {
+    width: 70,
+    height: 90,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: Colors.dark.surface,
   },
-  bigCardImage: {
+  selectedChipImage: {
     width: '100%',
     height: '100%',
   },
-  bigCardPlaceholder: {
-    width: '50%',
-    height: '50%',
-    opacity: 0.4,
-  },
-  bigCardInfo: {
+  selectedChipCategory: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 2,
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: 4,
   },
-  changeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: Colors.accent.primaryDim,
-    borderRadius: BorderRadius.pill,
+  selectedChipCategoryText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '600',
   },
-  sparkContainer: {
-    width: 36,
-    height: 36,
+  selectedChipRemove: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sparkIcon: {
-    width: 32,
-    height: 32,
+  removeText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    lineHeight: 16,
   },
-  creditInfoCard: {
+  // Category Tabs
+  categoryTabs: {
+    gap: 8,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  categoryTab: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.dark.strokeLight,
+  },
+  categoryTabActive: {
+    backgroundColor: Colors.accent.primaryDim,
+    borderColor: Colors.accent.primary,
+  },
+  categoryTabIcon: {
+    width: 16,
+    height: 16,
+    opacity: 0.7,
+  },
+  categoryCount: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: Colors.dark.surfaceElevated,
+    borderRadius: BorderRadius.sm,
+  },
+  categoryCountActive: {
+    backgroundColor: Colors.accent.primary,
+  },
+  categoryCountText: {
+    color: '#fff',
+    fontSize: 10,
+  },
+  // Garment Grid
+  garmentGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 4,
+  },
+  garmentCard: {
+    width: (width - Spacing.page * 2 - 10) / 2,
+    padding: 8,
+  },
+  garmentImageContainer: {
+    aspectRatio: 1,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  garmentImage: {
+    width: '100%',
+    height: '100%',
+  },
+  garmentCategoryBadge: {
+    position: 'absolute',
+    bottom: 6,
+    left: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.sm,
+  },
+  garmentCategoryText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  garmentInfo: {
+    gap: 2,
+  },
+  // Style Note
+  styleNoteSection: {
+    marginTop: 8,
+    gap: 8,
+  },
+  styleNoteLabel: {
+    marginLeft: 4,
+  },
+  styleNoteCard: {
+    padding: 12,
+  },
+  styleNoteInput: {
+    color: Colors.text.primary,
+    fontSize: 14,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  styleNoteHint: {
+    marginLeft: 4,
+  },
+  // Confirm
+  confirmContainer: {
+    gap: 20,
+  },
+  // Profile Section - Large Photo
+  confirmProfileSection: {
+    alignItems: 'center',
+  },
+  confirmProfileCard: {
+    width: width - Spacing.page * 2,
+    height: 280,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    backgroundColor: Colors.dark.surface,
+  },
+  confirmProfileImage: {
+    width: '100%',
+    height: '100%',
+  },
+  confirmProfileGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    justifyContent: 'flex-end',
     padding: 16,
+  },
+  confirmProfileInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  confirmProfileName: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  // Garments Section
+  confirmGarmentsSection: {
     gap: 12,
-    backgroundColor: 'rgba(181, 255, 31, 0.05)',
+  },
+  confirmGarmentsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  confirmGarmentsScroll: {
+    gap: 12,
+  },
+  confirmGarmentCard: {
+    width: 100,
+    height: 130,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+    backgroundColor: Colors.dark.surface,
+  },
+  confirmGarmentImage: {
+    width: '100%',
+    height: '100%',
+  },
+  confirmGarmentBadge: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  confirmGarmentBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  // Style Note
+  confirmStyleNote: {
+    padding: 14,
+    gap: 6,
+  },
+  confirmStyleNoteText: {
+    fontStyle: 'italic',
+    color: Colors.text.secondary,
+  },
+  // AI Section
+  confirmAISection: {
+    gap: 12,
+    marginTop: 8,
+  },
+  confirmAIBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: 'rgba(181, 255, 31, 0.08)',
+    borderWidth: 1,
     borderColor: Colors.accent.primaryDim,
   },
-  creditInfoIcon: {
-    width: 28,
-    height: 28,
-  },
-  creditInfoText: {
-    flex: 1,
-    gap: 2,
-  },
-  // Şablon info card
-  templateInfoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 12,
-    marginBottom: 12,
-  },
-  templateInfoEmoji: {
+  confirmAIIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.dark.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  templateEmoji: {
-    fontSize: 20,
-  },
-  templateInfoText: {
+  confirmAIText: {
     flex: 1,
     gap: 2,
   },
-  templateChangeBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: Colors.accent.primaryDim,
-    borderRadius: BorderRadius.pill,
+  confirmCreditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
+  confirmCreditIcon: {
+    width: 16,
+    height: 16,
+  },
+  // Bottom Actions
   bottomActions: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.page,
+    paddingTop: 12,
     gap: 12,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   fullButton: {
     width: '100%',
+    minHeight: 56,
   },
   backButton: {
     minWidth: 80,
   },
   nextButton: {
     flex: 1,
+    minHeight: 52,
   },
   generateButton: {
     flex: 1,

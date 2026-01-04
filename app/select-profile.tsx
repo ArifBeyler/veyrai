@@ -1,42 +1,41 @@
-import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Dimensions,
-  Alert,
-  Pressable,
-} from 'react-native';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { 
-  FadeIn, 
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-  withTiming,
-  interpolate,
-  Extrapolate,
-} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
 import {
-  HeadlineMedium,
-  HeadlineSmall,
-  BodyMedium,
-  BodySmall,
-  LabelMedium,
-  LabelSmall,
-} from '../src/ui/Typography';
+  Alert,
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Animated, {
+  Extrapolate,
+  FadeIn,
+  FadeInDown,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { UserProfile, useSessionStore } from '../src/state/useSessionStore';
 import { GlassCard } from '../src/ui/GlassCard';
 import { IconButton } from '../src/ui/IconButton';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
-import { useSessionStore, UserProfile } from '../src/state/useSessionStore';
+import { BorderRadius, Colors, Spacing } from '../src/ui/theme';
+import {
+  BodyMedium,
+  HeadlineMedium,
+  HeadlineSmall,
+  LabelMedium,
+  LabelSmall
+} from '../src/ui/Typography';
 
 const { width } = Dimensions.get('window');
 
@@ -267,7 +266,7 @@ const SelectProfileScreen = () => {
       {selectedId && (
         <Animated.View 
           entering={FadeIn}
-          style={[styles.bottomActions, { paddingBottom: insets.bottom + 16 }]}
+          style={[styles.bottomActions, { paddingBottom: Math.max(insets.bottom, 34) + 16 }]}
         >
           <LinearGradient
             colors={['transparent', Colors.dark.background]}
@@ -383,10 +382,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       <Pressable onPress={handlePress} onLongPress={handleLongPress}>
         <Animated.View style={animatedStyle}>
           <GlassCard
-            style={[
+            style={StyleSheet.flatten([
               styles.profileCard,
-              isSelected && styles.profileCardSelected,
-            ]}
+              isSelected ? styles.profileCardSelected : {},
+            ])}
           >
             {/* Glow Effect */}
             {isSelected && (
@@ -576,6 +575,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.page,
+    paddingTop: 16,
   },
   bottomGradient: {
     position: 'absolute',

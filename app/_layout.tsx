@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Colors } from '../src/ui/theme';
 import { usePushNotifications } from '../src/hooks/usePushNotifications';
+import { useSessionStore } from '../src/state/useSessionStore';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -26,6 +27,10 @@ const RootLayout = () => {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  // Get sample garments loader from store
+  const loadSampleGarments = useSessionStore((state) => state.loadSampleGarments);
+  const sampleGarmentsLoaded = useSessionStore((state) => state.sampleGarmentsLoaded);
+
   // Initialize push notifications
   usePushNotifications();
 
@@ -34,6 +39,13 @@ const RootLayout = () => {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  // Load sample garments on first launch
+  useEffect(() => {
+    if (!sampleGarmentsLoaded) {
+      loadSampleGarments();
+    }
+  }, [sampleGarmentsLoaded, loadSampleGarments]);
 
   if (!fontsLoaded && !fontError) {
     return null;
