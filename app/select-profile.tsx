@@ -6,12 +6,12 @@ import React, { useState } from 'react';
 import {
   Alert,
   Dimensions,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   Extrapolate,
   FadeIn,
@@ -136,8 +136,7 @@ const SelectProfileScreen = () => {
   const handleCreateProfile = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsEditing: false,
       quality: 0.8,
     });
 
@@ -151,8 +150,7 @@ const SelectProfileScreen = () => {
     if (!permission.granted) return;
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsEditing: false,
       quality: 0.8,
     });
 
@@ -397,7 +395,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 <Image
                   source={{ uri: mainPhoto.uri }}
                   style={styles.profileImage}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
                 />
               ) : (
                 <Image

@@ -3,11 +3,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Image,
   Alert,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -148,7 +148,9 @@ const ProfileScreen = () => {
                   <Image
                     source={{ uri: activeProfile.photos[0].uri }}
                     style={styles.profilePhoto}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <View style={styles.profilePhotoPlaceholder}>
@@ -212,43 +214,49 @@ const ProfileScreen = () => {
 
         {/* Subscription Status */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <GlassCard
-            style={[
-              styles.subscriptionCard,
-              isPremium && styles.subscriptionCardPremium,
-            ]}
-          >
-            <View style={styles.subscriptionContent}>
+          {isPremium ? (
+            <GlassCard style={styles.subscriptionCardPremium}>
               <View style={styles.subscriptionHeader}>
-                <Image
-                  source={require('../../full3dicons/images/sparkle.png')}
-                  style={styles.subscriptionIcon}
-                  resizeMode="contain"
-                />
+                <View style={styles.premiumIconContainer}>
+                  <Image
+                    source={require('../../full3dicons/images/sparkle.png')}
+                    style={styles.subscriptionIcon}
+                    resizeMode="contain"
+                  />
+                </View>
                 <View style={styles.subscriptionText}>
-                  <LabelMedium>
-                    {isPremium ? 'Premium Üye' : 'Ücretsiz Plan'}
-                  </LabelMedium>
-                  <LabelSmall color="secondary">
-                    {isPremium
-                      ? 'Sınırsız deneme hakkı'
-                      : hasCredits
-                      ? '1 ücretsiz kredi'
-                      : 'Kredi yok'}
-                  </LabelSmall>
+                  <LabelMedium>Premium Üye</LabelMedium>
+                  <LabelSmall color="secondary">Sınırsız deneme hakkı</LabelSmall>
                 </View>
               </View>
-
-              {!isPremium && (
+            </GlassCard>
+          ) : (
+            <View style={styles.freePlanContainer}>
+              <View style={styles.freePlanContent}>
+                <View style={styles.freePlanLeft}>
+                  <View style={styles.freePlanIconContainer}>
+                    <Image
+                      source={require('../../full3dicons/images/sparkle.png')}
+                      style={styles.freePlanIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <View style={styles.freePlanText}>
+                    <LabelMedium>Ücretsiz Plan</LabelMedium>
+                    <LabelSmall color="secondary">
+                      {hasCredits ? '1 ücretsiz kredi' : 'Kredi yok'}
+                    </LabelSmall>
+                  </View>
+                </View>
                 <PrimaryButton
                   title="Premium'a Yükselt"
                   onPress={handleUpgrade}
                   size="sm"
-                  style={styles.upgradeButton}
+                  style={styles.upgradeButtonInline}
                 />
-              )}
+              </View>
             </View>
-          </GlassCard>
+          )}
         </Animated.View>
 
         {/* Stats - Compact Single Row */}
@@ -512,30 +520,72 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   // Subscription
-  subscriptionCard: {
-    padding: 16,
-  },
   subscriptionCardPremium: {
+    padding: 16,
     borderColor: Colors.accent.primary,
-  },
-  subscriptionContent: {
-    gap: 12,
+    borderWidth: 1,
   },
   subscriptionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
+  premiumIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.accent.primaryDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   subscriptionIcon: {
-    width: 32,
-    height: 32,
+    width: 24,
+    height: 24,
   },
   subscriptionText: {
     flex: 1,
     gap: 2,
   },
-  upgradeButton: {
-    alignSelf: 'flex-start',
+  // Free Plan - Modern Design
+  freePlanContainer: {
+    backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.dark.stroke,
+    overflow: 'hidden',
+  },
+  freePlanContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    gap: 12,
+  },
+  freePlanLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  freePlanIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(251, 191, 36, 0.15)', // Yellow tint
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  freePlanIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#FBBF24',
+  },
+  freePlanText: {
+    flex: 1,
+    gap: 2,
+  },
+  upgradeButtonInline: {
+    flexShrink: 0,
   },
   // Stats
   sectionTitle: {

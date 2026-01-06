@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
-  Image,
   Dimensions,
   Pressable,
   Alert,
+  Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,11 +16,10 @@ import Animated, {
   SlideInUp,
   useSharedValue,
   useAnimatedStyle,
-  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, BorderRadius, Shadows } from '../src/ui/theme';
+import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
 import {
   DisplaySmall,
   HeadlineMedium,
@@ -36,7 +34,7 @@ import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { IconButton } from '../src/ui/IconButton';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
-import type { PurchasesPackage } from 'react-native-purchases';
+import { Image } from 'expo-image';
 
 const { width, height } = Dimensions.get('window');
 
@@ -95,7 +93,6 @@ const PaywallScreen = () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       
-      // Get package from offerings
       const packageToPurchase = getPackage(selectedPlan);
       
       if (!packageToPurchase) {
@@ -103,14 +100,11 @@ const PaywallScreen = () => {
         return;
       }
       
-      // Purchase package
       await purchase(packageToPurchase);
       
-      // Success - navigate back
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
     } catch (error: any) {
-      // Error is already handled in hook
       console.error('Purchase error:', error);
     }
   };
@@ -120,40 +114,52 @@ const PaywallScreen = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await restore();
     } catch (error: any) {
-      // Error is already handled in hook
       console.error('Restore error:', error);
     }
   };
 
-  // Get package pricing
-  const getPackagePrice = (plan: Plan): string => {
+  const getPackagePrice = (plan: Plan): { main: string; suffix?: string } => {
     const packageToCheck = getPackage(plan);
+    let priceString = '';
+    
     if (packageToCheck?.product?.priceString) {
-      return packageToCheck.product.priceString;
+      priceString = packageToCheck.product.priceString;
+    } else {
+      switch (plan) {
+        case 'monthly':
+          priceString = '₺49.99/ay';
+          break;
+        case 'yearly':
+          priceString = '₺299.99/yıl';
+          break;
+        case 'lifetime':
+          priceString = '₺999.99';
+          break;
+      }
     }
-    // Fallback prices
-    switch (plan) {
-      case 'monthly':
-        return '₺49.99/ay';
-      case 'yearly':
-        return '₺299.99/yıl';
-      case 'lifetime':
-        return '₺999.99';
-      default:
-        return '';
-    }
+
+    // Split price and suffix
+    const parts = priceString.split('/');
+    return {
+      main: parts[0],
+      suffix: parts[1] || undefined,
+    };
   };
 
-  // Check if package is available
   const isPackageAvailable = (plan: Plan): boolean => {
     return getPackage(plan) !== null;
   };
 
+  // Calculate discount percentage
+  const getDiscountPercentage = (): number => {
+    return 19; // Default discount for yearly
+  };
+
   return (
     <View style={styles.container}>
-      {/* Background gradient */}
+      {/* Background gradient - top section */}
       <LinearGradient
-        colors={['#0B0B0C', '#1a1a2e', '#0B0B0C']}
+        colors={['#0B0B0C', '#1a1a2e', '#2a1a3e']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -162,17 +168,12 @@ const PaywallScreen = () => {
         <Image
           source={require('../full3dicons/images/sparkle.png')}
           style={[styles.sparkle, styles.sparkle1]}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <Image
           source={require('../full3dicons/images/ai-sparkle.png')}
           style={[styles.sparkle, styles.sparkle2]}
-          resizeMode="contain"
-        />
-        <Image
-          source={require('../full3dicons/images/sparkle.png')}
-          style={[styles.sparkle, styles.sparkle3]}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </Animated.View>
 
@@ -189,210 +190,188 @@ const PaywallScreen = () => {
         </Animated.View>
       )}
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 20 },
+      {/* Modal - bottom section */}
+      <Animated.View 
+        entering={SlideInUp.delay(300).springify()}
+        style={[
+          styles.modal,
+          { 
+            bottom: 0,
+            paddingBottom: insets.bottom + 20,
+          }
         ]}
-        showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
-          <Image
-            source={require('../full3dicons/images/sparkle.png')}
-            style={styles.headerIcon}
-            resizeMode="contain"
-          />
-          <DisplaySmall style={styles.headerTitle}>
-            Unlimited{'\n'}
-            <DisplaySmall color="accent">Combos</DisplaySmall>
-          </DisplaySmall>
-          <BodyLarge color="secondary" style={styles.headerSubtitle}>
-            Sınırsız kombin üretimi + yüksek kalite
-          </BodyLarge>
-        </Animated.View>
+        <GlassCard style={styles.modalContent}>
+          {/* Title */}
+          <Animated.View entering={FadeInDown.delay(400).springify()}>
+            <HeadlineMedium style={styles.title}>
+              Yolculuğuna başla
+            </HeadlineMedium>
+            <BodyLarge color="secondary" style={styles.subtitle}>
+              İstediğin kadar kombin üret, sınırsız deneme yap
+            </BodyLarge>
+          </Animated.View>
 
-        {/* Features */}
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.featuresSection}>
-          <FeatureItem
-            icon={require('../full3dicons/images/ai-sparkle.png')}
-            title="Sınırsız Deneme"
-            description="İstediğin kadar kıyafet dene"
-          />
-          <FeatureItem
-            icon={require('../full3dicons/images/photo.png')}
-            title="HD Kalite"
-            description="Yüksek çözünürlüklü sonuçlar"
-          />
-          <FeatureItem
-            icon={require('../full3dicons/images/t-shirts.png')}
-            title="4 Varyasyon"
-            description="Her denemede 4 farklı görsel"
-          />
-          <FeatureItem
-            icon={require('../full3dicons/images/sparkle.png')}
-            title="Öncelikli İşlem"
-            description="Daha hızlı sonuç al"
-          />
-        </Animated.View>
+          {/* Features List */}
+          <Animated.View 
+            entering={FadeInDown.delay(500).springify()}
+            style={styles.featuresList}
+          >
+            <FeatureItem text="Sınırsız kombin üretimi" />
+            <FeatureItem text="Yüksek kaliteli sonuçlar" />
+            <FeatureItem text="Öncelikli işlem hızı" />
+          </Animated.View>
 
-        {/* Plans */}
-        <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.plansSection}>
-          <HeadlineSmall style={styles.plansTitle}>Plan Seç</HeadlineSmall>
-
-          <View style={styles.plansContainer}>
-            {/* Yearly Plan */}
-            {isPackageAvailable('yearly') && (
-              <Pressable onPress={() => handleSelectPlan('yearly')}>
-                <GlassCard
-                  style={[
-                    styles.planCard,
-                    selectedPlan === 'yearly' && styles.planCardSelected,
-                  ]}
-                >
-                  {/* Best value badge */}
-                  <View style={styles.bestValueBadge}>
-                    <LabelSmall style={styles.bestValueText}>En Avantajlı</LabelSmall>
-                  </View>
-
-                  <View style={styles.planHeader}>
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selectedPlan === 'yearly' && styles.radioOuterSelected,
-                      ]}
-                    >
-                      {selectedPlan === 'yearly' && <View style={styles.radioInner} />}
-                    </View>
-                    <View style={styles.planInfo}>
-                      <HeadlineMedium>Yıllık</HeadlineMedium>
-                      <BodySmall color="secondary">12 aylık erişim</BodySmall>
-                    </View>
-                  </View>
-
-                  <View style={styles.planPricing}>
-                    <HeadlineSmall color="accent">{getPackagePrice('yearly').split('/')[0]}</HeadlineSmall>
-                    {getPackagePrice('yearly').includes('/') && (
-                      <BodySmall color="tertiary">/{getPackagePrice('yearly').split('/')[1]}</BodySmall>
-                    )}
-                  </View>
-
-                  <View style={styles.savingsBadge}>
-                    <LabelSmall color="success">%50 Tasarruf</LabelSmall>
-                  </View>
-                </GlassCard>
-              </Pressable>
-            )}
-
-            {/* Monthly Plan */}
+          {/* Plans - Horizontal layout */}
+          <Animated.View 
+            entering={FadeInDown.delay(600).springify()}
+            style={styles.plansRow}
+          >
+            {/* Monthly */}
             {isPackageAvailable('monthly') && (
-              <Pressable onPress={() => handleSelectPlan('monthly')}>
-                <GlassCard
-                  style={[
-                    styles.planCard,
-                    selectedPlan === 'monthly' && styles.planCardSelected,
-                  ]}
-                >
-                  <View style={styles.planHeader}>
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selectedPlan === 'monthly' && styles.radioOuterSelected,
-                      ]}
-                    >
-                      {selectedPlan === 'monthly' && <View style={styles.radioInner} />}
+              <Pressable 
+                onPress={() => handleSelectPlan('monthly')}
+                style={styles.planCardWrapper}
+              >
+                <View style={styles.planCardContainer}>
+                  <GlassCard
+                    style={[
+                      styles.planCard,
+                      selectedPlan === 'monthly' && styles.planCardSelected,
+                    ]}
+                  >
+                    <View style={[
+                      styles.planRadio,
+                      selectedPlan === 'monthly' && styles.planRadioSelected,
+                    ]}>
+                      {selectedPlan === 'monthly' && <View style={styles.planRadioInner} />}
                     </View>
-                    <View style={styles.planInfo}>
-                      <HeadlineMedium>Aylık</HeadlineMedium>
-                      <BodySmall color="secondary">1 aylık erişim</BodySmall>
+                    <LabelMedium style={styles.planLabel}>Aylık</LabelMedium>
+                    <View style={styles.planPriceContainer}>
+                      <BodyMedium style={styles.planPrice}>
+                        {getPackagePrice('monthly').main}
+                      </BodyMedium>
                     </View>
-                  </View>
-
-                  <View style={styles.planPricing}>
-                    <HeadlineSmall color="accent">{getPackagePrice('monthly').split('/')[0]}</HeadlineSmall>
-                    {getPackagePrice('monthly').includes('/') && (
-                      <BodySmall color="tertiary">/{getPackagePrice('monthly').split('/')[1]}</BodySmall>
-                    )}
-                  </View>
-                </GlassCard>
+                  </GlassCard>
+                </View>
               </Pressable>
             )}
 
-            {/* Lifetime Plan */}
+            {/* Yearly - Selected by default */}
+            {isPackageAvailable('yearly') && (
+              <Pressable 
+                onPress={() => handleSelectPlan('yearly')}
+                style={styles.planCardWrapper}
+              >
+                <View style={styles.planCardContainer}>
+                  <GlassCard
+                    style={[
+                      styles.planCard,
+                      selectedPlan === 'yearly' && styles.planCardSelected,
+                    ]}
+                  >
+                    <View style={[
+                      styles.planRadio,
+                      selectedPlan === 'yearly' && styles.planRadioSelected,
+                    ]}>
+                      {selectedPlan === 'yearly' && <View style={styles.planRadioInner} />}
+                    </View>
+                    <LabelMedium style={styles.planLabel}>Yıllık</LabelMedium>
+                    <View style={styles.planPriceContainer}>
+                      <BodyMedium style={styles.planPrice}>
+                        {getPackagePrice('yearly').main}
+                      </BodyMedium>
+                    </View>
+                  </GlassCard>
+                  {/* Discount badge - outside card */}
+                  {selectedPlan === 'yearly' && (
+                    <View style={styles.discountBadge}>
+                      <LabelSmall style={styles.discountText}>
+                        %{getDiscountPercentage()} İNDİRİM
+                      </LabelSmall>
+                    </View>
+                  )}
+                </View>
+              </Pressable>
+            )}
+
+            {/* Lifetime */}
             {isPackageAvailable('lifetime') && (
-              <Pressable onPress={() => handleSelectPlan('lifetime')}>
-                <GlassCard
-                  style={[
-                    styles.planCard,
-                    selectedPlan === 'lifetime' && styles.planCardSelected,
-                  ]}
-                >
-                  <View style={styles.planHeader}>
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selectedPlan === 'lifetime' && styles.radioOuterSelected,
-                      ]}
-                    >
-                      {selectedPlan === 'lifetime' && <View style={styles.radioInner} />}
+              <Pressable 
+                onPress={() => handleSelectPlan('lifetime')}
+                style={styles.planCardWrapper}
+              >
+                <View style={styles.planCardContainer}>
+                  <GlassCard
+                    style={[
+                      styles.planCard,
+                      selectedPlan === 'lifetime' && styles.planCardSelected,
+                    ]}
+                  >
+                    <View style={[
+                      styles.planRadio,
+                      selectedPlan === 'lifetime' && styles.planRadioSelected,
+                    ]}>
+                      {selectedPlan === 'lifetime' && <View style={styles.planRadioInner} />}
                     </View>
-                    <View style={styles.planInfo}>
-                      <HeadlineMedium>Ömür Boyu</HeadlineMedium>
-                      <BodySmall color="secondary">Tek seferlik ödeme</BodySmall>
+                    <LabelMedium style={styles.planLabel}>Ömür Boyu</LabelMedium>
+                    <View style={styles.planPriceContainer}>
+                      <BodyMedium style={styles.planPrice}>
+                        {getPackagePrice('lifetime').main}
+                      </BodyMedium>
                     </View>
-                  </View>
-
-                  <View style={styles.planPricing}>
-                    <HeadlineSmall color="accent">{getPackagePrice('lifetime')}</HeadlineSmall>
-                  </View>
-                </GlassCard>
+                  </GlassCard>
+                </View>
               </Pressable>
             )}
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        {/* Subscribe button */}
-        <Animated.View entering={SlideInUp.delay(400).springify()} style={styles.subscribeSection}>
-          <PrimaryButton
-            title={`Satın Al - ${getPackagePrice(selectedPlan)}`}
-            onPress={handleSubscribe}
-            loading={isLoading}
-            disabled={!isPackageAvailable(selectedPlan)}
-          />
+          {/* Continue Button */}
+          <Animated.View entering={FadeInDown.delay(700).springify()}>
+            <PrimaryButton
+              title="Devam Et"
+              onPress={handleSubscribe}
+              loading={isLoading}
+              disabled={!isPackageAvailable(selectedPlan)}
+              style={styles.continueButton}
+            />
+          </Animated.View>
 
-          <Pressable onPress={handleRestorePurchases} style={styles.restoreButton}>
-            <BodySmall color="tertiary">Satın alımları geri yükle</BodySmall>
-          </Pressable>
-        </Animated.View>
-
-        {/* Terms */}
-        <View style={styles.termsSection}>
-          <BodySmall color="tertiary" style={styles.termsText}>
-            Aboneliğiniz App Store hesabınız üzerinden faturalandırılacaktır.
-            İstediğiniz zaman ayarlardan iptal edebilirsiniz.
-          </BodySmall>
-        </View>
-      </ScrollView>
+          {/* Footer Links */}
+          <Animated.View 
+            entering={FadeInDown.delay(800).springify()}
+            style={styles.footerLinks}
+          >
+            <Pressable onPress={handleRestorePurchases}>
+              <BodySmall color="tertiary">Geri Yükle</BodySmall>
+            </Pressable>
+            <View style={styles.footerDot} />
+            <Pressable onPress={() => Linking.openURL('https://example.com/terms')}>
+              <BodySmall color="tertiary">Şartlar</BodySmall>
+            </Pressable>
+            <View style={styles.footerDot} />
+            <Pressable onPress={() => Linking.openURL('https://example.com/privacy')}>
+              <BodySmall color="tertiary">Gizlilik</BodySmall>
+            </Pressable>
+          </Animated.View>
+        </GlassCard>
+      </Animated.View>
     </View>
   );
 };
 
 type FeatureItemProps = {
-  icon: any;
-  title: string;
-  description: string;
+  text: string;
 };
 
-const FeatureItem: React.FC<FeatureItemProps> = ({ icon, title, description }) => (
+const FeatureItem: React.FC<FeatureItemProps> = ({ text }) => (
   <View style={styles.featureItem}>
-    <View style={styles.featureIconContainer}>
-      <Image source={icon} style={styles.featureIcon} resizeMode="contain" />
+    <View style={styles.checkmark}>
+      <LabelSmall style={styles.checkmarkText}>✓</LabelSmall>
     </View>
-    <View style={styles.featureText}>
-      <LabelMedium>{title}</LabelMedium>
-      <BodySmall color="secondary">{description}</BodySmall>
-    </View>
+    <BodyMedium color="primary" style={styles.featureText}>
+      {text}
+    </BodyMedium>
   </View>
 );
 
@@ -410,113 +389,95 @@ const styles = StyleSheet.create({
     opacity: 0.2,
   },
   sparkle1: {
-    width: 80,
-    height: 80,
-    top: 100,
-    right: 20,
+    width: 140,
+    height: 140,
+    top: 60,
+    right: -30,
   },
   sparkle2: {
-    width: 60,
-    height: 60,
-    top: 250,
-    left: 20,
-  },
-  sparkle3: {
-    width: 40,
-    height: 40,
-    bottom: 200,
-    right: 40,
+    width: 120,
+    height: 120,
+    top: 160,
+    left: -30,
   },
   closeButton: {
     position: 'absolute',
     left: Spacing.page,
     zIndex: 10,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  modal: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: height * 0.7, // Bottom 70% of screen
     paddingHorizontal: Spacing.page,
-    gap: 32,
+    paddingTop: Spacing.xxl,
   },
-  header: {
-    alignItems: 'center',
-    gap: 12,
+  modalContent: {
+    padding: Spacing.xxl,
+    gap: Spacing.xxl,
   },
-  headerIcon: {
-    width: 60,
-    height: 60,
-  },
-  headerTitle: {
+  title: {
     textAlign: 'center',
-    lineHeight: 40,
+    marginBottom: Spacing.sm,
+    fontSize: 24,
+    fontWeight: '700',
   },
-  headerSubtitle: {
+  subtitle: {
     textAlign: 'center',
+    marginBottom: Spacing.lg,
+    fontSize: 16,
   },
-  featuresSection: {
-    gap: 16,
+  featuresList: {
+    gap: Spacing.md,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.md,
   },
-  featureIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.accent.primaryDim,
+  checkmark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.accent.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureIcon: {
-    width: 28,
-    height: 28,
+  checkmarkText: {
+    color: Colors.text.inverse,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   featureText: {
     flex: 1,
-    gap: 2,
+    fontSize: 16,
   },
-  plansSection: {
-    gap: 16,
+  plansRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    justifyContent: 'space-between',
   },
-  plansTitle: {
-    textAlign: 'center',
+  planCardWrapper: {
+    flex: 1,
   },
-  plansContainer: {
-    gap: 12,
+  planCardContainer: {
+    position: 'relative',
   },
   planCard: {
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    gap: 12,
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+    minHeight: 110,
+    justifyContent: 'flex-start',
+    paddingTop: Spacing.lg + 4,
   },
   planCardSelected: {
     borderColor: Colors.accent.primary,
-    backgroundColor: Colors.accent.primaryDim,
+    borderWidth: 2,
+    backgroundColor: Colors.accent.primaryDim + '40',
   },
-  bestValueBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: Colors.accent.primary,
-    borderRadius: BorderRadius.sm,
-  },
-  bestValueText: {
-    color: Colors.text.inverse,
-    fontWeight: '600',
-  },
-  planHeader: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  radioOuter: {
+  planRadio: {
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -524,46 +485,65 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.stroke,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: Spacing.sm,
   },
-  radioOuterSelected: {
+  planRadioSelected: {
     borderColor: Colors.accent.primary,
   },
-  radioInner: {
+  planRadioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
     backgroundColor: Colors.accent.primary,
   },
-  planInfo: {
-    gap: 2,
-  },
-  planPricing: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
-  },
-  savingsBadge: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(74, 222, 128, 0.15)',
-    borderRadius: BorderRadius.sm,
-  },
-  subscribeSection: {
-    gap: 12,
-    alignItems: 'center',
-  },
-  restoreButton: {
-    paddingVertical: 8,
-  },
-  termsSection: {
-    paddingHorizontal: 20,
-  },
-  termsText: {
+  planLabel: {
     textAlign: 'center',
-    lineHeight: 18,
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: Spacing.xs,
+  },
+  planPriceContainer: {
+    marginTop: 'auto',
+  },
+  planPrice: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text.primary,
+  },
+  discountBadge: {
+    position: 'absolute',
+    bottom: -10,
+    alignSelf: 'center',
+    backgroundColor: '#FBBF24',
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
+    minWidth: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  discountText: {
+    color: '#000000',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  continueButton: {
+    marginTop: Spacing.md,
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  footerDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.text.tertiary,
   },
 });
 

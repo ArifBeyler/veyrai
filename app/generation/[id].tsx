@@ -7,12 +7,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
-  Image,
   Pressable,
   Share,
   StyleSheet,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   FadeIn,
   FadeInUp,
@@ -90,9 +90,11 @@ const GenerationScreen = () => {
 
   // Animation values
   const shimmerPosition = useSharedValue(-width);
+  const successShimmerPosition = useSharedValue(-width);
   const pulseScale = useSharedValue(1);
   const progressWidth = useSharedValue(0);
   const iconRotation = useSharedValue(0);
+  const imageOpacity = useSharedValue(0);
 
   // Shuffle messages
   const [messages] = useState(() => [...LOADING_MESSAGES].sort(() => Math.random() - 0.5));
@@ -206,7 +208,7 @@ const GenerationScreen = () => {
     return () => clearInterval(interval);
   }, [state, messages.length]);
 
-  // Progress animation
+  // Progress animation - Rastgele ilerleme
   useEffect(() => {
     if (state === 'success') {
       setProgress(100);
@@ -216,15 +218,26 @@ const GenerationScreen = () => {
     
     if (state !== 'loading') return;
 
+    // Rastgele başlangıç değeri (15-35 arası)
+    const initialProgress = Math.random() * 20 + 15;
+    setProgress(initialProgress);
+    progressWidth.value = withTiming(initialProgress, { duration: 300 });
+
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 90) return prev;
-        const increment = Math.random() * 10 + 5;
-        const newProgress = Math.min(prev + increment, 90);
-        progressWidth.value = withTiming(newProgress, { duration: 500 });
+        if (prev >= 95) return prev; // 95'e kadar çık, sonra beklesin
+        
+        // Her seferinde farklı artış miktarı (rastgele)
+        const increment = Math.random() * 12 + 3; // 3-15 arası
+        const newProgress = Math.min(prev + increment, 95);
+        
+        // Rastgele animasyon süresi (400-800ms)
+        const duration = Math.random() * 400 + 400;
+        progressWidth.value = withTiming(newProgress, { duration });
+        
         return newProgress;
       });
-    }, 1500);
+    }, Math.random() * 1000 + 800); // 800-1800ms arası rastgele interval
     
     return () => clearInterval(progressInterval);
   }, [state]);
@@ -253,8 +266,29 @@ const GenerationScreen = () => {
     );
   }, []);
 
+  // Success shimmer animation and image fade-in
+  useEffect(() => {
+    if (state === 'success') {
+      // Image fade-in
+      imageOpacity.value = withTiming(1, { duration: 600 });
+      
+      // Success shimmer animation
+      successShimmerPosition.value = withRepeat(
+        withTiming(width * 2, { duration: 2500 }),
+        -1,
+        false
+      );
+    } else {
+      imageOpacity.value = 0;
+    }
+  }, [state]);
+
   const shimmerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shimmerPosition.value }],
+  }));
+
+  const successShimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: successShimmerPosition.value }],
   }));
 
   const pulseStyle = useAnimatedStyle(() => ({
@@ -267,6 +301,10 @@ const GenerationScreen = () => {
 
   const iconStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${iconRotation.value}deg` }],
+  }));
+
+  const imageFadeStyle = useAnimatedStyle(() => ({
+    opacity: imageOpacity.value,
   }));
 
   const handleClose = () => {
@@ -389,17 +427,40 @@ const GenerationScreen = () => {
           <Animated.View entering={ZoomIn.springify()} style={styles.resultContainer}>
             <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.resultCardWrapper}>
               <GlassCard style={styles.resultCard}>
+                {/* Glow effect */}
+                <Animated.View style={[styles.resultGlow, pulseStyle]} />
+                
                 <View style={styles.resultImageContainer}>
-                  <Image
-                    source={{ uri: resultImageUrl }}
-                    style={styles.resultImage}
-                    resizeMode="cover"
-                  />
+                  <Animated.View style={[styles.resultImageWrapper, imageFadeStyle]}>
+                    <Image
+                      source={{ uri: resultImageUrl }}
+                      style={styles.resultImage}
+                      contentFit="cover"
+                      transition={300}
+                      cachePolicy="memory-disk"
+                    />
+                    {/* Shimmer effect on success */}
+                    <Animated.View style={[styles.successShimmer, successShimmerStyle]}>
+                      <LinearGradient
+                        colors={['transparent', 'rgba(181, 255, 31, 0.4)', 'transparent']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={StyleSheet.absoluteFill}
+                      />
+                    </Animated.View>
+                  </Animated.View>
                 </View>
               </GlassCard>
             </Animated.View>
 
-            <Animated.View entering={FadeIn.delay(400)} style={styles.actionButtons}>
+            {/* Success Message */}
+            <Animated.View entering={FadeIn.delay(500)} style={styles.successMessage}>
+              <LabelMedium color="accent" style={styles.successText}>
+                ✨ Kombin hazır!
+              </LabelMedium>
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(600)} style={styles.actionButtons}>
               <GlassCard style={styles.actionButton} onPress={handleSave}>
                 <View style={styles.actionButtonContent}>
                   <Image
@@ -717,13 +778,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flex: 1,
     paddingVertical: 16,
+    position: 'relative',
   },
   resultCardWrapper: {
     flex: 1,
     justifyContent: 'center',
+    width: '100%',
+    alignItems: 'center',
   },
   resultCard: {
     padding: 8,
+    position: 'relative',
+  },
+  resultGlow: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderRadius: BorderRadius.md + 4,
+    borderWidth: 2,
+    borderColor: Colors.accent.primary,
+    shadowColor: Colors.accent.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
   },
   resultImageContainer: {
     width: width * 0.88,
@@ -731,10 +810,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.surface,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  resultImageWrapper: {
+    width: '100%',
+    height: '100%',
   },
   resultImage: {
     width: '100%',
     height: '100%',
+  },
+  successShimmer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  successMessage: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  successText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   actionButtons: {
     flexDirection: 'row',

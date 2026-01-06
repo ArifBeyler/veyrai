@@ -290,7 +290,9 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
             <Image
               source={{ uri: garment.imageUri }}
               style={styles.garmentImage}
-              resizeMode="cover"
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
             />
           ) : (
             <Image

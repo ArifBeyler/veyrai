@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Image,
   Pressable,
   Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -171,7 +171,9 @@ const GalleryScreen = () => {
                       <Image
                         source={{ uri: job.resultImageUrl }}
                         style={styles.galleryImage}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        transition={200}
+                        cachePolicy="memory-disk"
                       />
                     </View>
 

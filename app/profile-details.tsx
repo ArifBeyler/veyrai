@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  Image,
   Dimensions,
   Pressable,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -127,7 +127,9 @@ const ProfileDetailsScreen = () => {
               <Image
                 source={{ uri: profile.photos[0].uri }}
                 style={styles.profileImage}
-                resizeMode="cover"
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
               />
             ) : (
               <Image

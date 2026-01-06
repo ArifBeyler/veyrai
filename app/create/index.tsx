@@ -7,7 +7,6 @@ import {
   ActionSheetIOS,
   Alert,
   Dimensions,
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -15,6 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -186,8 +186,7 @@ const CreateScreen = () => {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsEditing: false,
       quality: 0.8,
     });
 
@@ -199,8 +198,7 @@ const CreateScreen = () => {
   const pickProfileFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsEditing: false,
       quality: 0.8,
     });
 
@@ -643,7 +641,9 @@ const CreateScreen = () => {
                             <Image
                               source={{ uri: garment.imageUri }}
                               style={styles.garmentImage}
-                              resizeMode="cover"
+                              contentFit="cover"
+                              transition={200}
+                              cachePolicy="memory-disk"
                             />
                           ) : (
                             <Image

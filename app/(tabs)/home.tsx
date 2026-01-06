@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Image,
   Dimensions,
   Pressable,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -154,47 +154,149 @@ const HomeScreen = () => {
             </View>
 
             {/* Dinamik grid - görsel sayısına göre */}
-            <View style={[
-              styles.resultsGrid,
-              completedJobs.length === 1 && styles.resultsGridSingle,
-              completedJobs.length === 2 && styles.resultsGridDouble,
-            ]}>
-              {completedJobs.filter(job => job.resultImageUrl).slice(0, 6).map((job, index) => (
-                <Pressable
-                  key={job.id}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push({
-                      pathname: '/generation/[id]',
-                      params: {
-                        id: job.id,
-                        imageUrl: encodeURIComponent(job.resultImageUrl!),
-                      },
-                    });
-                  }}
-                  style={[
-                    completedJobs.length === 1 && styles.resultCardSingle,
-                    completedJobs.length === 2 && styles.resultCardDouble,
-                  ]}
-                >
-                  <GlassCard style={[
-                    styles.resultGridCard,
-                    completedJobs.length === 1 && styles.resultGridCardSingle,
-                    completedJobs.length === 2 && styles.resultGridCardDouble,
+            {(() => {
+              const displayJobs = completedJobs.filter(job => job.resultImageUrl).slice(0, 6);
+              const jobCount = displayJobs.length;
+              
+              if (jobCount === 4) {
+                // 4 görsel: 3 yatay küçük + 1 büyük dikey
+                return (
+                  <View style={styles.resultsGridFour}>
+                    {/* İlk 3 görsel - yatay küçük */}
+                    <View style={styles.resultsGridFourTop}>
+                      {displayJobs.slice(0, 3).map((job, index) => (
+                        <Pressable
+                          key={job.id}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({
+                              pathname: '/generation/[id]',
+                              params: {
+                                id: job.id,
+                                imageUrl: encodeURIComponent(job.resultImageUrl!),
+                              },
+                            });
+                          }}
+                          style={styles.resultCardFourSmall}
+                        >
+                          <GlassCard style={styles.resultGridCardFourSmall}>
+                            <Image
+                              source={{ uri: job.resultImageUrl }}
+                              style={styles.resultGridImageFourSmall}
+                              contentFit="cover"
+                              transition={200}
+                              cachePolicy="memory-disk"
+                            />
+                          </GlassCard>
+                        </Pressable>
+                      ))}
+                    </View>
+                    {/* 4. görsel - büyük dikey */}
+                    {displayJobs[3] && (
+                      <Pressable
+                        key={displayJobs[3].id}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          router.push({
+                            pathname: '/generation/[id]',
+                            params: {
+                              id: displayJobs[3].id,
+                              imageUrl: encodeURIComponent(displayJobs[3].resultImageUrl!),
+                            },
+                          });
+                        }}
+                        style={styles.resultCardFourLarge}
+                      >
+                        <GlassCard style={styles.resultGridCardFourLarge}>
+                          <Image
+                            source={{ uri: displayJobs[3].resultImageUrl }}
+                            style={styles.resultGridImageFourLarge}
+                            contentFit="cover"
+                            transition={200}
+                            cachePolicy="memory-disk"
+                          />
+                        </GlassCard>
+                      </Pressable>
+                    )}
+                  </View>
+                );
+              } else if (jobCount === 2) {
+                // 2 görsel: 2 büyük alt alta
+                return (
+                  <View style={styles.resultsGridTwo}>
+                    {displayJobs.map((job, index) => (
+                      <Pressable
+                        key={job.id}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          router.push({
+                            pathname: '/generation/[id]',
+                            params: {
+                              id: job.id,
+                              imageUrl: encodeURIComponent(job.resultImageUrl!),
+                            },
+                          });
+                        }}
+                        style={styles.resultCardTwo}
+                      >
+                        <GlassCard style={styles.resultGridCardTwo}>
+                          <Image
+                            source={{ uri: job.resultImageUrl }}
+                            style={styles.resultGridImageTwo}
+                            contentFit="cover"
+                            transition={200}
+                            cachePolicy="memory-disk"
+                          />
+                        </GlassCard>
+                      </Pressable>
+                    ))}
+                  </View>
+                );
+              } else {
+                // Diğer durumlar (1, 3, 5, 6+)
+                return (
+                  <View style={[
+                    styles.resultsGrid,
+                    jobCount === 1 && styles.resultsGridSingle,
                   ]}>
-                    <Image
-                      source={{ uri: job.resultImageUrl }}
-                      style={[
-                        styles.resultGridImage,
-                        completedJobs.length === 1 && styles.resultGridImageSingle,
-                        completedJobs.length === 2 && styles.resultGridImageDouble,
-                      ]}
-                      resizeMode="cover"
-                    />
-                  </GlassCard>
-                </Pressable>
-              ))}
-            </View>
+                    {displayJobs.map((job, index) => (
+                      <Pressable
+                        key={job.id}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          router.push({
+                            pathname: '/generation/[id]',
+                            params: {
+                              id: job.id,
+                              imageUrl: encodeURIComponent(job.resultImageUrl!),
+                            },
+                          });
+                        }}
+                        style={[
+                          jobCount === 1 && styles.resultCardSingle,
+                        ]}
+                      >
+                        <GlassCard style={[
+                          styles.resultGridCard,
+                          jobCount === 1 && styles.resultGridCardSingle,
+                        ]}>
+                          <Image
+                            source={{ uri: job.resultImageUrl }}
+                            style={[
+                              styles.resultGridImage,
+                              jobCount === 1 && styles.resultGridImageSingle,
+                            ]}
+                            contentFit="cover"
+                            transition={200}
+                            cachePolicy="memory-disk"
+                          />
+                        </GlassCard>
+                      </Pressable>
+                    ))}
+                  </View>
+                );
+              }
+            })()}
           </Animated.View>
         ) : (
           /* Empty State */
@@ -347,6 +449,51 @@ const styles = StyleSheet.create({
   resultsGridDouble: {
     justifyContent: 'space-between',
   },
+  // 4 görsel layout
+  resultsGridFour: {
+    gap: 12,
+  },
+  resultsGridFourTop: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  resultCardFourSmall: {
+    width: (width - Spacing.page * 2 - 24) / 3,
+  },
+  resultGridCardFourSmall: {
+    padding: 6,
+  },
+  resultGridImageFourSmall: {
+    width: '100%',
+    aspectRatio: 1.2, // Yatay (geniş)
+    borderRadius: BorderRadius.sm,
+  },
+  resultCardFourLarge: {
+    width: '100%',
+  },
+  resultGridCardFourLarge: {
+    padding: 10,
+  },
+  resultGridImageFourLarge: {
+    width: '100%',
+    aspectRatio: 0.65, // Dikey (uzun)
+    borderRadius: BorderRadius.md,
+  },
+  // 2 görsel layout
+  resultsGridTwo: {
+    gap: 12,
+  },
+  resultCardTwo: {
+    width: '100%',
+  },
+  resultGridCardTwo: {
+    padding: 10,
+  },
+  resultGridImageTwo: {
+    width: '100%',
+    aspectRatio: 0.75, // Büyük dikey
+    borderRadius: BorderRadius.md,
+  },
   resultGridCard: {
     width: (width - Spacing.page * 2 - 24) / 3,
     padding: 6,
@@ -355,15 +502,8 @@ const styles = StyleSheet.create({
     width: width - Spacing.page * 2,
     padding: 10,
   },
-  resultGridCardDouble: {
-    width: (width - Spacing.page * 2 - 12) / 2,
-    padding: 8,
-  },
   resultCardSingle: {
     width: '100%',
-  },
-  resultCardDouble: {
-    width: (width - Spacing.page * 2 - 12) / 2,
   },
   resultGridImage: {
     width: '100%',
@@ -372,10 +512,6 @@ const styles = StyleSheet.create({
   },
   resultGridImageSingle: {
     aspectRatio: 0.8,
-    borderRadius: BorderRadius.md,
-  },
-  resultGridImageDouble: {
-    aspectRatio: 0.75,
     borderRadius: BorderRadius.md,
   },
   emptyCard: {

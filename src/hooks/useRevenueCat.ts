@@ -204,8 +204,6 @@ export const useRevenueCat = () => {
 
   // Initialize on mount
   useEffect(() => {
-    let subscription: { unsubscribe: () => void } | null = null;
-    
     const init = async () => {
       // Check if user is logged in
       const { data: { session } } = await supabase.auth.getSession();
@@ -216,17 +214,16 @@ export const useRevenueCat = () => {
     init();
     
     // Listen for auth state changes
-    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         await setUserId(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         await logOut();
       }
     });
-    subscription = data;
     
     return () => {
-      subscription?.unsubscribe();
+      subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
