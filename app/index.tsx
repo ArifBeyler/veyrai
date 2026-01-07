@@ -11,10 +11,12 @@ import Animated, {
 import { Colors } from '../src/ui/theme';
 import { DisplayLarge, BodyMedium } from '../src/ui/Typography';
 import { useSessionStore } from '../src/state/useSessionStore';
+import { useTranslation } from '../src/hooks/useTranslation';
 import { generateDeviceHash } from '../src/utils/deviceHash';
 import { supabase } from '../src/services/supabase';
 
 const SplashScreen = () => {
+  const { t } = useTranslation();
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.8);
   const textOpacity = useSharedValue(0);
@@ -99,14 +101,14 @@ const SplashScreen = () => {
       </Animated.View>
 
       <Animated.View style={[styles.textContainer, textStyle]}>
-        <DisplayLarge style={styles.title}>FIT-SWAP</DisplayLarge>
+        <DisplayLarge style={styles.title}>Wearify</DisplayLarge>
         <BodyMedium color="secondary" style={styles.subtitle}>
-          Kıyafetleri üzerinde dene
+          {t('splash.subtitle')}
         </BodyMedium>
       </Animated.View>
 
       <Animated.View style={[styles.footer, textStyle]}>
-        <BodyMedium color="tertiary">AI destekli sanal deneme</BodyMedium>
+        <BodyMedium color="tertiary">{t('splash.footer')}</BodyMedium>
       </Animated.View>
     </View>
   );

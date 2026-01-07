@@ -1,0 +1,253 @@
+{
+  "common": {
+    "appName": "Wearify",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "done": "Done",
+    "retry": "Retry"
+  },
+  "auth": {
+    "title": "Welcome",
+    "email": "Email",
+    "password": "Password",
+    "passwordPlaceholder": "Password (min 6 characters)",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "noAccount": "Don't have an account? Sign up",
+    "hasAccount": "Already have an account? Sign in",
+    "demoMode": "Continue in demo mode →",
+    "loginError": "Failed to sign in",
+    "registerError": "Failed to sign up",
+    "emailExists": "This email is already in use. Try signing in.",
+    "loginSubtitle": "Sign in to your account",
+    "registerSubtitle": "Create a new account"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Try outfits in seconds",
+      "description": "See clothes on you with AI, get instant results"
+    },
+    "step2": {
+      "title": "Not just one piece, complete outfit",
+      "description": "Select multiple items, see the full outfit"
+    },
+    "step3": {
+      "title": "Save your result, try again",
+      "description": "Keep results in your gallery, try again anytime"
+    }
+  },
+  "home": {
+    "welcome": "Welcome",
+    "newTryOn": "New Try-on",
+    "newTryOnSubtitle": "See the outfit on you, with one click",
+    "start": "Start",
+    "addPhoto": "Add Photo",
+    "addPhotoSubtitle": "{{count}} photos",
+    "wardrobe": "Wardrobe",
+    "wardrobeSubtitle": "See outfits",
+    "latestResults": "Latest Results",
+    "seeAll": "See All",
+    "noResults": "No results yet",
+    "startFirstTry": "Start by making your first try-on",
+    "startFirstTryButton": "Make First Try-on",
+    "credits": "{{count}} Credits"
+  },
+  "profile": {
+    "title": "Profile",
+    "profile": "Profile",
+    "male": "Male",
+    "female": "Female",
+    "addProfile": "Add Profile",
+    "freePlan": "Free Plan",
+    "premiumMember": "Premium Member",
+    "unlimitedAccess": "Unlimited trial access",
+    "oneFreeCredit": "1 free credit",
+    "noCredits": "No credits",
+    "upgradeToPremium": "Upgrade to Premium",
+    "quickActions": "Quick Actions",
+    "manageProfiles": "Manage Profiles",
+    "profilesCount": "{{count}} profiles",
+    "goToGallery": "Go to Gallery",
+    "imagesCount": "{{count}} images",
+    "support": "Support",
+    "helpAndSupport": "Help & Support",
+    "managePurchases": "Manage Purchases",
+    "privacyPolicy": "Privacy Policy",
+    "changeLanguage": "Change Language",
+    "selectLanguage": "Select Language",
+    "changingLanguage": "Changing language...",
+    "logout": "Sign Out",
+    "logoutConfirm": "All your data will be deleted and you will be redirected to the start screen. Are you sure?",
+    "stats": {
+      "profiles": "Profile",
+      "combinations": "Combinations",
+      "garments": "Garment",
+      "results": "Result"
+    }
+  },
+  "paywall": {
+    "title": "Begin your journey",
+    "subtitle": "Create as many combinations as you want, do unlimited trials",
+    "features": {
+      "unlimited": "Unlimited combination production",
+      "highQuality": "High-quality results",
+      "priority": "Priority processing speed"
+    },
+    "plans": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "lifetime": "Lifetime"
+    },
+    "discount": "%{{percent}} OFF",
+    "continue": "Continue",
+    "restore": "Restore",
+    "terms": "Terms",
+    "privacy": "Privacy"
+  },
+  "create": {
+    "title": "New Combination",
+    "selectProfile": "Select Profile",
+    "selectProfileDescription": "Select a profile to try on the outfit",
+    "addNewProfile": "Add New Profile",
+    "noProfilesYet": "No profiles yet. Start by adding a new profile.",
+    "createCombination": "Create Combination",
+    "selectGarments": "Select Garments",
+    "selectGarmentsDescription": "Select the pieces you want to try on",
+    "addGarment": "Add Garment",
+    "selectedCombination": "My Selected Combination",
+    "partsCount": "/8 pieces",
+    "styleNote": "Style Note (Optional)",
+    "confirm": "Confirm",
+    "oneCreditWillBeUsed": "1 Credit will be used",
+    "premiumUnlimited": "Premium Member - Unlimited Trials",
+    "continue": "Continue",
+    "back": "Back",
+    "generate": "Generate",
+    "noProfile": "No profile selected",
+    "noGarments": "No garments selected",
+    "selectAtLeastOne": "You must select at least 1 garment",
+    "emptyGarmentMessage": "No garments in this category.",
+    "wardrobeEmptyMessage": "Wardrobe is empty. Start by adding garments."
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "All your trials are here",
+    "all": "All",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "older": "Older",
+    "noImages": "No images yet",
+    "newTryOn": "New Try-on",
+    "totalTrials": "Total Trials",
+    "emptyTitle": "Gallery is empty",
+    "emptySubtitle": "You haven't made any trials yet",
+    "startFirstTry": "Make First Try-on"
+  },
+  "generation": {
+    "loadingMessages": {
+      "loadingPhotos": "Loading photos...",
+      "preparingWardrobe": "Preparing wardrobe...",
+      "applyingGarment": "Applying garment...",
+      "finalTouches": "Final touches...",
+      "simulatingFabric": "Simulating fabric physics...",
+      "convincingButtons": "Convincing buttons...",
+      "aligningUniverse": "Aligning with the universe...",
+      "cinematicMode": "Lighting: cinematic mode",
+      "stylistCalled": "Stylist called...",
+      "fashionMath": "Calculating fashion math...",
+      "colorCheck": "Checking color harmony...",
+      "almostReady": "Almost ready..."
+    },
+    "success": "Combination ready!",
+    "shareMessage": "I tried on clothes with Wearify! 👕✨"
+  },
+  "wardrobe": {
+    "title": "Wardrobe",
+    "addGarment": "Add Garment",
+    "addGarmentSubtitle": "Take a photo or select from gallery",
+    "myGarments": "My Garments",
+    "garmentsCount": "{{count}} garment",
+    "garmentsCountPlural": "{{count}} garments",
+    "productsCount": "{{count}} product",
+    "noGarments": "No garments yet",
+    "wardrobeEmpty": "Wardrobe is empty",
+    "categoryEmpty": "No garments in this category",
+    "addGarmentsToStart": "Start by adding garments",
+    "addAndTry": "Add your garments and try them on",
+    "tryOn": "Try"
+  },
+  "splash": {
+    "subtitle": "Try clothes on yourself",
+    "footer": "AI-powered virtual try-on"
+  },
+  "selectProfile": {
+    "title": "Select Profile",
+    "info": "Select your profile for try-on or create a new profile",
+    "addNewProfile": "Add New Profile",
+    "takePhoto": "Take Photo",
+    "selectFromGallery": "Select from Gallery",
+    "myProfiles": "My Profiles",
+    "noProfilesYet": "No profiles yet",
+    "createFirstProfile": "Create your first profile by adding a photo",
+    "continue": "Continue"
+  },
+  "profileDetails": {
+    "title": "Profile",
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "selectGenderForBetterResults": "Select gender for better results",
+    "male": "Male",
+    "female": "Female",
+    "continue": "Continue"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Try outfits in seconds",
+      "description": "Upload your photo, select the pieces you want, see the result."
+    },
+    "step2": {
+      "title": "Not just one piece, complete outfit",
+      "description": "Skirt, blouse, shoes, bag... Select as many pieces as you want"
+    },
+    "step3": {
+      "title": "Save your result, try again",
+      "description": "Save the result, share or try new combinations"
+    },
+    "start": "Let's Start"
+  },
+  "welcome": {
+    "title": "See Clothes On You",
+    "subtitle": "Upload your photo, select the outfit you want. AI will show you how it looks on you.",
+    "feature1": "Upload photo",
+    "feature2": "Select outfit",
+    "feature3": "See result",
+    "start": "Start",
+    "freeTrial": "1 free trial"
+  },
+  "addGarment": {
+    "title": "Add Garment",
+    "garmentImage": "Garment Image",
+    "change": "Change",
+    "selectFromGallery": "Select from Gallery",
+    "takePhoto": "Take Photo",
+    "category": "Category",
+    "nameOptional": "Name (optional)",
+    "namePlaceholder": "e.g. White T-Shirt",
+    "brandOptional": "Brand (optional)",
+    "brandPlaceholder": "e.g. Zara, H&M",
+    "info": "If the garment background is flat and clean, AI will give better results.",
+    "save": "Save",
+    "defaultTitle": "Garment"
+  }
+}

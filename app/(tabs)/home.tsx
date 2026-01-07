@@ -25,12 +25,14 @@ import {
 import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = 16;
 
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const jobs = useSessionStore((s) => s.jobs);
   const profiles = useSessionStore((s) => s.profiles);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
@@ -78,8 +80,8 @@ const HomeScreen = () => {
         {/* Header */}
         <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
           <View style={styles.headerLeft}>
-            <BodySmall color="secondary">Hoş geldin 👋</BodySmall>
-            <DisplaySmall>FIT-SWAP</DisplaySmall>
+            <BodySmall color="secondary">{t('home.welcome')} 👋</BodySmall>
+            <DisplaySmall>{t('common.appName')}</DisplaySmall>
           </View>
           <View style={styles.creditBadge}>
             <Image
@@ -88,7 +90,7 @@ const HomeScreen = () => {
               resizeMode="contain"
             />
             <LabelSmall color={hasCredits ? 'accent' : 'secondary'}>
-              {isPremium ? 'Premium' : freeCreditsUsed ? '0 Kredi' : '1 Kredi'}
+              {isPremium ? t('profile.premiumMember') : freeCreditsUsed ? t('home.credits', { count: 0 }) : t('home.credits', { count: 1 })}
             </LabelSmall>
           </View>
         </Animated.View>
@@ -104,12 +106,12 @@ const HomeScreen = () => {
             />
             <View style={styles.heroContent}>
               <View style={styles.heroText}>
-                <HeadlineMedium>Yeni Deneme</HeadlineMedium>
-                <BodyMedium color="secondary" style={styles.heroDescription}>
-                  Kıyafeti üzerinde gör, tek tıkla
+                <HeadlineMedium numberOfLines={2}>{t('home.newTryOn')}</HeadlineMedium>
+                <BodyMedium color="secondary" style={styles.heroDescription} numberOfLines={2}>
+                  {t('home.newTryOnSubtitle')}
                 </BodyMedium>
                 <PrimaryButton
-                  title="Başla"
+                  title={t('home.start')}
                   onPress={handleNewTryOn}
                   size="md"
                   style={styles.heroButton}
@@ -125,31 +127,32 @@ const HomeScreen = () => {
         </Animated.View>
 
         {/* Quick Actions */}
-        <Animated.View
-          entering={FadeInDown.delay(300).springify()}
-          style={styles.quickActions}
-        >
-          <QuickActionCard
-            icon={require('../../full3dicons/images/camera.png')}
-            title="Fotoğraf Ekle"
-            subtitle={totalProfilePhotos > 0 ? `${totalProfilePhotos} fotoğraf` : 'Profil ekle'}
-            onPress={handleAddPhoto}
-          />
-          <QuickActionCard
-            icon={require('../../full3dicons/images/wardrobe.png')}
-            title="Gardrop"
-            subtitle="Kıyafetleri gör"
-            onPress={() => router.push('/(tabs)/wardrobe')}
-          />
-        </Animated.View>
+        <View style={styles.quickActions}>
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <QuickActionCard
+              icon={require('../../full3dicons/images/camera.png')}
+              title={t('home.addPhoto')}
+              subtitle={totalProfilePhotos > 0 ? t('home.addPhotoSubtitle', { count: totalProfilePhotos }) : t('profile.addProfile')}
+              onPress={handleAddPhoto}
+            />
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(350).springify()}>
+            <QuickActionCard
+              icon={require('../../full3dicons/images/wardrobe.png')}
+              title={t('home.wardrobe')}
+              subtitle={t('home.wardrobeSubtitle')}
+              onPress={() => router.push('/(tabs)/wardrobe')}
+            />
+          </Animated.View>
+        </View>
 
         {/* Completed Results Grid */}
         {hasCompletedResults ? (
           <Animated.View entering={FadeInDown.delay(400).springify()}>
             <View style={styles.sectionHeader}>
-              <HeadlineSmall>Son Sonuçlar</HeadlineSmall>
+              <HeadlineSmall>{t('home.latestResults')}</HeadlineSmall>
               <Pressable onPress={handleViewGallery}>
-                <LabelMedium color="accent">Tümünü Gör</LabelMedium>
+                <LabelMedium color="accent">{t('home.seeAll')}</LabelMedium>
               </Pressable>
             </View>
 
@@ -165,8 +168,77 @@ const HomeScreen = () => {
                     {/* İlk 3 görsel - yatay küçük */}
                     <View style={styles.resultsGridFourTop}>
                       {displayJobs.slice(0, 3).map((job, index) => (
-                        <Pressable
+                        <Animated.View
                           key={job.id}
+                          entering={FadeInDown.delay(450 + index * 50).springify()}
+                        >
+                          <Pressable
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              router.push({
+                                pathname: '/generation/[id]',
+                                params: {
+                                  id: job.id,
+                                  imageUrl: encodeURIComponent(job.resultImageUrl!),
+                                },
+                              });
+                            }}
+                            style={styles.resultCardFourSmall}
+                          >
+                            <GlassCard style={styles.resultGridCardFourSmall}>
+                              <Image
+                                source={{ uri: job.resultImageUrl }}
+                                style={styles.resultGridImageFourSmall}
+                                contentFit="cover"
+                                transition={200}
+                                cachePolicy="memory-disk"
+                              />
+                            </GlassCard>
+                          </Pressable>
+                        </Animated.View>
+                      ))}
+                    </View>
+                    {/* 4. görsel - büyük dikey */}
+                    {displayJobs[3] && (
+                      <Animated.View entering={FadeInDown.delay(600).springify()}>
+                        <Pressable
+                          key={displayJobs[3].id}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({
+                              pathname: '/generation/[id]',
+                              params: {
+                                id: displayJobs[3].id,
+                                imageUrl: encodeURIComponent(displayJobs[3].resultImageUrl!),
+                              },
+                            });
+                          }}
+                          style={styles.resultCardFourLarge}
+                        >
+                          <GlassCard style={styles.resultGridCardFourLarge}>
+                            <Image
+                              source={{ uri: displayJobs[3].resultImageUrl }}
+                              style={styles.resultGridImageFourLarge}
+                              contentFit="cover"
+                              transition={200}
+                              cachePolicy="memory-disk"
+                            />
+                          </GlassCard>
+                        </Pressable>
+                      </Animated.View>
+                    )}
+                  </View>
+                );
+              } else if (jobCount === 2) {
+                // 2 görsel: 2 büyük alt alta
+                return (
+                  <View style={styles.resultsGridTwo}>
+                    {displayJobs.map((job, index) => (
+                      <Animated.View
+                        key={job.id}
+                        entering={FadeInDown.delay(450 + index * 100).springify()}
+                      >
+                        <Pressable
                           onPress={() => {
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             router.push({
@@ -177,78 +249,19 @@ const HomeScreen = () => {
                               },
                             });
                           }}
-                          style={styles.resultCardFourSmall}
+                          style={styles.resultCardTwo}
                         >
-                          <GlassCard style={styles.resultGridCardFourSmall}>
+                          <GlassCard style={styles.resultGridCardTwo}>
                             <Image
                               source={{ uri: job.resultImageUrl }}
-                              style={styles.resultGridImageFourSmall}
+                              style={styles.resultGridImageTwo}
                               contentFit="cover"
                               transition={200}
                               cachePolicy="memory-disk"
                             />
                           </GlassCard>
                         </Pressable>
-                      ))}
-                    </View>
-                    {/* 4. görsel - büyük dikey */}
-                    {displayJobs[3] && (
-                      <Pressable
-                        key={displayJobs[3].id}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          router.push({
-                            pathname: '/generation/[id]',
-                            params: {
-                              id: displayJobs[3].id,
-                              imageUrl: encodeURIComponent(displayJobs[3].resultImageUrl!),
-                            },
-                          });
-                        }}
-                        style={styles.resultCardFourLarge}
-                      >
-                        <GlassCard style={styles.resultGridCardFourLarge}>
-                          <Image
-                            source={{ uri: displayJobs[3].resultImageUrl }}
-                            style={styles.resultGridImageFourLarge}
-                            contentFit="cover"
-                            transition={200}
-                            cachePolicy="memory-disk"
-                          />
-                        </GlassCard>
-                      </Pressable>
-                    )}
-                  </View>
-                );
-              } else if (jobCount === 2) {
-                // 2 görsel: 2 büyük alt alta
-                return (
-                  <View style={styles.resultsGridTwo}>
-                    {displayJobs.map((job, index) => (
-                      <Pressable
-                        key={job.id}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          router.push({
-                            pathname: '/generation/[id]',
-                            params: {
-                              id: job.id,
-                              imageUrl: encodeURIComponent(job.resultImageUrl!),
-                            },
-                          });
-                        }}
-                        style={styles.resultCardTwo}
-                      >
-                        <GlassCard style={styles.resultGridCardTwo}>
-                          <Image
-                            source={{ uri: job.resultImageUrl }}
-                            style={styles.resultGridImageTwo}
-                            contentFit="cover"
-                            transition={200}
-                            cachePolicy="memory-disk"
-                          />
-                        </GlassCard>
-                      </Pressable>
+                      </Animated.View>
                     ))}
                   </View>
                 );
@@ -260,38 +273,42 @@ const HomeScreen = () => {
                     jobCount === 1 && styles.resultsGridSingle,
                   ]}>
                     {displayJobs.map((job, index) => (
-                      <Pressable
+                      <Animated.View
                         key={job.id}
-                        onPress={() => {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          router.push({
-                            pathname: '/generation/[id]',
-                            params: {
-                              id: job.id,
-                              imageUrl: encodeURIComponent(job.resultImageUrl!),
-                            },
-                          });
-                        }}
-                        style={[
-                          jobCount === 1 && styles.resultCardSingle,
-                        ]}
+                        entering={FadeInDown.delay(450 + index * 50).springify()}
                       >
-                        <GlassCard style={[
-                          styles.resultGridCard,
-                          jobCount === 1 && styles.resultGridCardSingle,
-                        ]}>
-                          <Image
-                            source={{ uri: job.resultImageUrl }}
-                            style={[
-                              styles.resultGridImage,
-                              jobCount === 1 && styles.resultGridImageSingle,
-                            ]}
-                            contentFit="cover"
-                            transition={200}
-                            cachePolicy="memory-disk"
-                          />
-                        </GlassCard>
-                      </Pressable>
+                        <Pressable
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({
+                              pathname: '/generation/[id]',
+                              params: {
+                                id: job.id,
+                                imageUrl: encodeURIComponent(job.resultImageUrl!),
+                              },
+                            });
+                          }}
+                          style={[
+                            jobCount === 1 && styles.resultCardSingle,
+                          ]}
+                        >
+                          <GlassCard style={[
+                            styles.resultGridCard,
+                            jobCount === 1 && styles.resultGridCardSingle,
+                          ]}>
+                            <Image
+                              source={{ uri: job.resultImageUrl }}
+                              style={[
+                                styles.resultGridImage,
+                                jobCount === 1 && styles.resultGridImageSingle,
+                              ]}
+                              contentFit="cover"
+                              transition={200}
+                              cachePolicy="memory-disk"
+                            />
+                          </GlassCard>
+                        </Pressable>
+                      </Animated.View>
                     ))}
                   </View>
                 );
@@ -307,14 +324,14 @@ const HomeScreen = () => {
                 style={styles.emptyIcon}
                 resizeMode="contain"
               />
-              <HeadlineSmall style={styles.emptyTitle}>
-                Henüz sonuç yok
+              <HeadlineSmall style={styles.emptyTitle} numberOfLines={2}>
+                {t('home.noResults')}
               </HeadlineSmall>
-              <BodyMedium color="secondary" style={styles.emptyText}>
-                İlk denemenizi yaparak başlayın
+              <BodyMedium color="secondary" style={styles.emptyText} numberOfLines={2}>
+                {t('home.startFirstTry')}
               </BodyMedium>
               <PrimaryButton
-                title="İlk Denemeyi Yap"
+                title={t('home.startFirstTryButton')}
                 onPress={handleNewTryOn}
                 size="md"
               />
@@ -342,8 +359,8 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({
   <GlassCard style={styles.quickActionCard} onPress={onPress}>
     <Image source={icon} style={styles.quickActionIcon} resizeMode="contain" />
     <View style={styles.quickActionText}>
-      <LabelMedium>{title}</LabelMedium>
-      <BodySmall color="secondary">{subtitle}</BodySmall>
+      <LabelMedium numberOfLines={1}>{title}</LabelMedium>
+      <BodySmall color="secondary" numberOfLines={2}>{subtitle}</BodySmall>
     </View>
   </GlassCard>
 );
@@ -395,21 +412,28 @@ const styles = StyleSheet.create({
   heroContent: {
     flexDirection: 'row',
     padding: 20,
+    alignItems: 'flex-start',
+    minHeight: 140,
   },
   heroText: {
     flex: 1,
     gap: 8,
+    minWidth: 0,
+    paddingRight: 12,
   },
   heroDescription: {
     marginBottom: 8,
+    flexShrink: 1,
   },
   heroButton: {
     alignSelf: 'flex-start',
+    marginTop: 'auto',
   },
   heroImage: {
-    width: 100,
-    height: 100,
-    marginLeft: 16,
+    width: 90,
+    height: 90,
+    marginLeft: 12,
+    flexShrink: 0,
   },
   quickActions: {
     flexDirection: 'row',
@@ -418,18 +442,21 @@ const styles = StyleSheet.create({
   quickActionCard: {
     width: (width - Spacing.page * 2 - CARD_GAP) / 2,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
     paddingVertical: 16,
     paddingHorizontal: 14,
+    minHeight: 80,
   },
   quickActionIcon: {
     width: 44,
     height: 44,
+    flexShrink: 0,
   },
   quickActionText: {
     flex: 1,
     gap: 2,
+    minWidth: 0,
   },
   sectionHeader: {
     flexDirection: 'row',

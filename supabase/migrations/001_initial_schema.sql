@@ -1,4 +1,4 @@
--- FIT-SWAP / GARDROP - Initial Database Schema
+-- Wearify - Initial Database Schema
 -- =============================================
 
 -- Enable UUID extension

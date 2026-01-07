@@ -1,5 +1,5 @@
 /**
- * FIT-SWAP Color Constants
+ * Wearify Color Constants
  * Re-exported from design system theme
  */
 

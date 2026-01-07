@@ -1,0 +1,239 @@
+{
+  "common": {
+    "appName": "Wearify",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "close": "Kapat",
+    "continue": "Devam Et",
+    "back": "Geri",
+    "next": "İleri",
+    "skip": "Atla",
+    "done": "Tamam",
+    "retry": "Tekrar Dene"
+  },
+  "auth": {
+    "title": "Hoş Geldin",
+    "email": "Email",
+    "password": "Şifre",
+    "passwordPlaceholder": "Şifre (min 6 karakter)",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "noAccount": "Hesabın yok mu? Kayıt ol",
+    "hasAccount": "Hesabın var mı? Giriş yap",
+    "demoMode": "Demo modunda devam et →",
+    "loginError": "Giriş yapılamadı",
+    "registerError": "Kayıt olunamadı",
+    "emailExists": "Bu email zaten kullanılıyor. Giriş yapmayı deneyin.",
+    "loginSubtitle": "Hesabına giriş yap",
+    "registerSubtitle": "Yeni hesap oluştur"
+  },
+  "home": {
+    "welcome": "Hoş geldin",
+    "newTryOn": "Yeni Deneme",
+    "newTryOnSubtitle": "Kıyafeti üzerinde gör, tek tıkla",
+    "start": "Başla",
+    "addPhoto": "Fotoğraf Ekle",
+    "addPhotoSubtitle": "{{count}} fotoğraf",
+    "wardrobe": "Gardrop",
+    "wardrobeSubtitle": "Kıyafetleri gör",
+    "latestResults": "Son Sonuçlar",
+    "seeAll": "Tümünü Gör",
+    "noResults": "Henüz sonuç yok",
+    "startFirstTry": "İlk denemenizi yaparak başlayın",
+    "startFirstTryButton": "İlk Denemeyi Yap",
+    "credits": "{{count}} Kredi"
+  },
+  "profile": {
+    "title": "Profil",
+    "profile": "Profil",
+    "male": "Erkek",
+    "female": "Kadın",
+    "addProfile": "Profil Ekle",
+    "freePlan": "Ücretsiz Plan",
+    "premiumMember": "Premium Üye",
+    "unlimitedAccess": "Sınırsız deneme hakkı",
+    "oneFreeCredit": "1 ücretsiz kredi",
+    "noCredits": "Kredi yok",
+    "upgradeToPremium": "Premium'a Yükselt",
+    "quickActions": "Hızlı İşlemler",
+    "manageProfiles": "Profilleri Yönet",
+    "profilesCount": "{{count}} profil",
+    "goToGallery": "Galeriye Git",
+    "imagesCount": "{{count}} görsel",
+    "support": "Destek",
+    "helpAndSupport": "Yardım ve Destek",
+    "managePurchases": "Satın Alımları Yönet",
+    "privacyPolicy": "Gizlilik Politikası",
+    "changeLanguage": "Dil Değiştir",
+    "selectLanguage": "Dil Seçin",
+    "changingLanguage": "Dil değiştiriliyor...",
+    "logout": "Çıkış Yap",
+    "logoutConfirm": "Tüm verileriniz silinecek ve başlangıç ekranına yönlendirileceksiniz. Emin misiniz?",
+    "stats": {
+      "profiles": "Profil",
+      "combinations": "Kombinleme",
+      "garments": "Kıyafet",
+      "results": "Sonuç"
+    }
+  },
+  "paywall": {
+    "title": "Yolculuğuna başla",
+    "subtitle": "İstediğin kadar kombin üret, sınırsız deneme yap",
+    "features": {
+      "unlimited": "Sınırsız kombin üretimi",
+      "highQuality": "Yüksek kaliteli sonuçlar",
+      "priority": "Öncelikli işlem hızı"
+    },
+    "plans": {
+      "monthly": "Aylık",
+      "yearly": "Yıllık",
+      "lifetime": "Ömür Boyu"
+    },
+    "discount": "%{{percent}} İNDİRİM",
+    "continue": "Devam Et",
+    "restore": "Geri Yükle",
+    "terms": "Şartlar",
+    "privacy": "Gizlilik"
+  },
+  "create": {
+    "title": "Yeni Kombin",
+    "selectProfile": "Profil Seç",
+    "selectProfileDescription": "Kıyafeti denemek için bir profil seç",
+    "addNewProfile": "Yeni Profil Ekle",
+    "noProfilesYet": "Henüz profil yok. Yeni profil ekleyerek başla.",
+    "createCombination": "Kombin Oluştur",
+    "selectGarments": "Kıyafet Seç",
+    "selectGarmentsDescription": "Denemek istediğin parçaları seç",
+    "addGarment": "Kıyafet Ekle",
+    "selectedCombination": "Seçilen Kombinim",
+    "partsCount": "/8 parça",
+    "styleNote": "Stil Notu (Opsiyonel)",
+    "confirm": "Onayla",
+    "oneCreditWillBeUsed": "1 Kredi Kullanılacak",
+    "premiumUnlimited": "Premium Üye - Sınırsız Deneme",
+    "continue": "Devam",
+    "back": "Geri",
+    "generate": "Üret",
+    "noProfile": "Profil seçilmedi",
+    "noGarments": "Kıyafet seçilmedi",
+    "selectAtLeastOne": "En az 1 kıyafet seçmelisiniz",
+    "emptyGarmentMessage": "Bu kategoride kıyafet yok.",
+    "wardrobeEmptyMessage": "Gardrop boş. Kıyafet ekleyerek başla."
+  },
+  "gallery": {
+    "title": "Galeri",
+    "subtitle": "Tüm denemeleriniz burada",
+    "all": "Tümü",
+    "today": "Bugün",
+    "thisWeek": "Bu Hafta",
+    "older": "Eski",
+    "noImages": "Henüz görsel yok",
+    "newTryOn": "Yeni Deneme",
+    "totalTrials": "Toplam Deneme",
+    "emptyTitle": "Galeri boş",
+    "emptySubtitle": "Henüz bir deneme yapmadınız",
+    "startFirstTry": "İlk Denemeyi Yap"
+  },
+  "wardrobe": {
+    "title": "Gardrop",
+    "addGarment": "Kıyafet Ekle",
+    "addGarmentSubtitle": "Fotoğraf çek veya galeriden seç",
+    "myGarments": "Kıyafetlerim",
+    "garmentsCount": "{{count}} kıyafet",
+    "garmentsCountPlural": "{{count}} kıyafet",
+    "productsCount": "{{count}} ürün",
+    "noGarments": "Henüz kıyafet yok",
+    "wardrobeEmpty": "Gardrop boş",
+    "categoryEmpty": "Bu kategoride kıyafet yok",
+    "addGarmentsToStart": "Kıyafet ekleyerek başlayın",
+    "addAndTry": "Kıyafetlerini ekle ve dene",
+    "tryOn": "Dene"
+  },
+  "generation": {
+    "loadingMessages": {
+      "loadingPhotos": "Fotoğraflar yükleniyor...",
+      "preparingWardrobe": "Gardrop hazırlanıyor...",
+      "applyingGarment": "Kıyafet uygulanıyor...",
+      "finalTouches": "Son rötuşlar...",
+      "simulatingFabric": "Kumaş fiziği simüle ediliyor...",
+      "convincingButtons": "Düğmeler ikna ediliyor...",
+      "aligningUniverse": "Kombin evrenle hizalanıyor...",
+      "cinematicMode": "Işık ayarı: sinematik mod",
+      "stylistCalled": "Stil danışmanı çağrıldı...",
+      "fashionMath": "Moda matematiği hesaplanıyor...",
+      "colorCheck": "Renk uyumu kontrol ediliyor...",
+      "almostReady": "Birazdan hazır..."
+    },
+    "success": "Kombin hazır!",
+    "shareMessage": "Wearify ile kıyafet denedim! 👕✨"
+  },
+  "splash": {
+    "subtitle": "Kıyafetleri üzerinde dene",
+    "footer": "AI destekli sanal deneme"
+  },
+  "selectProfile": {
+    "title": "Profil Seç",
+    "info": "Try-on için profilini seç veya yeni profil oluştur",
+    "addNewProfile": "Yeni Profil Ekle",
+    "takePhoto": "Fotoğraf Çek",
+    "selectFromGallery": "Galeriden Seç",
+    "myProfiles": "Profillerim",
+    "noProfilesYet": "Henüz profil yok",
+    "createFirstProfile": "Fotoğrafını ekleyerek ilk profilini oluştur",
+    "continue": "Devam"
+  },
+  "profileDetails": {
+    "title": "Profil",
+    "cancel": "İptal",
+    "skip": "Atla",
+    "selectGenderForBetterResults": "Daha iyi sonuçlar için cinsiyet seç",
+    "male": "Erkek",
+    "female": "Kadın",
+    "continue": "Devam Et"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Kombin denemek artık saniyeler",
+      "description": "Fotoğrafını yükle, istediğin parçaları seç, sonucu gör."
+    },
+    "step2": {
+      "title": "Tek parça değil, komple kombin",
+      "description": "Etek, bluz, ayakkabı, çanta... İstediğin kadar parça seç"
+    },
+    "step3": {
+      "title": "Ürettiğin sonucu kaydet, tekrar dene",
+      "description": "Sonucu kaydet, paylaş veya yeni kombinler dene"
+    }
+  },
+  "welcome": {
+    "title": "Kıyafetleri Üzerinde Gör",
+    "subtitle": "Fotoğrafını yükle, istediğin kıyafeti seç. AI sana nasıl göründüğünü göstersin.",
+    "feature1": "Fotoğraf yükle",
+    "feature2": "Kıyafet seç",
+    "feature3": "Sonucu gör",
+    "start": "Başla",
+    "freeTrial": "1 ücretsiz deneme"
+  },
+  "addGarment": {
+    "title": "Kıyafet Ekle",
+    "garmentImage": "Kıyafet Görseli",
+    "change": "Değiştir",
+    "selectFromGallery": "Galeriden Seç",
+    "takePhoto": "Fotoğraf Çek",
+    "category": "Kategori",
+    "nameOptional": "İsim (opsiyonel)",
+    "namePlaceholder": "örn. Beyaz T-Shirt",
+    "brandOptional": "Marka (opsiyonel)",
+    "brandPlaceholder": "örn. Zara, H&M",
+    "info": "Kıyafet arka planı düz ve temiz olursa AI daha iyi sonuç verir.",
+    "save": "Kaydet",
+    "defaultTitle": "Kıyafet"
+  }
+}
+

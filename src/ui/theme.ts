@@ -1,5 +1,5 @@
 /**
- * FIT-SWAP Design System - Theme Constants
+ * Wearify Design System - Theme Constants
  * iOS premium "liquid glass" aesthetic
  */
 

@@ -1,4 +1,4 @@
-# FIT-SWAP (çalışma adı) — Cursor context.md (iOS)
+# Wearify — Cursor context.md (iOS)
 Amaç: Kullanıcı kendi fotoğraflarını yükler, ürün (kıyafet/aksesuar) seçer ve “tek tıkla” AI ile giydirilmiş görsel üretir. Her kullanıcıya 1 ücretsiz deneme (1 kredi). Sonraki denemede paywall + abonelik/coin.
 
 ================================================================================

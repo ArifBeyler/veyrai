@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FIT-SWAP",
-    "slug": "fit-swap",
+    "name": "Wearify",
+    "slug": "wearify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fitswap",
+    "scheme": "wearify",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.fitswap.app",
+      "bundleIdentifier": "com.wearify.app",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
       }
@@ -25,7 +25,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0B0B0C"
       },
-      "package": "com.fitswap.app",
+      "package": "com.wearify.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },

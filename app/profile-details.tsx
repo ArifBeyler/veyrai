@@ -27,6 +27,7 @@ import {
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { useSessionStore } from '../src/state/useSessionStore';
+import { useTranslation } from '../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +35,7 @@ type Gender = 'male' | 'female' | 'other';
 
 const ProfileDetailsScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { profileId, isUpdate } = useLocalSearchParams<{ profileId: string; isUpdate?: string }>();
   
   const profiles = useSessionStore((s) => s.profiles);
@@ -110,9 +112,9 @@ const ProfileDetailsScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <Pressable onPress={handleSkip} style={styles.headerButton}>
-          <LabelMedium color="secondary">{isUpdateMode ? 'İptal' : 'Atla'}</LabelMedium>
+          <LabelMedium color="secondary">{isUpdateMode ? t('profileDetails.cancel') : t('profileDetails.skip')}</LabelMedium>
         </Pressable>
-        <HeadlineMedium>Profil</HeadlineMedium>
+        <HeadlineMedium>{t('profileDetails.title')}</HeadlineMedium>
         <View style={styles.headerButton} />
       </View>
 
@@ -144,7 +146,7 @@ const ProfileDetailsScreen = () => {
             )}
           </View>
           <BodyMedium color="secondary" style={styles.infoText}>
-            Daha iyi sonuçlar için cinsiyet seç
+            {t('profileDetails.selectGenderForBetterResults')}
           </BodyMedium>
         </Animated.View>
 
@@ -152,13 +154,13 @@ const ProfileDetailsScreen = () => {
         <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.genderSection}>
           <View style={styles.genderOptions}>
             <GenderCard
-              label="Erkek"
+              label={t('profileDetails.male')}
               emoji="👨"
               selected={gender === 'male'}
               onPress={() => handleGenderSelect('male')}
             />
             <GenderCard
-              label="Kadın"
+              label={t('profileDetails.female')}
               emoji="👩"
               selected={gender === 'female'}
               onPress={() => handleGenderSelect('female')}
@@ -170,7 +172,7 @@ const ProfileDetailsScreen = () => {
       {/* Bottom Action */}
       <View style={[styles.bottomActions, { paddingBottom: insets.bottom + 16 }]}>
         <PrimaryButton
-          title={gender ? 'Devam Et' : 'Atla'}
+          title={gender ? t('profileDetails.continue') : t('profileDetails.skip')}
           onPress={gender ? handleSave : handleSkip}
           loading={isLoading}
         />

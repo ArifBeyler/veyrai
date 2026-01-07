@@ -28,6 +28,7 @@ import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { IconButton } from '../src/ui/IconButton';
 import { useSessionStore, GarmentCategory } from '../src/state/useSessionStore';
+import { useTranslation } from '../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -48,6 +49,7 @@ const CATEGORIES: CategoryOption[] = [
 
 const AddGarmentScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
@@ -104,7 +106,7 @@ const AddGarmentScreen = () => {
     // Create garment
     const garment = {
       id: Date.now().toString(),
-      title: title || 'Kıyafet',
+      title: title || t('addGarment.defaultTitle'),
       category,
       imageUri: selectedImage,
       brand: brand || undefined,
@@ -143,7 +145,7 @@ const AddGarmentScreen = () => {
           variant="glass"
           size="sm"
         />
-        <HeadlineMedium>Kıyafet Ekle</HeadlineMedium>
+        <HeadlineMedium>{t('addGarment.title')}</HeadlineMedium>
         <View style={{ width: 36 }} />
       </View>
 
@@ -155,7 +157,7 @@ const AddGarmentScreen = () => {
       >
         {/* Image Picker */}
         <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <LabelMedium style={styles.sectionLabel}>Kıyafet Görseli</LabelMedium>
+          <LabelMedium style={styles.sectionLabel}>{t('addGarment.garmentImage')}</LabelMedium>
           
           {selectedImage ? (
             <GlassCard style={styles.imagePreviewCard} onPress={handlePickImage}>
@@ -165,7 +167,7 @@ const AddGarmentScreen = () => {
                 resizeMode="cover"
               />
               <View style={styles.changeImageOverlay}>
-                <LabelSmall color="primary">Değiştir</LabelSmall>
+                <LabelSmall color="primary">{t('addGarment.change')}</LabelSmall>
               </View>
             </GlassCard>
           ) : (
@@ -176,7 +178,7 @@ const AddGarmentScreen = () => {
                   style={styles.imagePickerIcon}
                   resizeMode="contain"
                 />
-                <LabelMedium>Galeriden Seç</LabelMedium>
+                <LabelMedium>{t('addGarment.selectFromGallery')}</LabelMedium>
               </GlassCard>
               
               <GlassCard style={styles.imagePickerCard} onPress={handleTakePhoto}>
@@ -185,7 +187,7 @@ const AddGarmentScreen = () => {
                   style={styles.imagePickerIcon}
                   resizeMode="contain"
                 />
-                <LabelMedium>Fotoğraf Çek</LabelMedium>
+                <LabelMedium>{t('addGarment.takePhoto')}</LabelMedium>
               </GlassCard>
             </View>
           )}
@@ -193,7 +195,7 @@ const AddGarmentScreen = () => {
 
         {/* Category Selection */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <LabelMedium style={styles.sectionLabel}>Kategori</LabelMedium>
+          <LabelMedium style={styles.sectionLabel}>{t('addGarment.category')}</LabelMedium>
           
           <View style={styles.categoryGrid}>
             {CATEGORIES.map((cat) => (
@@ -225,12 +227,12 @@ const AddGarmentScreen = () => {
 
         {/* Title Input */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <LabelMedium style={styles.sectionLabel}>İsim (opsiyonel)</LabelMedium>
+          <LabelMedium style={styles.sectionLabel}>{t('addGarment.nameOptional')}</LabelMedium>
           
           <GlassCard style={styles.inputCard}>
             <TextInput
               style={styles.input}
-              placeholder="örn. Beyaz T-Shirt"
+              placeholder={t('addGarment.namePlaceholder')}
               placeholderTextColor={Colors.text.tertiary}
               value={title}
               onChangeText={setTitle}
@@ -241,12 +243,12 @@ const AddGarmentScreen = () => {
 
         {/* Brand Input */}
         <Animated.View entering={FadeInDown.delay(400).springify()}>
-          <LabelMedium style={styles.sectionLabel}>Marka (opsiyonel)</LabelMedium>
+          <LabelMedium style={styles.sectionLabel}>{t('addGarment.brandOptional')}</LabelMedium>
           
           <GlassCard style={styles.inputCard}>
             <TextInput
               style={styles.input}
-              placeholder="örn. Zara, H&M"
+              placeholder={t('addGarment.brandPlaceholder')}
               placeholderTextColor={Colors.text.tertiary}
               value={brand}
               onChangeText={setBrand}
@@ -264,7 +266,7 @@ const AddGarmentScreen = () => {
               resizeMode="contain"
             />
             <BodySmall color="secondary" style={styles.infoText}>
-              Kıyafet arka planı düz ve temiz olursa AI daha iyi sonuç verir.
+              {t('addGarment.info')}
             </BodySmall>
           </GlassCard>
         </Animated.View>
@@ -273,7 +275,7 @@ const AddGarmentScreen = () => {
       {/* Bottom Action */}
       <View style={[styles.bottomActions, { paddingBottom: insets.bottom + 16 }]}>
         <PrimaryButton
-          title="Kaydet"
+          title={t('addGarment.save')}
           onPress={handleSave}
           disabled={!canSave}
           loading={isLoading}

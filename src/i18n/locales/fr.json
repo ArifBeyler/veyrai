@@ -1,0 +1,251 @@
+{
+  "common": {
+    "appName": "Wearify",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "continue": "Continuer",
+    "back": "Retour",
+    "next": "Suivant",
+    "skip": "Ignorer",
+    "done": "Terminé",
+    "retry": "Réessayer"
+  },
+  "auth": {
+    "title": "Bienvenue",
+    "email": "Email",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Mot de passe (min 6 caractères)",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "noAccount": "Pas de compte ? Inscrivez-vous",
+    "hasAccount": "Déjà un compte ? Connectez-vous",
+    "demoMode": "Continuer en mode démo →",
+    "loginError": "Échec de la connexion",
+    "registerError": "Échec de l'inscription",
+    "emailExists": "Cet email est déjà utilisé. Essayez de vous connecter."
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Essayez des tenues en quelques secondes",
+      "description": "Voyez les vêtements sur vous avec l'IA, obtenez des résultats instantanés"
+    },
+    "step2": {
+      "title": "Pas juste une pièce, une tenue complète",
+      "description": "Sélectionnez plusieurs articles, voyez la tenue complète"
+    },
+    "step3": {
+      "title": "Enregistrez votre résultat, réessayez",
+      "description": "Gardez les résultats dans votre galerie, réessayez à tout moment"
+    }
+  },
+  "home": {
+    "welcome": "Bienvenue",
+    "newTryOn": "Nouvel Essai",
+    "newTryOnSubtitle": "Voyez la tenue sur vous, en un clic",
+    "start": "Commencer",
+    "addPhoto": "Ajouter une photo",
+    "addPhotoSubtitle": "{{count}} photos",
+    "wardrobe": "Garde-robe",
+    "wardrobeSubtitle": "Voir les tenues",
+    "latestResults": "Derniers Résultats",
+    "seeAll": "Voir tout",
+    "noResults": "Pas encore de résultats",
+    "startFirstTry": "Commencez par faire votre premier essai",
+    "startFirstTryButton": "Faire le premier essai",
+    "credits": "{{count}} Crédits"
+  },
+  "profile": {
+    "title": "Profil",
+    "profile": "Profil",
+    "male": "Homme",
+    "female": "Femme",
+    "addProfile": "Ajouter un profil",
+    "freePlan": "Plan gratuit",
+    "premiumMember": "Membre Premium",
+    "unlimitedAccess": "Accès illimité aux essais",
+    "oneFreeCredit": "1 crédit gratuit",
+    "noCredits": "Pas de crédits",
+    "upgradeToPremium": "Passer à Premium",
+    "quickActions": "Actions Rapides",
+    "manageProfiles": "Gérer les profils",
+    "profilesCount": "{{count}} profils",
+    "goToGallery": "Aller à la galerie",
+    "imagesCount": "{{count}} images",
+    "support": "Support",
+    "helpAndSupport": "Aide et Support",
+    "managePurchases": "Gérer les achats",
+    "privacyPolicy": "Politique de confidentialité",
+    "changeLanguage": "Changer la langue",
+    "selectLanguage": "Sélectionner la langue",
+    "changingLanguage": "Changement de langue...",
+    "logout": "Se déconnecter",
+    "logoutConfirm": "Toutes vos données seront supprimées et vous serez redirigé vers l'écran de démarrage. Êtes-vous sûr ?",
+    "stats": {
+      "profiles": "Profil",
+      "combinations": "Combinaisons",
+      "garments": "Vêtement",
+      "results": "Résultat"
+    }
+  },
+  "paywall": {
+    "title": "Commencez votre voyage",
+    "subtitle": "Créez autant de combinaisons que vous voulez, faites des essais illimités",
+    "features": {
+      "unlimited": "Production de combinaisons illimitée",
+      "highQuality": "Résultats de haute qualité",
+      "priority": "Vitesse de traitement prioritaire"
+    },
+    "plans": {
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "lifetime": "À vie"
+    },
+    "discount": "%{{percent}} DE RÉDUCTION",
+    "continue": "Continuer",
+    "restore": "Restaurer",
+    "terms": "Conditions",
+    "privacy": "Confidentialité"
+  },
+  "create": {
+    "title": "Nouvelle Combinaison",
+    "selectProfile": "Sélectionner un profil",
+    "selectProfileDescription": "Sélectionnez un profil pour essayer la tenue",
+    "addNewProfile": "Ajouter un nouveau profil",
+    "noProfilesYet": "Pas encore de profils. Commencez par ajouter un nouveau profil.",
+    "createCombination": "Créer une combinaison",
+    "selectGarments": "Sélectionner des vêtements",
+    "selectGarmentsDescription": "Sélectionnez les pièces que vous voulez essayer",
+    "addGarment": "Ajouter un vêtement",
+    "selectedCombination": "Ma combinaison sélectionnée",
+    "partsCount": "/8 pièces",
+    "styleNote": "Note de style (optionnel)",
+    "confirm": "Confirmer",
+    "oneCreditWillBeUsed": "1 crédit sera utilisé",
+    "premiumUnlimited": "Membre Premium - Essais illimités",
+    "continue": "Continuer",
+    "back": "Retour",
+    "generate": "Générer",
+    "noProfile": "Aucun profil sélectionné",
+    "noGarments": "Aucun vêtement sélectionné",
+    "selectAtLeastOne": "Vous devez sélectionner au moins 1 vêtement",
+    "emptyGarmentMessage": "Aucun vêtement dans cette catégorie.",
+    "wardrobeEmptyMessage": "La garde-robe est vide. Commencez par ajouter des vêtements."
+  },
+  "gallery": {
+    "title": "Galerie",
+    "subtitle": "Tous vos essais sont ici",
+    "all": "Tous",
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette Semaine",
+    "older": "Plus ancien",
+    "noImages": "Pas encore d'images",
+    "newTryOn": "Nouvel Essai",
+    "emptyTitle": "Galerie vide",
+    "emptySubtitle": "Vous n'avez pas encore fait d'essai",
+    "startFirstTry": "Faire le premier essai"
+  },
+  "wardrobe": {
+    "title": "Garde-robe",
+    "addGarment": "Ajouter un vêtement",
+    "addGarmentSubtitle": "Prendre une photo ou sélectionner dans la galerie",
+    "myGarments": "Mes Vêtements",
+    "garmentsCount": "{{count}} vêtement",
+    "garmentsCountPlural": "{{count}} vêtements",
+    "productsCount": "{{count}} produit",
+    "noGarments": "Pas encore de vêtements",
+    "wardrobeEmpty": "La garde-robe est vide",
+    "categoryEmpty": "Aucun vêtement dans cette catégorie",
+    "addGarmentsToStart": "Commencez par ajouter des vêtements",
+    "addAndTry": "Ajoutez vos vêtements et essayez-les",
+    "tryOn": "Essayer"
+  },
+  "generation": {
+    "loadingMessages": {
+      "loadingPhotos": "Chargement des photos...",
+      "preparingWardrobe": "Préparation de la garde-robe...",
+      "applyingGarment": "Application du vêtement...",
+      "finalTouches": "Touches finales...",
+      "simulatingFabric": "Simulation de la physique du tissu...",
+      "convincingButtons": "Convaincre les boutons...",
+      "aligningUniverse": "Alignement avec l'univers...",
+      "cinematicMode": "Éclairage : mode cinématique",
+      "stylistCalled": "Styliste appelé...",
+      "fashionMath": "Calcul des mathématiques de la mode...",
+      "colorCheck": "Vérification de l'harmonie des couleurs...",
+      "almostReady": "Presque prêt..."
+    },
+    "success": "Combinaison prête !",
+    "shareMessage": "J'ai essayé des vêtements avec Wearify ! 👕✨"
+  },
+  "splash": {
+    "subtitle": "Essayez les vêtements sur vous",
+    "footer": "Essai virtuel alimenté par l'IA"
+  },
+  "selectProfile": {
+    "title": "Sélectionner un profil",
+    "info": "Sélectionnez votre profil pour l'essai ou créez un nouveau profil",
+    "addNewProfile": "Ajouter un nouveau profil",
+    "takePhoto": "Prendre une photo",
+    "selectFromGallery": "Sélectionner dans la galerie",
+    "myProfiles": "Mes profils",
+    "noProfilesYet": "Pas encore de profils",
+    "createFirstProfile": "Créez votre premier profil en ajoutant une photo",
+    "continue": "Continuer"
+  },
+  "profileDetails": {
+    "title": "Profil",
+    "cancel": "Annuler",
+    "skip": "Ignorer",
+    "selectGenderForBetterResults": "Sélectionnez le sexe pour de meilleurs résultats",
+    "male": "Homme",
+    "female": "Femme",
+    "continue": "Continuer"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Essayez des tenues en quelques secondes",
+      "description": "Téléchargez votre photo, sélectionnez les pièces que vous voulez, voyez le résultat."
+    },
+    "step2": {
+      "title": "Pas juste une pièce, une tenue complète",
+      "description": "Jupe, blouse, chaussures, sac... Sélectionnez autant de pièces que vous voulez"
+    },
+    "step3": {
+      "title": "Enregistrez votre résultat, réessayez",
+      "description": "Enregistrez le résultat, partagez ou essayez de nouvelles combinaisons"
+    },
+    "start": "Commençons"
+  },
+  "welcome": {
+    "title": "Voir les vêtements sur vous",
+    "subtitle": "Téléchargez votre photo, sélectionnez la tenue que vous voulez. L'IA vous montrera à quoi elle ressemble sur vous.",
+    "feature1": "Télécharger une photo",
+    "feature2": "Sélectionner une tenue",
+    "feature3": "Voir le résultat",
+    "start": "Commencer",
+    "freeTrial": "1 essai gratuit"
+  },
+  "addGarment": {
+    "title": "Ajouter un vêtement",
+    "garmentImage": "Image du vêtement",
+    "change": "Changer",
+    "selectFromGallery": "Sélectionner dans la galerie",
+    "takePhoto": "Prendre une photo",
+    "category": "Catégorie",
+    "nameOptional": "Nom (optionnel)",
+    "namePlaceholder": "ex. T-Shirt blanc",
+    "brandOptional": "Marque (optionnel)",
+    "brandPlaceholder": "ex. Zara, H&M",
+    "info": "Si l'arrière-plan du vêtement est plat et propre, l'IA donnera de meilleurs résultats.",
+    "save": "Enregistrer",
+    "defaultTitle": "Vêtement"
+  }
+}
+

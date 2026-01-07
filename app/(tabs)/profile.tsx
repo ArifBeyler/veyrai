@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
   FadeInDown, 
   FadeIn,
+  FadeOut,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -33,11 +34,27 @@ import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { useRevenueCat } from '../../src/hooks/useRevenueCat';
+import { useTranslation } from '../../src/hooks/useTranslation';
+import { useAppLanguage } from '../../src/hooks/useAppLanguage';
 
 const { width } = Dimensions.get('window');
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { setLang, resolvedLang, supportedLanguages } = useAppLanguage();
+  const [showLanguageChangeToast, setShowLanguageChangeToast] = React.useState(false);
+  
+  // Auto-hide toast after 1.5 seconds
+  useEffect(() => {
+    if (showLanguageChangeToast) {
+      const timer = setTimeout(() => {
+        setShowLanguageChangeToast(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [showLanguageChangeToast]);
+  
   const isPremium = useSessionStore((s) => s.isPremium);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const profiles = useSessionStore((s) => s.profiles);
@@ -62,12 +79,12 @@ const ProfileScreen = () => {
 
   const handleLogout = () => {
     Alert.alert(
-      'Çıkış Yap',
-      'Tüm verileriniz silinecek ve başlangıç ekranına yönlendirileceksiniz. Emin misiniz?',
+      t('profile.logout'),
+      t('profile.logoutConfirm'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Çıkış Yap',
+          text: t('profile.logout'),
           style: 'destructive',
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -109,6 +126,34 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleChangeLanguage = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    const languageNames: Record<string, string> = {
+      tr: 'Türkçe',
+      en: 'English',
+      fr: 'Français',
+    };
+
+    Alert.alert(
+      t('profile.selectLanguage'),
+      '',
+      [
+        ...supportedLanguages.map((lang) => ({
+          text: languageNames[lang],
+          onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setShowLanguageChangeToast(true);
+            setLang(lang);
+          },
+          style: resolvedLang === lang ? 'default' : undefined,
+        })),
+        { text: t('common.cancel'), style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -126,7 +171,7 @@ const ProfileScreen = () => {
       >
         {/* Header */}
         <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
-          <DisplaySmall>Profil</DisplaySmall>
+          <DisplaySmall>{t('profile.title')}</DisplaySmall>
         </Animated.View>
 
         {/* Profile Card - Hero Section */}
@@ -175,27 +220,27 @@ const ProfileScreen = () => {
               {/* Profile Info */}
               <View style={styles.profileInfo}>
                 <HeadlineMedium style={styles.profileName}>
-                  {activeProfile?.name || 'Profil Ekle'}
+                  {activeProfile?.name || t('profile.addProfile')}
                 </HeadlineMedium>
                 <BodySmall color="secondary">
-                  {activeProfile?.gender === 'male' ? 'Erkek' : activeProfile?.gender === 'female' ? 'Kadın' : 'Profil'}
+                  {activeProfile?.gender === 'male' ? t('profile.male') : activeProfile?.gender === 'female' ? t('profile.female') : t('profile.profile')}
                 </BodySmall>
                 
                 {/* Quick Stats */}
                 <View style={styles.quickStats}>
                   <View style={styles.quickStat}>
                     <LabelSmall color="accent">{profiles.length}</LabelSmall>
-                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>Profil</LabelSmall>
+                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>{t('profile.stats.profiles')}</LabelSmall>
                   </View>
                   <View style={styles.quickStatDivider} />
                   <View style={styles.quickStat}>
                     <LabelSmall color="accent">{completedGenerations}</LabelSmall>
-                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>Sonuç</LabelSmall>
+                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>{t('profile.stats.results')}</LabelSmall>
                   </View>
                   <View style={styles.quickStatDivider} />
                   <View style={styles.quickStat}>
                     <LabelSmall color="accent">{garments.length}</LabelSmall>
-                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>Kıyafet</LabelSmall>
+                    <LabelSmall color="tertiary" style={styles.quickStatLabel}>{t('profile.stats.garments')}</LabelSmall>
                   </View>
                 </View>
               </View>
@@ -225,8 +270,8 @@ const ProfileScreen = () => {
                   />
                 </View>
                 <View style={styles.subscriptionText}>
-                  <LabelMedium>Premium Üye</LabelMedium>
-                  <LabelSmall color="secondary">Sınırsız deneme hakkı</LabelSmall>
+                  <LabelMedium>{t('profile.premiumMember')}</LabelMedium>
+                  <LabelSmall color="secondary">{t('profile.unlimitedAccess')}</LabelSmall>
                 </View>
               </View>
             </GlassCard>
@@ -242,14 +287,14 @@ const ProfileScreen = () => {
                     />
                   </View>
                   <View style={styles.freePlanText}>
-                    <LabelMedium>Ücretsiz Plan</LabelMedium>
+                    <LabelMedium>{t('profile.freePlan')}</LabelMedium>
                     <LabelSmall color="secondary">
-                      {hasCredits ? '1 ücretsiz kredi' : 'Kredi yok'}
+                      {hasCredits ? t('profile.oneFreeCredit') : t('profile.noCredits')}
                     </LabelSmall>
                   </View>
                 </View>
                 <PrimaryButton
-                  title="Premium'a Yükselt"
+                  title={t('profile.upgradeToPremium')}
                   onPress={handleUpgrade}
                   size="sm"
                   style={styles.upgradeButtonInline}
@@ -269,14 +314,14 @@ const ProfileScreen = () => {
               <StatItem 
                 icon="👤"
                 value={profiles.length}
-                label="Profil"
+                label={t('profile.stats.profiles')}
                 color="#A855F7"
               />
               <View style={styles.statDivider} />
               <StatItem 
                 icon="✨"
                 value={completedGenerations}
-                label="Kombinleme"
+                label={t('profile.stats.combinations')}
                 color="#10B981"
               />
             </View>
@@ -285,20 +330,20 @@ const ProfileScreen = () => {
 
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.delay(650).springify()}>
-          <HeadlineSmall style={styles.sectionTitle}>Hızlı İşlemler</HeadlineSmall>
+          <HeadlineSmall style={styles.sectionTitle}>{t('profile.quickActions')}</HeadlineSmall>
           
           <GlassCard style={styles.actionsCard}>
             <ActionItem
               icon={require('../../full3dicons/images/profile-icon.png')}
-              title="Profilleri Yönet"
-              subtitle={`${profiles.length} profil`}
+              title={t('profile.manageProfiles')}
+              subtitle={t('profile.profilesCount', { count: profiles.length })}
               onPress={() => router.push('/select-profile')}
             />
             <View style={styles.divider} />
             <ActionItem
               icon={require('../../full3dicons/images/photo.png')}
-              title="Galeriye Git"
-              subtitle={`${completedGenerations} görsel`}
+              title={t('profile.goToGallery')}
+              subtitle={t('profile.imagesCount', { count: completedGenerations })}
               onPress={() => router.push('/(tabs)/gallery')}
             />
           </GlassCard>
@@ -306,25 +351,32 @@ const ProfileScreen = () => {
 
         {/* Support */}
         <Animated.View entering={FadeInDown.delay(700).springify()}>
-          <HeadlineSmall style={styles.sectionTitle}>Destek</HeadlineSmall>
+          <HeadlineSmall style={styles.sectionTitle}>{t('profile.support')}</HeadlineSmall>
 
           <GlassCard style={styles.settingsCard}>
             <ActionItem
               icon={require('../../full3dicons/images/sparkle.png')}
-              title="Yardım ve Destek"
+              title={t('profile.helpAndSupport')}
               onPress={handleSupport}
             />
             <View style={styles.divider} />
             <ActionItem
               icon={require('../../full3dicons/images/ai-sparkle.png')}
-              title="Satın Alımları Yönet"
+              title={t('profile.managePurchases')}
               onPress={handleCustomerCenter}
             />
             <View style={styles.divider} />
             <ActionItem
               icon={require('../../full3dicons/images/profile-icon.png')}
-              title="Gizlilik Politikası"
+              title={t('profile.privacyPolicy')}
               onPress={handlePrivacy}
+            />
+            <View style={styles.divider} />
+            <ActionItem
+              icon={require('../../full3dicons/images/ai-sparkle.png')}
+              title={t('profile.changeLanguage')}
+              subtitle={resolvedLang === 'tr' ? 'Türkçe' : resolvedLang === 'en' ? 'English' : 'Français'}
+              onPress={handleChangeLanguage}
             />
           </GlassCard>
         </Animated.View>
@@ -345,7 +397,7 @@ const ProfileScreen = () => {
               style={styles.logoutIcon}
               resizeMode="contain"
             />
-            <LabelMedium color="error">Çıkış Yap</LabelMedium>
+            <LabelMedium color="error">{t('profile.logout')}</LabelMedium>
           </TouchableOpacity>
         </Animated.View>
 
@@ -354,9 +406,29 @@ const ProfileScreen = () => {
           entering={FadeInDown.delay(800).springify()}
           style={styles.versionContainer}
         >
-          <BodySmall color="tertiary">FIT-SWAP v1.0.0</BodySmall>
+          <BodySmall color="tertiary">Wearify v1.0.0</BodySmall>
         </Animated.View>
       </ScrollView>
+
+      {/* Language Change Toast */}
+      {showLanguageChangeToast && (
+        <Animated.View 
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(300)}
+          style={[styles.toastContainer, { paddingTop: insets.top + 60 }]}
+        >
+          <GlassCard style={styles.toastCard}>
+            <View style={styles.toastContent}>
+              <Image
+                source={require('../../full3dicons/images/sparkle.png')}
+                style={styles.toastIcon}
+                resizeMode="contain"
+              />
+              <LabelMedium>{t('profile.changingLanguage')}</LabelMedium>
+            </View>
+          </GlassCard>
+        </Animated.View>
+      )}
     </View>
   );
 };
@@ -688,6 +760,29 @@ const styles = StyleSheet.create({
   versionContainer: {
     alignItems: 'center',
     marginTop: 12,
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 1000,
+    pointerEvents: 'none',
+  },
+  toastCard: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    minWidth: 200,
+  },
+  toastContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  toastIcon: {
+    width: 20,
+    height: 20,
   },
 });
 

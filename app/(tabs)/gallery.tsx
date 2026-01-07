@@ -24,6 +24,7 @@ import {
 import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ type TimeFilter = 'all' | 'today' | 'week';
 
 const GalleryScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
   const jobs = useSessionStore((s) => s.jobs);
 
@@ -86,9 +88,9 @@ const GalleryScreen = () => {
       >
         {/* Header */}
         <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
-          <DisplaySmall>Galeri</DisplaySmall>
+          <DisplaySmall>{t('gallery.title')}</DisplaySmall>
           <BodyMedium color="secondary">
-            Tüm denemeleriniz burada
+            {t('gallery.subtitle')}
           </BodyMedium>
         </Animated.View>
 
@@ -111,33 +113,18 @@ const GalleryScreen = () => {
               <LabelMedium
                 color={timeFilter === filter ? 'accent' : 'secondary'}
               >
-                {filter === 'all' && 'Tümü'}
-                {filter === 'today' && 'Bugün'}
-                {filter === 'week' && 'Son 7 Gün'}
+                {filter === 'all' && t('gallery.all')}
+                {filter === 'today' && t('gallery.today')}
+                {filter === 'week' && t('gallery.thisWeek')}
               </LabelMedium>
             </Pressable>
           ))}
         </Animated.View>
 
-        {/* Stats */}
-        <Animated.View
-          entering={FadeInDown.delay(300).springify()}
-          style={styles.statsContainer}
-        >
-          <GlassCard style={styles.statCard}>
-            <LabelSmall color="secondary">Toplam Deneme</LabelSmall>
-            <HeadlineSmall color="accent">{jobs.length}</HeadlineSmall>
-          </GlassCard>
-          <GlassCard style={styles.statCard}>
-            <LabelSmall color="secondary">Başarılı</LabelSmall>
-            <HeadlineSmall color="success">{completedJobs.length}</HeadlineSmall>
-          </GlassCard>
-        </Animated.View>
-
         {/* Gallery Grid */}
         {filteredJobs.length > 0 ? (
           <Animated.View
-            entering={FadeInDown.delay(400).springify()}
+            entering={FadeInDown.delay(300).springify()}
             style={styles.gallerySection}
           >
             <View style={styles.sectionHeader}>
@@ -193,7 +180,7 @@ const GalleryScreen = () => {
         ) : (
           /* Empty State */
           <Animated.View
-            entering={FadeInDown.delay(400).springify()}
+            entering={FadeInDown.delay(300).springify()}
             style={styles.emptyState}
           >
             <GlassCard style={styles.emptyCard}>
@@ -203,13 +190,13 @@ const GalleryScreen = () => {
                 resizeMode="contain"
               />
               <HeadlineSmall style={styles.emptyTitle}>
-                Galeri boş
+                {t('gallery.emptyTitle')}
               </HeadlineSmall>
               <BodyMedium color="secondary" style={styles.emptyText}>
-                Henüz bir deneme yapmadınız
+                {t('gallery.emptySubtitle')}
               </BodyMedium>
               <PrimaryButton
-                title="İlk Denemeyi Yap"
+                title={t('gallery.startFirstTry')}
                 onPress={handleNewTryOn}
                 size="md"
               />
@@ -251,16 +238,6 @@ const styles = StyleSheet.create({
   filterChipActive: {
     backgroundColor: Colors.accent.primaryDim,
     borderColor: Colors.accent.primary,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 16,
-    gap: 4,
   },
   gallerySection: {
     gap: 12,

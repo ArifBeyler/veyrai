@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -26,12 +26,16 @@ import {
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { GlassCard } from '../src/ui/GlassCard';
+import { useTranslation } from '../src/hooks/useTranslation';
+import { Video, ResizeMode } from 'expo-av';
 
 const { width, height } = Dimensions.get('window');
 
 const OnboardingScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
+  const videoRef = useRef<Video>(null);
   const [currentStep, setCurrentStep] = useState(0);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -40,8 +44,27 @@ const OnboardingScreen = () => {
     if (newStep !== currentStep) {
       setCurrentStep(newStep);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      
+      // Play video when reaching step 3
+      if (newStep === 2 && videoRef.current) {
+        videoRef.current.playAsync();
+      } else if (newStep !== 2 && videoRef.current) {
+        videoRef.current.pauseAsync();
+      }
     }
   };
+
+  // Play video on mount if already on step 3
+  useEffect(() => {
+    if (currentStep === 2 && videoRef.current) {
+      videoRef.current.playAsync();
+    }
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pauseAsync();
+      }
+    };
+  }, [currentStep]);
 
   const goToStep = (step: number) => {
     scrollRef.current?.scrollTo({ x: step * width, animated: true });
@@ -58,7 +81,7 @@ const OnboardingScreen = () => {
 
   const handleComplete = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/onboarding-video');
+    router.replace('/auth');
   };
 
   return (
@@ -97,10 +120,10 @@ const OnboardingScreen = () => {
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
             <View style={styles.stepHeader}>
               <DisplaySmall style={styles.stepTitle}>
-                Kombin denemek{'\n'}artık saniyeler
+                {t('onboarding.step1.title')}
               </DisplaySmall>
               <BodyLarge color="secondary" style={styles.stepDescription}>
-                Fotoğrafını yükle, istediğin parçaları seç, sonucu gör.
+                {t('onboarding.step1.description')}
               </BodyLarge>
             </View>
 
@@ -119,10 +142,10 @@ const OnboardingScreen = () => {
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
             <View style={styles.stepHeader}>
               <DisplaySmall style={styles.stepTitle}>
-                Tek parça değil,{'\n'}komple kombin
+                {t('onboarding.step2.title')}
               </DisplaySmall>
               <BodyLarge color="secondary" style={styles.stepDescription}>
-                Etek, bluz, ayakkabı, çanta... İstediğin kadar parça seç
+                {t('onboarding.step2.description')}
               </BodyLarge>
             </View>
 
@@ -161,44 +184,21 @@ const OnboardingScreen = () => {
           </Animated.View>
         </View>
 
-        {/* Step 3: "Sonuç + Kaydet/Paylaş" */}
+        {/* Step 3: Video in Rounded Container */}
         <View style={styles.stepContainer}>
           <Animated.View entering={FadeInDown.delay(200)} style={styles.stepContent}>
-            <View style={styles.stepHeader}>
-              <DisplaySmall style={styles.stepTitle}>
-                Ürettiğin sonucu{'\n'}kaydet, tekrar dene
-              </DisplaySmall>
-              <BodyLarge color="secondary" style={styles.stepDescription}>
-                Sonucu kaydet, paylaş veya yeni kombinler dene
-              </BodyLarge>
-            </View>
-
-            <View style={styles.resultContainer}>
-              <GlassCard style={styles.resultCard}>
-                <Image
-                  source={require('../full3dicons/images/photo.png')}
-                  style={styles.resultIcon}
-                  resizeMode="contain"
+            <View style={styles.videoWrapper}>
+              <View style={styles.videoContainer}>
+                <Video
+                  ref={videoRef}
+                  source={require('../assets/videos/0106 (1).mp4')}
+                  style={styles.video}
+                  resizeMode={ResizeMode.COVER}
+                  isLooping
+                  isMuted
+                  shouldPlay={currentStep === 2}
                 />
-                <View style={styles.resultActions}>
-                  <View style={styles.actionButton}>
-                    <Image
-                      source={require('../full3dicons/images/sparkle.png')}
-                      style={styles.actionIcon}
-                      resizeMode="contain"
-                    />
-                    <LabelMedium>Kaydet</LabelMedium>
-                  </View>
-                  <View style={styles.actionButton}>
-                    <Image
-                      source={require('../full3dicons/images/ai-sparkle.png')}
-                      style={styles.actionIcon}
-                      resizeMode="contain"
-                    />
-                    <LabelMedium>Paylaş</LabelMedium>
-                  </View>
-                </View>
-              </GlassCard>
+              </View>
             </View>
           </Animated.View>
         </View>
@@ -207,7 +207,7 @@ const OnboardingScreen = () => {
       {/* Bottom CTA */}
       <View style={[styles.bottomContainer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
-          title={currentStep === 2 ? 'Başlayalım' : 'Devam'}
+          title={currentStep === 2 ? t('onboarding.start') : t('common.next')}
           onPress={handleNext}
         />
       </View>
@@ -311,40 +311,25 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
   },
-  resultContainer: {
+  videoWrapper: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.page,
     paddingVertical: 48,
   },
-  resultCard: {
-    width: width * 0.8,
-    aspectRatio: 0.75,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    gap: 24,
+  videoContainer: {
+    width: '100%',
+    aspectRatio: 9 / 16,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.dark.stroke,
+    backgroundColor: Colors.dark.surface,
   },
-  resultIcon: {
-    width: 120,
-    height: 120,
-  },
-  resultActions: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: Colors.accent.primaryDim,
-    borderRadius: BorderRadius.md,
-  },
-  actionIcon: {
-    width: 20,
-    height: 20,
+  video: {
+    width: '100%',
+    height: '100%',
   },
   bottomContainer: {
     paddingHorizontal: Spacing.page,

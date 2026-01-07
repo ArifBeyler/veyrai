@@ -10,6 +10,7 @@ import { Colors } from '../src/ui/theme';
 import { usePushNotifications } from '../src/hooks/usePushNotifications';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
+import { I18nProvider } from '../src/providers/I18nProvider';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -57,21 +58,21 @@ const RootLayout = () => {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <QueryClientProvider client={queryClient}>
-        <View style={styles.container}>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: Colors.dark.background },
-              animation: 'fade',
-            }}
-          >
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <View style={styles.container}>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: Colors.dark.background },
+                animation: 'fade',
+              }}
+            >
             <Stack.Screen name="index" />
             <Stack.Screen name="welcome" />
             <Stack.Screen name="auth" />
             <Stack.Screen name="onboarding" />
-            <Stack.Screen name="onboarding-video" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
               name="create"
@@ -118,6 +119,7 @@ const RootLayout = () => {
           </Stack>
         </View>
       </QueryClientProvider>
+      </I18nProvider>
     </GestureHandlerRootView>
   );
 };

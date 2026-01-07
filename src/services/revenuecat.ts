@@ -7,7 +7,7 @@ import Purchases, {
 import { Platform } from 'react-native';
 
 const API_KEY = 'test_ZlrmixGXfOlxOaNTwnPJmMtpKNG';
-const ENTITLEMENT_ID = 'fitswap Pro';
+const ENTITLEMENT_ID = 'wearify Pro';
 
 // RevenueCat konfigürasyonu
 let isConfigured = false;
@@ -53,7 +53,7 @@ export const getCustomerInfo = async (): Promise<CustomerInfo | null> => {
 };
 
 /**
- * Kullanıcının fitswap Pro entitlement'ına sahip olup olmadığını kontrol et
+ * Kullanıcının wearify Pro entitlement'ına sahip olup olmadığını kontrol et
  */
 export const checkEntitlement = async (): Promise<boolean> => {
   try {

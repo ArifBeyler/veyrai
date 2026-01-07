@@ -28,6 +28,7 @@ import { getRandomModelPhoto } from '../../src/constants/modelPhotos';
 import { useTryOnFlow } from '../../src/hooks/useTryOn';
 import { supabase } from '../../src/services/supabase';
 import { useSessionStore } from '../../src/state/useSessionStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { IconButton } from '../../src/ui/IconButton';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -42,26 +43,27 @@ import {
 
 const { width } = Dimensions.get('window');
 
-// Mizahi mesaj havuzu
-const LOADING_MESSAGES = [
-  { text: 'Fotoğraflar yükleniyor...', emoji: '📸' },
-  { text: 'Gardrop hazırlanıyor...', emoji: '👔' },
-  { text: 'Kıyafet uygulanıyor...', emoji: '✨' },
-  { text: 'Son rötuşlar...', emoji: '🎨' },
-  { text: 'Kumaş fiziği simüle ediliyor...', emoji: '🧵' },
-  { text: 'Düğmeler ikna ediliyor...', emoji: '🔘' },
-  { text: 'Kombin evrenle hizalanıyor...', emoji: '🌟' },
-  { text: 'Işık ayarı: sinematik mod', emoji: '🎬' },
-  { text: 'Stil danışmanı çağrıldı...', emoji: '👨‍🎨' },
-  { text: 'Moda matematiği hesaplanıyor...', emoji: '📐' },
-  { text: 'Renk uyumu kontrol ediliyor...', emoji: '🎨' },
-  { text: 'Birazdan hazır...', emoji: '⏳' },
-];
-
 type GenerationState = 'loading' | 'success' | 'error';
 
 const GenerationScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  
+  // Mizahi mesaj havuzu - dinamik çeviri
+  const getLoadingMessages = () => [
+    { text: t('generation.loadingMessages.loadingPhotos'), emoji: '📸' },
+    { text: t('generation.loadingMessages.preparingWardrobe'), emoji: '👔' },
+    { text: t('generation.loadingMessages.applyingGarment'), emoji: '✨' },
+    { text: t('generation.loadingMessages.finalTouches'), emoji: '🎨' },
+    { text: t('generation.loadingMessages.simulatingFabric'), emoji: '🧵' },
+    { text: t('generation.loadingMessages.convincingButtons'), emoji: '🔘' },
+    { text: t('generation.loadingMessages.aligningUniverse'), emoji: '🌟' },
+    { text: t('generation.loadingMessages.cinematicMode'), emoji: '🎬' },
+    { text: t('generation.loadingMessages.stylistCalled'), emoji: '👨‍🎨' },
+    { text: t('generation.loadingMessages.fashionMath'), emoji: '📐' },
+    { text: t('generation.loadingMessages.colorCheck'), emoji: '🎨' },
+    { text: t('generation.loadingMessages.almostReady'), emoji: '⏳' },
+  ];
   const params = useLocalSearchParams<{
     id: string;
     imageUrl?: string;
@@ -97,7 +99,7 @@ const GenerationScreen = () => {
   const imageOpacity = useSharedValue(0);
 
   // Shuffle messages
-  const [messages] = useState(() => [...LOADING_MESSAGES].sort(() => Math.random() - 0.5));
+  const [messages] = useState(() => getLoadingMessages().sort(() => Math.random() - 0.5));
 
   // If imageUrl is already provided, show result immediately
   useEffect(() => {
@@ -315,7 +317,7 @@ const GenerationScreen = () => {
     if (!resultImageUrl) return;
     try {
       await Share.share({
-        message: 'FIT-SWAP ile kıyafet denedim! 👕✨',
+        message: t('generation.shareMessage'),
         url: resultImageUrl,
       });
     } catch (error) {
@@ -456,7 +458,7 @@ const GenerationScreen = () => {
             {/* Success Message */}
             <Animated.View entering={FadeIn.delay(500)} style={styles.successMessage}>
               <LabelMedium color="accent" style={styles.successText}>
-                ✨ Kombin hazır!
+                ✨ {t('generation.success')}
               </LabelMedium>
             </Animated.View>
 

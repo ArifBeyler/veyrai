@@ -7,6 +7,7 @@ import { BlurView } from 'expo-blur';
 import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
 import { HeadlineLarge, BodyLarge, BodyMedium, LabelMedium } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
+import { useTranslation } from '../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -48,26 +49,26 @@ const WelcomeScreen = () => {
         {/* Main Title */}
         <View style={styles.titleSection}>
           <HeadlineLarge style={styles.title}>
-            Kıyafetleri{'\n'}Üzerinde Gör
+            {t('welcome.title')}
           </HeadlineLarge>
           <BodyLarge color="secondary" style={styles.subtitle}>
-            Fotoğrafını yükle, istediğin kıyafeti seç.{'\n'}AI sana nasıl göründüğünü göstersin.
+            {t('welcome.subtitle')}
           </BodyLarge>
         </View>
 
         {/* Features */}
         <View style={styles.featuresSection}>
-          <FeatureRow icon="📸" text="Fotoğraf yükle" />
-          <FeatureRow icon="👕" text="Kıyafet seç" />
-          <FeatureRow icon="✨" text="Sonucu gör" />
+          <FeatureRow icon="📸" text={t('welcome.feature1')} />
+          <FeatureRow icon="👕" text={t('welcome.feature2')} />
+          <FeatureRow icon="✨" text={t('welcome.feature3')} />
         </View>
       </View>
 
       {/* Bottom CTA */}
       <View style={[styles.bottomSection, { paddingBottom: insets.bottom + 24 }]}>
-        <PrimaryButton title="Başla" onPress={handleStart} />
+        <PrimaryButton title={t('welcome.start')} onPress={handleStart} />
         <View style={styles.freeTrialBadge}>
-          <BodyMedium color="accent">1 ücretsiz deneme</BodyMedium>
+          <BodyMedium color="accent">{t('welcome.freeTrial')}</BodyMedium>
         </View>
       </View>
     </View>

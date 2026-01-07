@@ -189,9 +189,9 @@ const AuthScreen = () => {
             style={styles.logo}
             resizeMode="contain"
           />
-          <HeadlineMedium>FIT-SWAP</HeadlineMedium>
+          <HeadlineMedium>Wearify</HeadlineMedium>
           <BodyMedium color="secondary">
-            {isLogin ? 'Hesabına giriş yap' : 'Yeni hesap oluştur'}
+            {isLogin ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
           </BodyMedium>
         </Animated.View>
 

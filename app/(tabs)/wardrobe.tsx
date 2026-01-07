@@ -24,6 +24,7 @@ import {
 } from '../../src/ui/Typography';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { useSessionStore, GarmentCategory, Garment } from '../../src/state/useSessionStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -64,6 +65,7 @@ const CATEGORIES: { key: Category; label: string }[] = [
 
 const WardrobeScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
   
   const garments = useSessionStore((s) => s.garments);
@@ -148,11 +150,11 @@ const WardrobeScreen = () => {
       >
         {/* Header */}
         <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
-          <DisplaySmall>Gardrop</DisplaySmall>
+          <DisplaySmall>{t('wardrobe.title')}</DisplaySmall>
           <BodyMedium color="secondary">
             {garments.length > 0
-              ? `${garments.length} kıyafet`
-              : 'Kıyafetlerini ekle ve dene'}
+              ? t('wardrobe.garmentsCount', { count: garments.length })
+              : t('wardrobe.addAndTry')}
           </BodyMedium>
         </Animated.View>
 
@@ -212,8 +214,8 @@ const WardrobeScreen = () => {
                 />
               </View>
               <View style={styles.addCardText}>
-                <LabelMedium>Kıyafet Ekle</LabelMedium>
-                <BodySmall color="secondary">Fotoğraf çek veya galeriden seç</BodySmall>
+                <LabelMedium>{t('wardrobe.addGarment')}</LabelMedium>
+                <BodySmall color="secondary">{t('wardrobe.addGarmentSubtitle')}</BodySmall>
               </View>
             </View>
           </GlassCard>
@@ -227,9 +229,9 @@ const WardrobeScreen = () => {
           {filteredGarments.length > 0 ? (
             <>
               <View style={styles.sectionHeader}>
-                <HeadlineSmall>Kıyafetlerim</HeadlineSmall>
+                <HeadlineSmall>{t('wardrobe.myGarments')}</HeadlineSmall>
                 <LabelSmall color="secondary">
-                  {filteredGarments.length} ürün
+                  {t('wardrobe.productsCount', { count: filteredGarments.length })}
                 </LabelSmall>
               </View>
 
@@ -247,21 +249,23 @@ const WardrobeScreen = () => {
             </>
           ) : (
             /* Empty State */
-            <GlassCard style={styles.emptyCard}>
-              <Image
-                source={require('../../full3dicons/images/wardrobe.png')}
-                style={styles.emptyIcon}
-                resizeMode="contain"
-              />
-              <HeadlineSmall style={styles.emptyTitle}>
-                {selectedCategory === 'all'
-                  ? 'Gardrop boş'
-                  : 'Bu kategoride kıyafet yok'}
-              </HeadlineSmall>
-              <BodyMedium color="secondary" style={styles.emptyText}>
-                Kıyafet ekleyerek başlayın
-              </BodyMedium>
-            </GlassCard>
+            <Animated.View entering={FadeInDown.delay(500).springify()}>
+              <GlassCard style={styles.emptyCard}>
+                <Image
+                  source={require('../../full3dicons/images/wardrobe.png')}
+                  style={styles.emptyIcon}
+                  resizeMode="contain"
+                />
+                <HeadlineSmall style={styles.emptyTitle}>
+                  {selectedCategory === 'all'
+                    ? t('wardrobe.wardrobeEmpty')
+                    : t('wardrobe.categoryEmpty')}
+                </HeadlineSmall>
+                <BodyMedium color="secondary" style={styles.emptyText}>
+                  {t('wardrobe.addGarmentsToStart')}
+                </BodyMedium>
+              </GlassCard>
+            </Animated.View>
           )}
         </Animated.View>
       </ScrollView>

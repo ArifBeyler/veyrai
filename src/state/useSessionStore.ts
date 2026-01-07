@@ -430,7 +430,7 @@ export const useSessionStore = create<SessionState>()(
       },
     }),
     {
-      name: 'fit-swap-session',
+      name: 'wearify-session',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         hasCompletedOnboarding: state.hasCompletedOnboarding,

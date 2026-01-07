@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
@@ -28,8 +28,9 @@ import {
   LAYER_PRIORITY,
   MULTI_SELECT_CATEGORIES,
   UserProfile,
-  useSessionStore
+  useSessionStore,
 } from '../../src/state/useSessionStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { IconButton } from '../../src/ui/IconButton';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -71,6 +72,7 @@ const CATEGORY_COLORS: Record<GarmentCategory, string> = {
 
 const CreateScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('profile');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<GarmentCategory | 'all'>('all');
@@ -83,11 +85,24 @@ const CreateScreen = () => {
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const isPremium = useSessionStore((s) => s.isPremium);
   
+  // Store'dan seçili profil ID'sini al
+  const storeSelectedProfileId = useSessionStore((s) => s.selectedProfileId);
+  const activeProfileId = useSessionStore((s) => s.activeProfileId);
+  
   // Multi-select state
   const selectedGarmentIds = useSessionStore((s) => s.selectedGarmentIds);
   const toggleSelectedGarment = useSessionStore((s) => s.toggleSelectedGarment);
   const clearSelectedGarments = useSessionStore((s) => s.clearSelectedGarments);
   const setStyleNote = useSessionStore((s) => s.setStyleNote);
+  
+  // Store'dan gelen seçili profil ID'sini local state'e senkronize et
+  useEffect(() => {
+    if (storeSelectedProfileId && profiles.some(p => p.id === storeSelectedProfileId)) {
+      setSelectedProfileId(storeSelectedProfileId);
+    } else if (activeProfileId && profiles.some(p => p.id === activeProfileId)) {
+      setSelectedProfileId(activeProfileId);
+    }
+  }, [storeSelectedProfileId, activeProfileId, profiles]);
 
   // Trial logic: First generation is free, then show paywall
   const shouldShowPaywall = freeCreditsUsed && !isPremium;
@@ -449,72 +464,80 @@ const CreateScreen = () => {
         {step === 'profile' && (
           <Animated.View entering={FadeIn}>
             <View style={styles.stepHeader}>
-              <HeadlineMedium>Profil Seç</HeadlineMedium>
+              <HeadlineMedium>{t('create.selectProfile')}</HeadlineMedium>
               <BodyMedium color="secondary">
-                Kıyafeti denemek için bir profil seç
+                {t('create.selectProfileDescription')}
               </BodyMedium>
             </View>
 
             {/* Add Profile */}
-            <GlassCard style={styles.addCard} onPress={handleAddProfile}>
-              <Image
-                source={require('../../full3dicons/images/plus-sign.png')}
-                style={styles.addIcon}
-                resizeMode="contain"
-              />
-              <LabelMedium>Yeni Profil Ekle</LabelMedium>
-            </GlassCard>
+            <Animated.View entering={FadeInDown.delay(200).springify()}>
+              <GlassCard style={styles.addCard} onPress={handleAddProfile}>
+                <Image
+                  source={require('../../full3dicons/images/plus-sign.png')}
+                  style={styles.addIcon}
+                  resizeMode="contain"
+                />
+                <LabelMedium>{t('create.addNewProfile')}</LabelMedium>
+              </GlassCard>
+            </Animated.View>
 
             {/* Profile Grid */}
             {profiles.length > 0 ? (
               <View style={styles.profileGrid}>
-                {profiles.map((profile) => (
-                  <Pressable
+                {profiles.map((profile, index) => (
+                  <Animated.View
                     key={profile.id}
-                    onPress={() => handleSelectProfile(profile)}
+                    entering={FadeInDown.delay(300 + index * 50).springify()}
                   >
-                    <GlassCard
-                      style={StyleSheet.flatten([
-                        styles.profileCard,
-                        selectedProfileId === profile.id ? styles.selectedCard : {},
-                      ])}
+                    <Pressable
+                      onPress={() => handleSelectProfile(profile)}
                     >
-                      <View style={styles.profileImageContainer}>
-                        {profile.photos[0] ? (
-                          <Image
-                            source={{ uri: profile.photos[0].uri }}
-                            style={styles.profileImage}
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <Image
-                            source={require('../../full3dicons/images/profile.png')}
-                            style={styles.placeholderImage}
-                            resizeMode="contain"
-                          />
-                        )}
-                      </View>
-                      <LabelMedium numberOfLines={1}>{profile.name}</LabelMedium>
-                      {selectedProfileId === profile.id && (
-                        <View style={styles.checkBadge}>
-                          <LabelSmall color="inverse">✓</LabelSmall>
+                      <GlassCard
+                        style={StyleSheet.flatten([
+                          styles.profileCard,
+                          selectedProfileId === profile.id ? styles.selectedCard : {},
+                        ])}
+                      >
+                        <View style={styles.profileImageContainer}>
+                          {profile.photos[0] ? (
+                            <Image
+                              source={{ uri: profile.photos[0].uri }}
+                              style={styles.profileImage}
+                              resizeMode="cover"
+                            />
+                          ) : (
+                            <Image
+                              source={require('../../full3dicons/images/profile.png')}
+                              style={styles.placeholderImage}
+                              resizeMode="contain"
+                            />
+                          )}
                         </View>
-                      )}
-                    </GlassCard>
-                  </Pressable>
+                        <LabelMedium numberOfLines={1}>{profile.name}</LabelMedium>
+                        {selectedProfileId === profile.id && (
+                          <View style={styles.checkBadge}>
+                            <LabelSmall color="inverse">✓</LabelSmall>
+                          </View>
+                        )}
+                      </GlassCard>
+                    </Pressable>
+                  </Animated.View>
                 ))}
               </View>
             ) : (
-              <GlassCard style={styles.emptyCard}>
-                <Image
-                  source={require('../../full3dicons/images/profile.png')}
-                  style={styles.emptyIcon}
-                  resizeMode="contain"
-                />
-                <BodyMedium color="secondary" style={styles.emptyText}>
-                  Henüz profil yok. Yeni profil ekleyerek başla.
-                </BodyMedium>
-              </GlassCard>
+              <Animated.View entering={FadeInDown.delay(300).springify()}>
+                <GlassCard style={styles.emptyCard}>
+                  <Image
+                    source={require('../../full3dicons/images/profile.png')}
+                    style={styles.emptyIcon}
+                    resizeMode="contain"
+                  />
+                  <BodyMedium color="secondary" style={styles.emptyText}>
+                    {t('create.noProfilesYet')}
+                  </BodyMedium>
+                </GlassCard>
+              </Animated.View>
             )}
           </Animated.View>
         )}
@@ -523,9 +546,9 @@ const CreateScreen = () => {
         {step === 'garment' && (
           <Animated.View entering={SlideInRight}>
             <View style={styles.stepHeader}>
-              <HeadlineMedium>Kombin Oluştur</HeadlineMedium>
+              <HeadlineMedium>{t('create.createCombination')}</HeadlineMedium>
               <BodyMedium color="secondary">
-                Denemek istediğin parçaları seç
+                {t('create.selectGarmentsDescription')}
               </BodyMedium>
             </View>
 
@@ -533,8 +556,8 @@ const CreateScreen = () => {
             {selectedGarmentIds.length > 0 && (
               <Animated.View entering={FadeInDown} style={styles.selectedTray}>
                 <View style={styles.selectedTrayHeader}>
-                  <LabelMedium>Seçilen Kombinim</LabelMedium>
-                  <LabelSmall color="secondary">{selectedGarmentIds.length}/8 parça</LabelSmall>
+                  <LabelMedium>{t('create.selectedCombination')}</LabelMedium>
+                  <LabelSmall color="secondary">{selectedGarmentIds.length}{t('create.partsCount')}</LabelSmall>
                 </View>
                 <ScrollView 
                   horizontal 
@@ -609,96 +632,104 @@ const CreateScreen = () => {
             </ScrollView>
 
             {/* Add Garment */}
-            <GlassCard style={styles.addCard} onPress={handleAddGarment}>
-              <Image
-                source={require('../../full3dicons/images/plus-sign.png')}
-                style={styles.addIcon}
-                resizeMode="contain"
-              />
-              <LabelMedium>Kıyafet Ekle</LabelMedium>
-            </GlassCard>
+            <Animated.View entering={FadeInDown.delay(200).springify()}>
+              <GlassCard style={styles.addCard} onPress={handleAddGarment}>
+                <Image
+                  source={require('../../full3dicons/images/plus-sign.png')}
+                  style={styles.addIcon}
+                  resizeMode="contain"
+                />
+                <LabelMedium>{t('create.addGarment')}</LabelMedium>
+              </GlassCard>
+            </Animated.View>
 
             {/* Garment Grid */}
             {filteredGarments.length > 0 ? (
               <View style={styles.garmentGrid}>
-                {filteredGarments.map((garment) => {
+                {filteredGarments.map((garment, index) => {
                   const isSelected = selectedGarmentIds.includes(garment.id);
                   const isMultiSelect = MULTI_SELECT_CATEGORIES.includes(garment.category);
                   
                   return (
-                    <Pressable
+                    <Animated.View
                       key={garment.id}
-                      onPress={() => handleToggleGarment(garment)}
+                      entering={FadeInDown.delay(300 + index * 50).springify()}
                     >
-                      <GlassCard
-                        style={StyleSheet.flatten([
-                          styles.garmentCard,
-                          isSelected ? styles.selectedCard : {},
-                        ])}
+                      <Pressable
+                        onPress={() => handleToggleGarment(garment)}
                       >
-                        <View style={styles.garmentImageContainer}>
-                          {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
-                            <Image
-                              source={{ uri: garment.imageUri }}
-                              style={styles.garmentImage}
-                              contentFit="cover"
-                              transition={200}
-                              cachePolicy="memory-disk"
-                            />
-                          ) : (
-                            <Image
-                              source={require('../../full3dicons/images/t-shirt.png')}
-                              style={styles.placeholderImage}
-                              resizeMode="contain"
-                            />
-                          )}
+                        <GlassCard
+                          style={StyleSheet.flatten([
+                            styles.garmentCard,
+                            isSelected ? styles.selectedCard : {},
+                          ])}
+                        >
+                          <View style={styles.garmentImageContainer}>
+                            {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
+                              <Image
+                                source={{ uri: garment.imageUri }}
+                                style={styles.garmentImage}
+                                contentFit="cover"
+                                transition={200}
+                                cachePolicy="memory-disk"
+                              />
+                            ) : (
+                              <Image
+                                source={require('../../full3dicons/images/t-shirt.png')}
+                                style={styles.placeholderImage}
+                                resizeMode="contain"
+                              />
+                            )}
+                            
+                            {/* Category Badge */}
+                            <View style={[
+                              styles.garmentCategoryBadge,
+                              { backgroundColor: CATEGORY_COLORS[garment.category] }
+                            ]}>
+                              <LabelSmall style={styles.garmentCategoryText}>
+                                {CATEGORIES.find(c => c.key === garment.category)?.label}
+                              </LabelSmall>
+                            </View>
+                          </View>
                           
-                          {/* Category Badge */}
-                          <View style={[
-                            styles.garmentCategoryBadge,
-                            { backgroundColor: CATEGORY_COLORS[garment.category] }
-                          ]}>
-                            <LabelSmall style={styles.garmentCategoryText}>
-                              {CATEGORIES.find(c => c.key === garment.category)?.label}
-                            </LabelSmall>
+                          <View style={styles.garmentInfo}>
+                            <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
+                            {isMultiSelect && (
+                              <LabelSmall color="tertiary">Çoklu seçim</LabelSmall>
+                            )}
                           </View>
-                        </View>
-                        
-                        <View style={styles.garmentInfo}>
-                          <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
-                          {isMultiSelect && (
-                            <LabelSmall color="tertiary">Çoklu seçim</LabelSmall>
+                          
+                          {isSelected && (
+                            <View style={styles.checkBadge}>
+                              <LabelSmall color="inverse">✓</LabelSmall>
+                            </View>
                           )}
-                        </View>
-                        
-                        {isSelected && (
-                          <View style={styles.checkBadge}>
-                            <LabelSmall color="inverse">✓</LabelSmall>
-                          </View>
-                        )}
-                      </GlassCard>
-                    </Pressable>
+                        </GlassCard>
+                      </Pressable>
+                    </Animated.View>
                   );
                 })}
               </View>
             ) : (
-              <GlassCard style={styles.emptyCard}>
-                <Image
-                  source={require('../../full3dicons/images/wardrobe.png')}
-                  style={styles.emptyIcon}
-                  resizeMode="contain"
-                />
-                <BodyMedium color="secondary" style={styles.emptyText}>
-                  {selectedCategory === 'all' 
-                    ? 'Gardrop boş. Kıyafet ekleyerek başla.'
-                    : 'Bu kategoride kıyafet yok.'}
-                </BodyMedium>
-              </GlassCard>
+              <Animated.View entering={FadeInDown.delay(300).springify()}>
+                <GlassCard style={styles.emptyCard}>
+                  <Image
+                    source={require('../../full3dicons/images/wardrobe.png')}
+                    style={styles.emptyIcon}
+                    resizeMode="contain"
+                  />
+                  <BodyMedium color="secondary" style={styles.emptyText}>
+                    {selectedCategory === 'all' 
+                      ? t('create.wardrobeEmptyMessage')
+                      : t('create.emptyGarmentMessage')}
+                  </BodyMedium>
+                </GlassCard>
+              </Animated.View>
             )}
 
             {/* Style Note Input */}
             <View style={styles.styleNoteSection}>
-              <LabelMedium style={styles.styleNoteLabel}>Stil Notu (Opsiyonel)</LabelMedium>
+              <LabelMedium style={styles.styleNoteLabel}>{t('create.styleNote')}</LabelMedium>
               <GlassCard style={styles.styleNoteCard}>
                 <TextInput
                   style={styles.styleNoteInput}
@@ -816,7 +847,7 @@ const CreateScreen = () => {
                   resizeMode="contain"
                 />
                 <LabelSmall color={isPremium ? 'accent' : 'tertiary'}>
-                  {isPremium ? 'Premium Üye - Sınırsız Deneme' : '1 Kredi Kullanılacak'}
+                  {isPremium ? t('create.premiumUnlimited') : t('create.oneCreditWillBeUsed')}
                 </LabelSmall>
               </View>
             </Animated.View>
@@ -828,7 +859,7 @@ const CreateScreen = () => {
       <View style={[styles.bottomActions, { paddingBottom: Math.max(insets.bottom, 34) + 16 }]}>
         {step === 'profile' ? (
           <PrimaryButton
-            title="Devam"
+            title={t('create.continue')}
             onPress={handleNextStep}
             disabled={!canProceed}
             style={styles.fullButton}
@@ -843,7 +874,7 @@ const CreateScreen = () => {
               style={styles.backButton}
             />
             <PrimaryButton
-              title={`Devam (${selectedGarmentIds.length})`}
+              title={`${t('create.continue')} (${selectedGarmentIds.length})`}
               onPress={handleNextStep}
               disabled={selectedGarmentIds.length === 0}
               style={styles.nextButton}
@@ -852,14 +883,14 @@ const CreateScreen = () => {
         ) : (
           <>
             <PrimaryButton
-              title="Geri"
+              title={t('create.back')}
               variant="ghost"
               onPress={handlePrevStep}
               size="md"
               style={styles.backButton}
             />
             <PrimaryButton
-              title="Oluştur"
+              title={t('create.generate')}
               onPress={handleGenerate}
               style={styles.generateButton}
             />

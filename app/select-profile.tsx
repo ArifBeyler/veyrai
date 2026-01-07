@@ -25,6 +25,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserProfile, useSessionStore } from '../src/state/useSessionStore';
+import { useTranslation } from '../src/hooks/useTranslation';
 import { GlassCard } from '../src/ui/GlassCard';
 import { IconButton } from '../src/ui/IconButton';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
@@ -41,6 +42,7 @@ const { width } = Dimensions.get('window');
 
 const SelectProfileScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const profiles = useSessionStore((s) => s.profiles);
@@ -67,19 +69,10 @@ const SelectProfileScreen = () => {
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     
-    // If no gender, go to profile details
-    if (!profile.gender) {
-      setSelectedProfileId(profile.id);
-      router.push({
-        pathname: '/profile-details',
-        params: { profileId: profile.id },
-      });
-    } else {
-      // Has gender, ready to go
-      setSelectedProfileId(profile.id);
-      setActiveProfileId(profile.id);
-      router.back();
-    }
+    // Set selected profile and navigate to create screen
+    setSelectedProfileId(profile.id);
+    setActiveProfileId(profile.id);
+    router.push('/create');
   };
 
   const handleDeleteProfile = (profile: UserProfile) => {
@@ -175,7 +168,7 @@ const SelectProfileScreen = () => {
           variant="glass"
           size="sm"
         />
-        <HeadlineMedium>Profil Seç</HeadlineMedium>
+        <HeadlineMedium>{t('selectProfile.title')}</HeadlineMedium>
         <View style={{ width: 36 }} />
       </View>
 
@@ -190,7 +183,7 @@ const SelectProfileScreen = () => {
         {/* Info */}
         <Animated.View entering={FadeIn.delay(100)}>
           <BodyMedium color="secondary" style={styles.infoText}>
-            Try-on için profilini seç veya yeni profil oluştur
+            {t('selectProfile.info')}
           </BodyMedium>
         </Animated.View>
 
@@ -199,17 +192,17 @@ const SelectProfileScreen = () => {
           entering={FadeInDown.delay(200).springify()}
           style={styles.createSection}
         >
-          <LabelMedium style={styles.sectionLabel}>Yeni Profil Ekle</LabelMedium>
+          <LabelMedium style={styles.sectionLabel}>{t('selectProfile.addNewProfile')}</LabelMedium>
           
           <View style={styles.createOptions}>
             <CreateCard
               icon={require('../full3dicons/images/camera.png')}
-              label="Fotoğraf Çek"
+              label={t('selectProfile.takePhoto')}
               onPress={handleTakePhoto}
             />
             <CreateCard
               icon={require('../full3dicons/images/photo.png')}
-              label="Galeriden Seç"
+              label={t('selectProfile.selectFromGallery')}
               onPress={handleCreateProfile}
             />
           </View>
@@ -222,7 +215,7 @@ const SelectProfileScreen = () => {
             style={styles.profilesSection}
           >
             <LabelMedium style={styles.sectionLabel}>
-              Profillerim ({profiles.length})
+              {t('selectProfile.myProfiles')} ({profiles.length})
             </LabelMedium>
 
             <View style={styles.profilesGrid}>
@@ -250,10 +243,10 @@ const SelectProfileScreen = () => {
                 resizeMode="contain"
               />
               <HeadlineSmall style={styles.emptyTitle}>
-                Henüz profil yok
+                {t('selectProfile.noProfilesYet')}
               </HeadlineSmall>
               <BodyMedium color="secondary" style={styles.emptyText}>
-                Fotoğrafını ekleyerek ilk profilini oluştur
+                {t('selectProfile.createFirstProfile')}
               </BodyMedium>
             </GlassCard>
           </Animated.View>
@@ -271,7 +264,7 @@ const SelectProfileScreen = () => {
             style={styles.bottomGradient}
           />
           <PrimaryButton
-            title="Devam Et"
+            title={t('selectProfile.continue')}
             onPress={handleContinue}
           />
         </Animated.View>
