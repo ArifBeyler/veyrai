@@ -97,23 +97,21 @@
     }
   },
   "paywall": {
-    "title": "Begin your journey",
-    "subtitle": "Create as many combinations as you want, do unlimited trials",
-    "features": {
-      "unlimited": "Unlimited combination production",
-      "highQuality": "High-quality results",
-      "priority": "Priority processing speed"
-    },
+    "title": "Wearify Pro",
+    "subtitle": "Generate with your credits",
+    "subscribe": "Subscribe",
+    "startTrial": "Try 7 Days Free",
+    "save": "off",
+    "planNotFound": "Selected plan not found. Please try again later.",
     "plans": {
       "monthly": "Monthly",
-      "yearly": "Yearly",
-      "lifetime": "Lifetime"
+      "yearly": "Yearly"
     },
-    "discount": "%{{percent}} OFF",
-    "continue": "Continue",
+    "month": "month",
+    "year": "year",
     "restore": "Restore",
-    "terms": "Terms",
-    "privacy": "Privacy"
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   },
   "create": {
     "title": "New Combination",

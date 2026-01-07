@@ -95,23 +95,21 @@
     }
   },
   "paywall": {
-    "title": "Commencez votre voyage",
-    "subtitle": "Créez autant de combinaisons que vous voulez, faites des essais illimités",
-    "features": {
-      "unlimited": "Production de combinaisons illimitée",
-      "highQuality": "Résultats de haute qualité",
-      "priority": "Vitesse de traitement prioritaire"
-    },
+    "title": "Wearify Pro",
+    "subtitle": "Générez avec vos crédits",
+    "subscribe": "S'abonner",
+    "startTrial": "Essai gratuit 7 jours",
+    "save": "de réduction",
+    "planNotFound": "Plan sélectionné introuvable. Veuillez réessayer plus tard.",
     "plans": {
       "monthly": "Mensuel",
-      "yearly": "Annuel",
-      "lifetime": "À vie"
+      "yearly": "Annuel"
     },
-    "discount": "%{{percent}} DE RÉDUCTION",
-    "continue": "Continuer",
+    "month": "mois",
+    "year": "an",
     "restore": "Restaurer",
-    "terms": "Conditions",
-    "privacy": "Confidentialité"
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité"
   },
   "create": {
     "title": "Nouvelle Combinaison",

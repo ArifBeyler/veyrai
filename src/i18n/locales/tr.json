@@ -83,23 +83,21 @@
     }
   },
   "paywall": {
-    "title": "Yolculuğuna başla",
-    "subtitle": "İstediğin kadar kombin üret, sınırsız deneme yap",
-    "features": {
-      "unlimited": "Sınırsız kombin üretimi",
-      "highQuality": "Yüksek kaliteli sonuçlar",
-      "priority": "Öncelikli işlem hızı"
-    },
+    "title": "Wearify Pro",
+    "subtitle": "Kredin kadar üretim yap",
+    "subscribe": "Abone Ol",
+    "startTrial": "7 Gün Ücretsiz Dene",
+    "save": "indirim",
+    "planNotFound": "Seçilen plan bulunamadı. Lütfen daha sonra tekrar deneyin.",
     "plans": {
       "monthly": "Aylık",
-      "yearly": "Yıllık",
-      "lifetime": "Ömür Boyu"
+      "yearly": "Yıllık"
     },
-    "discount": "%{{percent}} İNDİRİM",
-    "continue": "Devam Et",
+    "month": "ay",
+    "year": "yıl",
     "restore": "Geri Yükle",
-    "terms": "Şartlar",
-    "privacy": "Gizlilik"
+    "terms": "Kullanım Şartları",
+    "privacy": "Gizlilik Politikası"
   },
   "create": {
     "title": "Yeni Kombin",
