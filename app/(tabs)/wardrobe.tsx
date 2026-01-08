@@ -1,30 +1,30 @@
-import React, { useState, useMemo } from 'react';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useMemo, useState } from 'react';
 import {
-  View,
-  StyleSheet,
-  ScrollView,
+  Alert,
+  Dimensions,
   Image,
   Pressable,
-  Dimensions,
-  Alert,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, BorderRadius } from '../../src/ui/theme';
+import { useTranslation } from '../../src/hooks/useTranslation';
+import { Garment, GarmentCategory, useSessionStore } from '../../src/state/useSessionStore';
+import { GlassCard } from '../../src/ui/GlassCard';
+import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
-  DisplaySmall,
-  HeadlineSmall,
   BodyMedium,
   BodySmall,
+  DisplaySmall,
+  HeadlineSmall,
   LabelMedium,
   LabelSmall,
 } from '../../src/ui/Typography';
-import { GlassCard } from '../../src/ui/GlassCard';
-import { useSessionStore, GarmentCategory, Garment } from '../../src/state/useSessionStore';
-import { useTranslation } from '../../src/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -290,7 +290,14 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
     <Pressable onPress={onPress} onLongPress={onLongPress}>
       <GlassCard style={styles.garmentCard}>
         <View style={styles.garmentImageContainer}>
-          {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
+          {typeof garment.imageUri === 'number' ? (
+            <Image
+              source={garment.imageUri}
+              style={styles.garmentImage}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : garment.imageUri && (garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http')) ? (
             <Image
               source={{ uri: garment.imageUri }}
               style={styles.garmentImage}

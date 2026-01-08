@@ -1,41 +1,37 @@
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
-  View,
-  StyleSheet,
-  ScrollView,
   Alert,
-  TouchableOpacity,
   Dimensions,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { 
-  FadeInDown, 
+import Animated, {
   FadeIn,
-  FadeOut,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
+  FadeInDown,
+  FadeOut
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, BorderRadius } from '../../src/ui/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppLanguage } from '../../src/hooks/useAppLanguage';
+import { useRevenueCat } from '../../src/hooks/useRevenueCat';
+import { useTranslation } from '../../src/hooks/useTranslation';
+import { useSessionStore } from '../../src/state/useSessionStore';
+import { GlassCard } from '../../src/ui/GlassCard';
+import { PrimaryButton } from '../../src/ui/PrimaryButton';
+import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
+  BodySmall,
   DisplaySmall,
   HeadlineMedium,
   HeadlineSmall,
-  BodyMedium,
-  BodySmall,
   LabelMedium,
-  LabelSmall,
+  LabelSmall
 } from '../../src/ui/Typography';
-import { GlassCard } from '../../src/ui/GlassCard';
-import { PrimaryButton } from '../../src/ui/PrimaryButton';
-import { useSessionStore } from '../../src/state/useSessionStore';
-import { useRevenueCat } from '../../src/hooks/useRevenueCat';
-import { useTranslation } from '../../src/hooks/useTranslation';
-import { useAppLanguage } from '../../src/hooks/useAppLanguage';
 
 const { width } = Dimensions.get('window');
 
@@ -63,6 +59,7 @@ const ProfileScreen = () => {
   const garments = useSessionStore((s) => s.garments);
   const clearUserData = useSessionStore((s) => s.clearUserData);
   const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
+  const loadSampleGarments = useSessionStore((s) => s.loadSampleGarments);
 
   const hasCredits = !freeCreditsUsed || isPremium;
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
@@ -91,6 +88,24 @@ const ProfileScreen = () => {
             clearUserData();
             setHasCompletedOnboarding(false);
             router.replace('/welcome');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleRefreshGarments = () => {
+    Alert.alert(
+      'Kıyafetleri Yenile',
+      'Yeni eklenen örnek kıyafetler ve kombinler yüklenecek.',
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: 'Yenile',
+          onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            loadSampleGarments();
+            Alert.alert('Başarılı', 'Kıyafetler güncellendi!');
           },
         },
       ]
@@ -377,6 +392,13 @@ const ProfileScreen = () => {
               title={t('profile.changeLanguage')}
               subtitle={resolvedLang === 'tr' ? 'Türkçe' : resolvedLang === 'en' ? 'English' : 'Français'}
               onPress={handleChangeLanguage}
+            />
+            <View style={styles.divider} />
+            <ActionItem
+              icon={require('../../full3dicons/images/wardrobe.png')}
+              title="Kıyafetleri Yenile"
+              subtitle="Yeni kombinleri yükle"
+              onPress={handleRefreshGarments}
             />
           </GlassCard>
         </Animated.View>

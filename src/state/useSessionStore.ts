@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SAMPLE_GARMENTS } from '../data/sampleGarments';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { getAllSampleGarments } from '../data/sampleGarments';
 
 // Types
 export type UserPhoto = {
@@ -60,18 +60,22 @@ export const MULTI_SELECT_CATEGORIES: GarmentCategory[] = ['accessories'];
 // Tek seçim kategorileri
 export const SINGLE_SELECT_CATEGORIES: GarmentCategory[] = ['tops', 'bottoms', 'onepiece', 'outerwear', 'footwear', 'bags'];
 
+// Cinsiyet tipi
+export type GarmentGender = 'male' | 'female' | 'unisex';
+
 export type Garment = {
   id: string;
   title: string;
   category: GarmentCategory;
   subCategory?: GarmentSubCategory;
-  imageUri: string;
+  imageUri: string | number; // string for URLs, number for require() bundled assets
   brand?: string;
   sourceUrl?: string;
   isUserAdded?: boolean;
   tags?: GarmentTag[];
   layerPriority?: number; // Manuel override için
   colorHint?: string; // Renk ipucu
+  gender?: GarmentGender; // Cinsiyet filtresi
   createdAt: Date;
 };
 
@@ -398,6 +402,9 @@ export const useSessionStore = create<SessionState>()(
         
         // Önce Unsplash görsellerini temizle
         const filteredGarments = state.garments.filter(garment => {
+          // Number (bundled asset) ise Unsplash değil, koru
+          if (typeof garment.imageUri === 'number') return true;
+          
           if (garment.imageUri && (
             garment.imageUri.includes('unsplash.com') ||
             garment.imageUri.includes('unsplash') ||
@@ -408,25 +415,47 @@ export const useSessionStore = create<SessionState>()(
           return true;
         });
         
-        if (state.sampleGarmentsLoaded) {
-          // Zaten yüklendiyse sadece Unsplash görsellerini temizle
+        // Tüm sample garment'ları al
+        const allSamples = getAllSampleGarments();
+        
+        // Mevcut sample garment ID'lerini kontrol et
+        const existingSampleTitles = filteredGarments
+          .filter(g => g.id?.startsWith('sample-'))
+          .map(g => g.title);
+        
+        // Eksik sample garment'ları bul
+        const missingSamples = allSamples.filter(
+          sample => !existingSampleTitles.includes(sample.title)
+        );
+        
+        if (missingSamples.length > 0) {
+          // Eksik olanları ekle
+          const newSampleGarments = missingSamples.map((garment, index) => ({
+            ...garment,
+            id: `sample-new-${index + 1}-${Date.now()}`,
+            createdAt: new Date(),
+          }));
+          
           set({
-            garments: filteredGarments,
+            garments: [...filteredGarments, ...newSampleGarments],
+            sampleGarmentsLoaded: true,
           });
-          return;
+        } else if (!state.sampleGarmentsLoaded) {
+          // İlk yükleme - tüm sample garments ekle
+          const sampleGarments = allSamples.map((garment, index) => ({
+            ...garment,
+            id: `sample-${index + 1}-${Date.now()}`,
+            createdAt: new Date(),
+          }));
+          
+          set({
+            garments: [...filteredGarments, ...sampleGarments],
+            sampleGarmentsLoaded: true,
+          });
+        } else {
+          // Sadece Unsplash temizliği
+          set({ garments: filteredGarments });
         }
-        
-        // İlk yükleme - yeni sample garments ekle
-        const sampleGarments = SAMPLE_GARMENTS.map((garment, index) => ({
-          ...garment,
-          id: `sample-${index + 1}-${Date.now()}`,
-          createdAt: new Date(),
-        }));
-        
-        set({
-          garments: [...filteredGarments, ...sampleGarments],
-          sampleGarmentsLoaded: true,
-        });
       },
     }),
     {

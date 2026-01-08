@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -9,12 +10,12 @@ import {
   Dimensions,
   Platform,
   Pressable,
+  Image as RNImage,
   ScrollView,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
-import { Image } from 'expo-image';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -22,15 +23,16 @@ import Animated, {
   SlideInRight
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from '../../src/hooks/useTranslation';
 import {
   Garment,
   GarmentCategory,
+  GarmentGender,
   LAYER_PRIORITY,
   MULTI_SELECT_CATEGORIES,
   UserProfile,
   useSessionStore,
 } from '../../src/state/useSessionStore';
-import { useTranslation } from '../../src/hooks/useTranslation';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { IconButton } from '../../src/ui/IconButton';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -47,12 +49,19 @@ const { width } = Dimensions.get('window');
 
 type Step = 'profile' | 'garment' | 'confirm';
 
+// Cinsiyet filtreleri
+const GENDER_FILTERS: { key: GarmentGender | 'all'; label: string; icon: any }[] = [
+  { key: 'all', label: 'Tümü', icon: require('../../full3dicons/images/wardrobe.png') },
+  { key: 'male', label: 'Erkek', icon: require('../../full3dicons/images/profile.png') },
+  { key: 'female', label: 'Kadın', icon: require('../../full3dicons/images/profile.png') },
+];
+
 // Kategori tanımları
 const CATEGORIES: { key: GarmentCategory | 'all'; label: string; icon: any }[] = [
   { key: 'all', label: 'Tümü', icon: require('../../full3dicons/images/wardrobe.png') },
   { key: 'tops', label: 'Üst', icon: require('../../full3dicons/images/t-shirt.png') },
   { key: 'bottoms', label: 'Alt', icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'onepiece', label: 'Elbise', icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'onepiece', label: 'Kombin', icon: require('../../full3dicons/images/clothes-hanger.png') },
   { key: 'outerwear', label: 'Dış', icon: require('../../full3dicons/images/flannel-shirt.png') },
   { key: 'footwear', label: 'Ayakkabı', icon: require('../../full3dicons/images/clothes-hanger.png') },
   { key: 'bags', label: 'Çanta', icon: require('../../full3dicons/images/clothes-hanger.png') },
@@ -75,7 +84,8 @@ const CreateScreen = () => {
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>('profile');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<GarmentCategory | 'all'>('all');
+  const [selectedGender, setSelectedGender] = useState<GarmentGender | 'all'>('all');
+  const [selectedCategories, setSelectedCategories] = useState<(GarmentCategory | 'all')[]>(['all']);
   const [styleNoteInput, setStyleNoteInput] = useState('');
 
   const profiles = useSessionStore((s) => s.profiles);
@@ -122,26 +132,92 @@ const CreateScreen = () => {
     });
   }, [garments, selectedGarmentIds]);
 
-  // Filtrelenmiş kıyafetler
+  // Filtrelenmiş kıyafetler (cinsiyet + kategori)
   const filteredGarments = useMemo(() => {
-    if (selectedCategory === 'all') return garments;
-    return garments.filter((g) => g.category === selectedCategory);
-  }, [garments, selectedCategory]);
+    let filtered = garments;
+    
+    // Cinsiyet filtresi
+    if (selectedGender !== 'all') {
+      filtered = filtered.filter((g) => 
+        g.gender === selectedGender || g.gender === 'unisex' || !g.gender
+      );
+    }
+    
+    // Kategori filtresi (çoklu seçim)
+    if (!selectedCategories.includes('all')) {
+      filtered = filtered.filter((g) => selectedCategories.includes(g.category));
+    }
+    
+    return filtered;
+  }, [garments, selectedGender, selectedCategories]);
 
-  // Kategori bazlı sayılar
-  const categoryCounts = useMemo(() => {
+  // Cinsiyet bazlı sayılar
+  const genderCounts = useMemo(() => {
     const counts: Record<string, number> = { all: garments.length };
+    counts['male'] = garments.filter((g) => g.gender === 'male').length;
+    counts['female'] = garments.filter((g) => g.gender === 'female').length;
+    counts['unisex'] = garments.filter((g) => g.gender === 'unisex' || !g.gender).length;
+    return counts;
+  }, [garments]);
+
+  // Kategori bazlı sayılar (seçili cinsiyete göre)
+  const categoryCounts = useMemo(() => {
+    // Önce cinsiyete göre filtrele
+    let filtered = garments;
+    if (selectedGender !== 'all') {
+      filtered = filtered.filter((g) => 
+        g.gender === selectedGender || g.gender === 'unisex' || !g.gender
+      );
+    }
+    
+    const counts: Record<string, number> = { all: filtered.length };
     CATEGORIES.forEach((cat) => {
       if (cat.key !== 'all') {
-        counts[cat.key] = garments.filter((g) => g.category === cat.key).length;
+        counts[cat.key] = filtered.filter((g) => g.category === cat.key).length;
       }
     });
     return counts;
-  }, [garments]);
+  }, [garments, selectedGender]);
 
   const handleClose = () => {
     clearSelectedGarments();
     router.back();
+  };
+
+  // Cinsiyet seçimi handler
+  const handleSelectGender = (gender: GarmentGender | 'all') => {
+    setSelectedGender(gender);
+    // Kategori seçimini sıfırla
+    setSelectedCategories(['all']);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  // Kategori seçimi handler (çoklu seçim)
+  const handleToggleCategory = (category: GarmentCategory | 'all') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    if (category === 'all') {
+      // Tümü seçildiğinde sadece all kalır
+      setSelectedCategories(['all']);
+      return;
+    }
+    
+    setSelectedCategories(prev => {
+      // Eğer all seçiliyse, onu kaldır ve yeni kategoriyi ekle
+      if (prev.includes('all')) {
+        return [category];
+      }
+      
+      // Eğer kategori zaten seçiliyse, kaldır
+      if (prev.includes(category)) {
+        const newCategories = prev.filter(c => c !== category);
+        // Hiçbir şey kalmadıysa all'a dön
+        return newCategories.length === 0 ? ['all'] : newCategories;
+      }
+      
+      // Yeni kategoriyi ekle
+      return [...prev, category];
+    });
   };
 
   const handleSelectProfile = (profile: UserProfile) => {
@@ -388,8 +464,14 @@ const CreateScreen = () => {
 
     const humanImageUri = selectedProfile.photos[0]?.uri;
     
-    // Tüm seçili kıyafetlerin URI'lerini al
-    const garmentImageUris = selectedGarments.map(g => g.imageUri);
+    // Tüm seçili kıyafetlerin URI'lerini al (number için resolveAssetSource)
+    const garmentImageUris = selectedGarments.map(g => {
+      if (typeof g.imageUri === 'number') {
+        const resolved = RNImage.resolveAssetSource(g.imageUri);
+        return resolved?.uri || '';
+      }
+      return g.imageUri;
+    }).filter(uri => uri);
     
     // Tüm seçili kıyafetlerin kategorilerini al
     const garmentCategories = selectedGarments.map(g => g.category);
@@ -405,7 +487,7 @@ const CreateScreen = () => {
       params: {
         id: jobId,
         humanImageUri: encodeURIComponent(humanImageUri),
-        // Tüm kıyafet URI'lerini virgülle ayırarak gönder
+        // Tüm kıyafet URI'lerini ||| ile ayırarak gönder
         garmentImageUris: garmentImageUris.map(uri => encodeURIComponent(uri)).join('|||'),
         garmentCategories: garmentCategories.join(','),
         gender: selectedProfile.gender || 'male',
@@ -571,7 +653,7 @@ const CreateScreen = () => {
                       style={styles.selectedChip}
                     >
                       <Image
-                        source={{ uri: garment.imageUri }}
+                        source={typeof garment.imageUri === 'number' ? garment.imageUri : { uri: garment.imageUri }}
                         style={styles.selectedChipImage}
                         resizeMode="cover"
                       />
@@ -595,41 +677,75 @@ const CreateScreen = () => {
               </Animated.View>
             )}
 
-            {/* Category Tabs */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryTabs}
-            >
-              {CATEGORIES.map((cat) => (
-                <Pressable
-                  key={cat.key}
-                  onPress={() => {
-                    setSelectedCategory(cat.key);
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }}
-                  style={[
-                    styles.categoryTab,
-                    selectedCategory === cat.key && styles.categoryTabActive,
-                  ]}
-                >
-                  <Image source={cat.icon} style={styles.categoryTabIcon} resizeMode="contain" />
-                  <LabelSmall color={selectedCategory === cat.key ? 'accent' : 'secondary'}>
-                    {cat.label}
-                  </LabelSmall>
-                  {categoryCounts[cat.key] > 0 && (
-                    <View style={[
-                      styles.categoryCount,
-                      selectedCategory === cat.key && styles.categoryCountActive
-                    ]}>
-                      <LabelSmall style={styles.categoryCountText}>
-                        {categoryCounts[cat.key]}
+            {/* Gender Tabs */}
+            <View style={styles.filterSection}>
+              <LabelSmall color="secondary" style={styles.filterLabel}>Cinsiyet</LabelSmall>
+              <View style={styles.genderTabs}>
+                {GENDER_FILTERS.map((gender) => (
+                  <Pressable
+                    key={gender.key}
+                    onPress={() => handleSelectGender(gender.key)}
+                    style={[
+                      styles.genderTab,
+                      selectedGender === gender.key && styles.genderTabActive,
+                    ]}
+                  >
+                    <LabelSmall color={selectedGender === gender.key ? 'accent' : 'secondary'}>
+                      {gender.label}
+                    </LabelSmall>
+                    {genderCounts[gender.key] > 0 && (
+                      <View style={[
+                        styles.genderCount,
+                        selectedGender === gender.key && styles.genderCountActive
+                      ]}>
+                        <LabelSmall style={styles.categoryCountText}>
+                          {genderCounts[gender.key]}
+                        </LabelSmall>
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {/* Category Tabs (Çoklu Seçim) */}
+            <View style={styles.filterSection}>
+              <LabelSmall color="secondary" style={styles.filterLabel}>Kategori (Çoklu Seçim)</LabelSmall>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.categoryTabs}
+              >
+                {CATEGORIES.map((cat) => {
+                  const isSelected = selectedCategories.includes(cat.key);
+                  return (
+                    <Pressable
+                      key={cat.key}
+                      onPress={() => handleToggleCategory(cat.key)}
+                      style={[
+                        styles.categoryTab,
+                        isSelected && styles.categoryTabActive,
+                      ]}
+                    >
+                      <Image source={cat.icon} style={styles.categoryTabIcon} resizeMode="contain" />
+                      <LabelSmall color={isSelected ? 'accent' : 'secondary'}>
+                        {cat.label}
                       </LabelSmall>
-                    </View>
-                  )}
-                </Pressable>
-              ))}
-            </ScrollView>
+                      {categoryCounts[cat.key] > 0 && (
+                        <View style={[
+                          styles.categoryCount,
+                          isSelected && styles.categoryCountActive
+                        ]}>
+                          <LabelSmall style={styles.categoryCountText}>
+                            {categoryCounts[cat.key]}
+                          </LabelSmall>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
 
             {/* Add Garment */}
             <Animated.View entering={FadeInDown.delay(200).springify()}>
@@ -665,7 +781,14 @@ const CreateScreen = () => {
                           ])}
                         >
                           <View style={styles.garmentImageContainer}>
-                            {garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http') ? (
+                            {typeof garment.imageUri === 'number' ? (
+                              <Image
+                                source={garment.imageUri}
+                                style={styles.garmentImage}
+                                contentFit="cover"
+                                transition={200}
+                              />
+                            ) : garment.imageUri && (garment.imageUri.startsWith('file') || garment.imageUri.startsWith('http')) ? (
                               <Image
                                 source={{ uri: garment.imageUri }}
                                 style={styles.garmentImage}
@@ -719,7 +842,7 @@ const CreateScreen = () => {
                     resizeMode="contain"
                   />
                   <BodyMedium color="secondary" style={styles.emptyText}>
-                    {selectedCategory === 'all' 
+                    {selectedCategories.includes('all') && selectedGender === 'all'
                       ? t('create.wardrobeEmptyMessage')
                       : t('create.emptyGarmentMessage')}
                   </BodyMedium>
@@ -796,7 +919,7 @@ const CreateScreen = () => {
                     style={styles.confirmGarmentCard}
                   >
                     <Image
-                      source={{ uri: garment.imageUri }}
+                      source={typeof garment.imageUri === 'number' ? garment.imageUri : { uri: garment.imageUri }}
                       style={styles.confirmGarmentImage}
                       resizeMode="cover"
                     />
@@ -1093,11 +1216,47 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 16,
   },
+  // Filter Section
+  filterSection: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  filterLabel: {
+    marginLeft: 4,
+  },
+  // Gender Tabs
+  genderTabs: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  genderTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 2,
+    borderColor: Colors.dark.strokeLight,
+  },
+  genderTabActive: {
+    backgroundColor: Colors.accent.primaryDim,
+    borderColor: Colors.accent.primary,
+  },
+  genderCount: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: Colors.dark.surfaceElevated,
+    borderRadius: BorderRadius.sm,
+  },
+  genderCountActive: {
+    backgroundColor: Colors.accent.primary,
+  },
   // Category Tabs
   categoryTabs: {
     gap: 8,
     paddingVertical: 4,
-    marginBottom: 8,
   },
   categoryTab: {
     flexDirection: 'row',
