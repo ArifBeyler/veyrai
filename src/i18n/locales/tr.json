@@ -97,11 +97,38 @@
     "year": "yıl",
     "restore": "Geri Yükle",
     "terms": "Kullanım Şartları",
-    "privacy": "Gizlilik Politikası"
+    "privacy": "Gizlilik Politikası",
+    "purchaseSuccess": {
+      "title": "Başarılı!",
+      "message": "Aboneliğiniz aktif edildi. Artık premium özelliklerden faydalanabilirsiniz.",
+      "continue": "Devam Et"
+    },
+    "purchaseError": {
+      "title": "Ödeme Başarısız",
+      "default": "Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+      "cancelled": "Ödeme iptal edildi.",
+      "notAllowed": "Satın alma izniniz bulunmuyor. Lütfen ayarlarınızı kontrol edin.",
+      "retry": "Tekrar Dene"
+    }
   },
   "create": {
     "title": "Yeni Kombin",
     "selectProfile": "Profil Seç",
+    "photoSource": {
+      "cancel": "İptal",
+      "takePhoto": "Fotoğraf Çek",
+      "selectFromGallery": "Galeriden Seç"
+    },
+    "permission": {
+      "title": "İzin Gerekli",
+      "cameraRequired": "Kamera izni gerekli"
+    },
+    "categoryPicker": {
+      "title": "Kategori Seç"
+    },
+    "error": {
+      "imageNotFound": "Görsel bulunamadı"
+    },
     "selectProfileDescription": "Kıyafeti denemek için bir profil seç",
     "addNewProfile": "Yeni Profil Ekle",
     "noProfilesYet": "Henüz profil yok. Yeni profil ekleyerek başla.",
@@ -122,7 +149,40 @@
     "noGarments": "Kıyafet seçilmedi",
     "selectAtLeastOne": "En az 1 kıyafet seçmelisiniz",
     "emptyGarmentMessage": "Bu kategoride kıyafet yok.",
-    "wardrobeEmptyMessage": "Gardrop boş. Kıyafet ekleyerek başla."
+    "wardrobeEmptyMessage": "Gardrop boş. Kıyafet ekleyerek başla.",
+    "exampleGarments": "Örnek Kıyafetler",
+    "myGarments": "Benim Kıyafetlerim",
+    "genderLabel": "Cinsiyet",
+    "categoryLabel": "Kategori (Çoklu Seçim)",
+    "gender": {
+      "all": "Tümü",
+      "male": "Erkek",
+      "female": "Kadın"
+    },
+    "category": {
+      "all": "Tümü",
+      "tops": "Üst",
+      "bottoms": "Alt",
+      "onepiece": "Kombin",
+      "outerwear": "Dış",
+      "footwear": "Ayakkabı",
+      "bags": "Çanta",
+      "accessories": "Aksesuar"
+    },
+    "photoGuide": {
+      "title": "İdeal Fotoğraf Nasıl Olmalı?",
+      "goodLighting": "İyi Aydınlatma",
+      "goodLightingDesc": "Doğal ışık veya iyi aydınlatılmış bir ortam tercih et",
+      "fullBody": "Tam Boy Görünüm",
+      "fullBodyDesc": "Vücudunun tamamı veya büyük kısmı görünmeli",
+      "straightPosture": "Düz Duruş",
+      "straightPostureDesc": "Kameraya dönük, düz ve rahat bir duruş",
+      "avoidTitle": "Kaçınılması Gerekenler",
+      "avoidDesc": "Bulanık fotoğraflar, karanlık ortamlar, yüzün veya vücudun saklandığı pozlar",
+      "good": "İyi",
+      "bad": "Kötü",
+      "continue": "Anladım, Devam Et"
+    }
   },
   "gallery": {
     "title": "Galeri",

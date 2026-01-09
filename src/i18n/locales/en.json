@@ -111,11 +111,38 @@
     "year": "year",
     "restore": "Restore",
     "terms": "Terms of Use",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "purchaseSuccess": {
+      "title": "Success!",
+      "message": "Your subscription has been activated. You can now enjoy premium features.",
+      "continue": "Continue"
+    },
+    "purchaseError": {
+      "title": "Payment Failed",
+      "default": "An error occurred during payment. Please try again.",
+      "cancelled": "Payment was cancelled.",
+      "notAllowed": "You don't have permission to make purchases. Please check your settings.",
+      "retry": "Try Again"
+    }
   },
   "create": {
     "title": "New Combination",
     "selectProfile": "Select Profile",
+    "photoSource": {
+      "cancel": "Cancel",
+      "takePhoto": "Take Photo",
+      "selectFromGallery": "Select from Gallery"
+    },
+    "permission": {
+      "title": "Permission Required",
+      "cameraRequired": "Camera permission is required"
+    },
+    "categoryPicker": {
+      "title": "Select Category"
+    },
+    "error": {
+      "imageNotFound": "Image not found"
+    },
     "selectProfileDescription": "Select a profile to try on the outfit",
     "addNewProfile": "Add New Profile",
     "noProfilesYet": "No profiles yet. Start by adding a new profile.",
@@ -136,7 +163,40 @@
     "noGarments": "No garments selected",
     "selectAtLeastOne": "You must select at least 1 garment",
     "emptyGarmentMessage": "No garments in this category.",
-    "wardrobeEmptyMessage": "Wardrobe is empty. Start by adding garments."
+    "wardrobeEmptyMessage": "Wardrobe is empty. Start by adding garments.",
+    "exampleGarments": "Example Garments",
+    "myGarments": "My Garments",
+    "genderLabel": "Gender",
+    "categoryLabel": "Category (Multiple Selection)",
+    "gender": {
+      "all": "All",
+      "male": "Male",
+      "female": "Female"
+    },
+    "category": {
+      "all": "All",
+      "tops": "Tops",
+      "bottoms": "Bottoms",
+      "onepiece": "Outfit",
+      "outerwear": "Outerwear",
+      "footwear": "Footwear",
+      "bags": "Bags",
+      "accessories": "Accessories"
+    },
+    "photoGuide": {
+      "title": "What Should the Ideal Photo Be?",
+      "goodLighting": "Good Lighting",
+      "goodLightingDesc": "Prefer natural light or a well-lit environment",
+      "fullBody": "Full Body View",
+      "fullBodyDesc": "Your entire body or most of it should be visible",
+      "straightPosture": "Straight Posture",
+      "straightPostureDesc": "Facing the camera, straight and relaxed stance",
+      "avoidTitle": "What to Avoid",
+      "avoidDesc": "Blurry photos, dark environments, poses where face or body is hidden",
+      "good": "Good",
+      "bad": "Bad",
+      "continue": "Got it, Continue"
+    }
   },
   "gallery": {
     "title": "Gallery",

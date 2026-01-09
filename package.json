@@ -2,6 +2,7 @@
   "name": "wearify",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -55,6 +56,7 @@
   "devDependencies": {
     "@types/react": "~19.1.0",
     "react-test-renderer": "19.1.0",
+    "tsx": "^4.19.2",
     "typescript": "~5.9.2"
   },
   "private": true

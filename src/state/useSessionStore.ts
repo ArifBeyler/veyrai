@@ -200,7 +200,7 @@ type SessionState = {
 
   // Sample garments
   sampleGarmentsLoaded: boolean;
-  loadSampleGarments: () => void;
+  loadSampleGarments: () => Promise<void>;
 };
 
 export const useSessionStore = create<SessionState>()(
@@ -397,69 +397,44 @@ export const useSessionStore = create<SessionState>()(
 
       // Sample garments
       sampleGarmentsLoaded: false,
-      loadSampleGarments: () => {
+      loadSampleGarments: async () => {
         const state = get();
         
-        // Önce Unsplash görsellerini temizle
-        const filteredGarments = state.garments.filter(garment => {
-          // Number (bundled asset) ise Unsplash değil, koru
-          if (typeof garment.imageUri === 'number') return true;
+        try {
+          // Supabase'den sample garment'ları çek
+          const { loadSampleGarments: fetchSamples } = await import('../data/sampleGarments');
+          const sampleGarments = await fetchSamples();
           
-          if (garment.imageUri && (
-            garment.imageUri.includes('unsplash.com') ||
-            garment.imageUri.includes('unsplash') ||
-            garment.imageUri.includes('images.unsplash')
-          )) {
-            return false;
-          }
-          return true;
-        });
-        
-        // Tüm sample garment'ları al
-        const allSamples = getAllSampleGarments();
-        
-        // Mevcut sample garment ID'lerini kontrol et
-        const existingSampleTitles = filteredGarments
-          .filter(g => g.id?.startsWith('sample-'))
-          .map(g => g.title);
-        
-        // Eksik sample garment'ları bul
-        const missingSamples = allSamples.filter(
-          sample => !existingSampleTitles.includes(sample.title)
-        );
-        
-        if (missingSamples.length > 0) {
-          // Eksik olanları ekle
-          const newSampleGarments = missingSamples.map((garment, index) => ({
-            ...garment,
-            id: `sample-new-${index + 1}-${Date.now()}`,
-            createdAt: new Date(),
-          }));
+          // Sadece kullanıcının eklediği garment'ları koru (isUserAdded: true)
+          const userGarments = state.garments.filter(g => g.isUserAdded === true);
           
+          // Kullanıcı garments + yeni sample garments
           set({
-            garments: [...filteredGarments, ...newSampleGarments],
+            garments: [...userGarments, ...sampleGarments],
             sampleGarmentsLoaded: true,
           });
-        } else if (!state.sampleGarmentsLoaded) {
-          // İlk yükleme - tüm sample garments ekle
-          const sampleGarments = allSamples.map((garment, index) => ({
+        } catch (error) {
+          console.error('Error loading sample garments:', error);
+          // Hata durumunda local fallback kullan
+          const { getAllSampleGarments } = await import('../data/sampleGarments');
+          const allSamples = getAllSampleGarments();
+          const localSamples = allSamples.map((garment, index) => ({
             ...garment,
             id: `sample-${index + 1}-${Date.now()}`,
             createdAt: new Date(),
           }));
           
+          const userGarments = state.garments.filter(g => g.isUserAdded === true);
           set({
-            garments: [...filteredGarments, ...sampleGarments],
+            garments: [...userGarments, ...localSamples],
             sampleGarmentsLoaded: true,
           });
-        } else {
-          // Sadece Unsplash temizliği
-          set({ garments: filteredGarments });
         }
       },
     }),
     {
       name: 'wearify-session',
+      version: 3, // Cache temizlemek için versiyon değiştirildi
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         hasCompletedOnboarding: state.hasCompletedOnboarding,
@@ -473,8 +448,19 @@ export const useSessionStore = create<SessionState>()(
         isPremium: state.isPremium,
         deviceHash: state.deviceHash,
         pushToken: state.pushToken,
-        sampleGarmentsLoaded: state.sampleGarmentsLoaded,
+        sampleGarmentsLoaded: false, // Yeniden yüklensin
       }),
+      migrate: (persistedState: any, version: number) => {
+        // Eski versiyondan geçiş - sample garments'ı yeniden yükle
+        if (version < 3) {
+          return {
+            ...persistedState,
+            sampleGarmentsLoaded: false,
+            garments: [], // Eski garments'ı temizle - duplicate sorunu çözümü
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );

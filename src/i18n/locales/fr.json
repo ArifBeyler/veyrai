@@ -29,7 +29,9 @@
     "demoMode": "Continuer en mode démo →",
     "loginError": "Échec de la connexion",
     "registerError": "Échec de l'inscription",
-    "emailExists": "Cet email est déjà utilisé. Essayez de vous connecter."
+    "emailExists": "Cet email est déjà utilisé. Essayez de vous connecter.",
+    "loginSubtitle": "Connectez-vous à votre compte",
+    "registerSubtitle": "Créer un nouveau compte"
   },
   "onboarding": {
     "step1": {
@@ -109,11 +111,38 @@
     "year": "an",
     "restore": "Restaurer",
     "terms": "Conditions d'utilisation",
-    "privacy": "Politique de confidentialité"
+    "privacy": "Politique de confidentialité",
+    "purchaseSuccess": {
+      "title": "Succès !",
+      "message": "Votre abonnement a été activé. Vous pouvez maintenant profiter des fonctionnalités premium.",
+      "continue": "Continuer"
+    },
+    "purchaseError": {
+      "title": "Échec du Paiement",
+      "default": "Une erreur s'est produite lors du paiement. Veuillez réessayer.",
+      "cancelled": "Le paiement a été annulé.",
+      "notAllowed": "Vous n'avez pas l'autorisation d'effectuer des achats. Veuillez vérifier vos paramètres.",
+      "retry": "Réessayer"
+    }
   },
   "create": {
     "title": "Nouvelle Combinaison",
     "selectProfile": "Sélectionner un profil",
+    "photoSource": {
+      "cancel": "Annuler",
+      "takePhoto": "Prendre une photo",
+      "selectFromGallery": "Sélectionner dans la galerie"
+    },
+    "permission": {
+      "title": "Autorisation Requise",
+      "cameraRequired": "L'autorisation de la caméra est requise"
+    },
+    "categoryPicker": {
+      "title": "Sélectionner une Catégorie"
+    },
+    "error": {
+      "imageNotFound": "Image introuvable"
+    },
     "selectProfileDescription": "Sélectionnez un profil pour essayer la tenue",
     "addNewProfile": "Ajouter un nouveau profil",
     "noProfilesYet": "Pas encore de profils. Commencez par ajouter un nouveau profil.",
@@ -134,7 +163,40 @@
     "noGarments": "Aucun vêtement sélectionné",
     "selectAtLeastOne": "Vous devez sélectionner au moins 1 vêtement",
     "emptyGarmentMessage": "Aucun vêtement dans cette catégorie.",
-    "wardrobeEmptyMessage": "La garde-robe est vide. Commencez par ajouter des vêtements."
+    "wardrobeEmptyMessage": "La garde-robe est vide. Commencez par ajouter des vêtements.",
+    "exampleGarments": "Vêtements Exemples",
+    "myGarments": "Mes Vêtements",
+    "genderLabel": "Genre",
+    "categoryLabel": "Catégorie (Sélection Multiple)",
+    "gender": {
+      "all": "Tous",
+      "male": "Homme",
+      "female": "Femme"
+    },
+    "category": {
+      "all": "Tous",
+      "tops": "Hauts",
+      "bottoms": "Bas",
+      "onepiece": "Tenue",
+      "outerwear": "Vêtements Extérieurs",
+      "footwear": "Chaussures",
+      "bags": "Sacs",
+      "accessories": "Accessoires"
+    },
+    "photoGuide": {
+      "title": "Comment devrait être la photo idéale ?",
+      "goodLighting": "Bon Éclairage",
+      "goodLightingDesc": "Préférez la lumière naturelle ou un environnement bien éclairé",
+      "fullBody": "Vue Corps Entier",
+      "fullBodyDesc": "Votre corps entier ou la majeure partie devrait être visible",
+      "straightPosture": "Posture Droite",
+      "straightPostureDesc": "Face à la caméra, position droite et détendue",
+      "avoidTitle": "À Éviter",
+      "avoidDesc": "Photos floues, environnements sombres, poses où le visage ou le corps est caché",
+      "good": "Bon",
+      "bad": "Mauvais",
+      "continue": "Compris, Continuer"
+    }
   },
   "gallery": {
     "title": "Galerie",
@@ -145,6 +207,7 @@
     "older": "Plus ancien",
     "noImages": "Pas encore d'images",
     "newTryOn": "Nouvel Essai",
+    "totalTrials": "Essais Totaux",
     "emptyTitle": "Galerie vide",
     "emptySubtitle": "Vous n'avez pas encore fait d'essai",
     "startFirstTry": "Faire le premier essai"

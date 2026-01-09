@@ -7,6 +7,7 @@ import {
   ScrollView,
   Pressable,
   Linking,
+  Modal,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,9 +15,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   FadeInDown,
   FadeIn,
+  FadeOut,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -27,9 +30,11 @@ import {
   BodyMedium,
   BodySmall,
   LabelMedium,
+  LabelLarge,
   LabelSmall,
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
+import { GlassCard } from '../src/ui/GlassCard';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
 import { useTranslation } from '../src/hooks/useTranslation';
 
@@ -42,6 +47,14 @@ const PaywallScreen = () => {
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<Plan>('yearly');
   const [showClose, setShowClose] = useState(false);
+  const [paymentModal, setPaymentModal] = useState<{
+    visible: boolean;
+    type: 'success' | 'error' | null;
+    message?: string;
+  }>({
+    visible: false,
+    type: null,
+  });
   
   const player = useVideoPlayer(
     require('../assets/videos/0106 (1).mp4'),
@@ -141,16 +154,70 @@ const PaywallScreen = () => {
       const packageToPurchase = getPackage(selectedPlan);
       
       if (!packageToPurchase) {
-        Alert.alert(t('common.error'), t('paywall.planNotFound'));
+        setPaymentModal({
+          visible: true,
+          type: 'error',
+          message: t('paywall.planNotFound'),
+        });
         return;
       }
       
       await purchase(packageToPurchase);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.back();
+      
+      // Başarılı ödeme modal'ı göster
+      setPaymentModal({
+        visible: true,
+        type: 'success',
+      });
     } catch (error: any) {
       console.error('Purchase error:', error);
+      
+      // Hata modal'ı göster
+      let errorMessage = t('paywall.purchaseError.default');
+      
+      if (error?.message) {
+        const errorMsgLower = error.message.toLowerCase();
+        if (
+          errorMsgLower.includes('iptal') || 
+          errorMsgLower.includes('cancel') ||
+          errorMsgLower.includes('cancelled') ||
+          errorMsgLower.includes('annulé')
+        ) {
+          errorMessage = t('paywall.purchaseError.cancelled');
+        } else if (
+          errorMsgLower.includes('izin') || 
+          errorMsgLower.includes('permission') ||
+          errorMsgLower.includes('not allowed') ||
+          errorMsgLower.includes('autorisation')
+        ) {
+          errorMessage = t('paywall.purchaseError.notAllowed');
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setPaymentModal({
+        visible: true,
+        type: 'error',
+        message: errorMessage,
+      });
     }
+  };
+  
+  const handleClosePaymentModal = () => {
+    setPaymentModal({ visible: false, type: null });
+    if (paymentModal.type === 'success') {
+      router.back();
+    }
+  };
+  
+  const handleRetryPurchase = () => {
+    setPaymentModal({ visible: false, type: null });
+    // Kısa bir gecikme sonra tekrar dene
+    setTimeout(() => {
+      handleSubscribe();
+    }, 300);
   };
 
   const handleRestorePurchases = async () => {
@@ -367,6 +434,96 @@ const PaywallScreen = () => {
           </Pressable>
         </Animated.View>
       </ScrollView>
+
+      {/* Payment Result Modal */}
+      <Modal
+        visible={paymentModal.visible}
+        animationType="none"
+        transparent={true}
+        onRequestClose={handleClosePaymentModal}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            entering={FadeIn.duration(200).springify()}
+            exiting={FadeOut.duration(150)}
+            style={styles.modalContent}
+          >
+            <LinearGradient
+              colors={
+                paymentModal.type === 'success'
+                  ? ['rgba(34, 197, 94, 0.15)', 'rgba(18, 18, 26, 0.98)']
+                  : ['rgba(239, 68, 68, 0.15)', 'rgba(18, 18, 26, 0.98)']
+              }
+              style={StyleSheet.absoluteFill}
+            />
+
+            {/* Icon */}
+            <Animated.View
+              entering={FadeInDown.delay(100).springify()}
+              style={[
+                styles.modalIconContainer,
+                paymentModal.type === 'success'
+                  ? styles.modalIconSuccess
+                  : styles.modalIconError,
+              ]}
+            >
+              {paymentModal.type === 'success' ? (
+                <LabelLarge style={styles.modalIconText}>✓</LabelLarge>
+              ) : (
+                <LabelLarge style={styles.modalIconText}>✕</LabelLarge>
+              )}
+            </Animated.View>
+
+            {/* Title */}
+            <Animated.View entering={FadeInDown.delay(200).springify()}>
+              <HeadlineMedium style={styles.modalTitle}>
+                {paymentModal.type === 'success'
+                  ? t('paywall.purchaseSuccess.title')
+                  : t('paywall.purchaseError.title')}
+              </HeadlineMedium>
+            </Animated.View>
+
+            {/* Message */}
+            <Animated.View entering={FadeInDown.delay(300).springify()}>
+              <BodyMedium style={styles.modalMessage}>
+                {paymentModal.type === 'success'
+                  ? t('paywall.purchaseSuccess.message')
+                  : paymentModal.message || t('paywall.purchaseError.default')}
+              </BodyMedium>
+            </Animated.View>
+
+            {/* Buttons */}
+            <Animated.View
+              entering={FadeInDown.delay(400).springify()}
+              style={styles.modalButtons}
+            >
+              {paymentModal.type === 'success' ? (
+                <PrimaryButton
+                  title={t('paywall.purchaseSuccess.continue')}
+                  onPress={handleClosePaymentModal}
+                  style={styles.modalButton}
+                />
+              ) : (
+                <View style={styles.modalButtonRow}>
+                  <Pressable
+                    onPress={handleClosePaymentModal}
+                    style={[styles.modalButtonSecondary, { marginRight: 8 }]}
+                  >
+                    <LabelMedium style={styles.modalButtonSecondaryText}>
+                      {t('common.cancel')}
+                    </LabelMedium>
+                  </Pressable>
+                  <PrimaryButton
+                    title={t('paywall.purchaseError.retry')}
+                    onPress={handleRetryPurchase}
+                    style={[styles.modalButton, { flex: 1 }]}
+                  />
+                </View>
+              )}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -607,6 +764,82 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 1.5,
     backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  
+  // Payment Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: BorderRadius.xl,
+    padding: 32,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  modalIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  modalIconSuccess: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+    borderWidth: 2,
+    borderColor: '#22c55e',
+  },
+  modalIconError: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderWidth: 2,
+    borderColor: '#ef4444',
+  },
+  modalIconText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  modalTitle: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalMessage: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 22,
+  },
+  modalButtons: {
+    width: '100%',
+    gap: 12,
+  },
+  modalButton: {
+    width: '100%',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    width: '100%',
+  },
+  modalButtonSecondary: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: BorderRadius.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  modalButtonSecondaryText: {
+    color: 'rgba(255, 255, 255, 0.9)',
   },
 });
 

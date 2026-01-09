@@ -48,7 +48,9 @@ const RootLayout = () => {
   // Load sample garments on first launch
   useEffect(() => {
     if (!sampleGarmentsLoaded) {
-      loadSampleGarments();
+      loadSampleGarments().catch((error) => {
+        console.error('Error loading sample garments:', error);
+      });
     }
   }, [sampleGarmentsLoaded, loadSampleGarments]);
 

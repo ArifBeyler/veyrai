@@ -8,6 +8,7 @@ import {
   ActionSheetIOS,
   Alert,
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   Image as RNImage,
@@ -49,23 +50,23 @@ const { width } = Dimensions.get('window');
 
 type Step = 'profile' | 'garment' | 'confirm';
 
-// Cinsiyet filtreleri
-const GENDER_FILTERS: { key: GarmentGender | 'all'; label: string; icon: any }[] = [
-  { key: 'all', label: 'Tümü', icon: require('../../full3dicons/images/wardrobe.png') },
-  { key: 'male', label: 'Erkek', icon: require('../../full3dicons/images/profile.png') },
-  { key: 'female', label: 'Kadın', icon: require('../../full3dicons/images/profile.png') },
+// Cinsiyet filtreleri - dinamik olarak t() ile doldurulacak
+const getGenderFilters = (t: (key: string) => string): { key: GarmentGender | 'all'; label: string; icon: any }[] => [
+  { key: 'all', label: t('create.gender.all'), icon: require('../../full3dicons/images/wardrobe.png') },
+  { key: 'male', label: t('create.gender.male'), icon: require('../../full3dicons/images/profile.png') },
+  { key: 'female', label: t('create.gender.female'), icon: require('../../full3dicons/images/profile.png') },
 ];
 
-// Kategori tanımları
-const CATEGORIES: { key: GarmentCategory | 'all'; label: string; icon: any }[] = [
-  { key: 'all', label: 'Tümü', icon: require('../../full3dicons/images/wardrobe.png') },
-  { key: 'tops', label: 'Üst', icon: require('../../full3dicons/images/t-shirt.png') },
-  { key: 'bottoms', label: 'Alt', icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'onepiece', label: 'Kombin', icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'outerwear', label: 'Dış', icon: require('../../full3dicons/images/flannel-shirt.png') },
-  { key: 'footwear', label: 'Ayakkabı', icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'bags', label: 'Çanta', icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'accessories', label: 'Aksesuar', icon: require('../../full3dicons/images/clothes-hanger.png') },
+// Kategori tanımları - dinamik olarak t() ile doldurulacak
+const getCategories = (t: (key: string) => string): { key: GarmentCategory | 'all'; label: string; icon: any }[] => [
+  { key: 'all', label: t('create.category.all'), icon: require('../../full3dicons/images/wardrobe.png') },
+  { key: 'tops', label: t('create.category.tops'), icon: require('../../full3dicons/images/t-shirt.png') },
+  { key: 'bottoms', label: t('create.category.bottoms'), icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'onepiece', label: t('create.category.onepiece'), icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'outerwear', label: t('create.category.outerwear'), icon: require('../../full3dicons/images/flannel-shirt.png') },
+  { key: 'footwear', label: t('create.category.footwear'), icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'bags', label: t('create.category.bags'), icon: require('../../full3dicons/images/clothes-hanger.png') },
+  { key: 'accessories', label: t('create.category.accessories'), icon: require('../../full3dicons/images/clothes-hanger.png') },
 ];
 
 // Kategori renkleri
@@ -86,7 +87,9 @@ const CreateScreen = () => {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedGender, setSelectedGender] = useState<GarmentGender | 'all'>('all');
   const [selectedCategories, setSelectedCategories] = useState<(GarmentCategory | 'all')[]>(['all']);
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [styleNoteInput, setStyleNoteInput] = useState('');
+  const [showPhotoGuide, setShowPhotoGuide] = useState(false);
 
   const profiles = useSessionStore((s) => s.profiles);
   const garments = useSessionStore((s) => s.garments);
@@ -132,24 +135,34 @@ const CreateScreen = () => {
     });
   }, [garments, selectedGarmentIds]);
 
-  // Filtrelenmiş kıyafetler (cinsiyet + kategori)
+  // Filtrelenmiş kıyafetler (cinsiyet + kategori + benim kıyafetlerim)
   const filteredGarments = useMemo(() => {
     let filtered = garments;
     
-    // Cinsiyet filtresi
-    if (selectedGender !== 'all') {
+    // Benim kıyafetlerim filtresi
+    if (showOnlyMine) {
+      filtered = filtered.filter((g) => g.isUserAdded === true);
+    }
+    
+    // Cinsiyet filtresi (sadece showOnlyMine false ise)
+    if (!showOnlyMine && selectedGender !== 'all') {
       filtered = filtered.filter((g) => 
         g.gender === selectedGender || g.gender === 'unisex' || !g.gender
       );
     }
     
-    // Kategori filtresi (çoklu seçim)
-    if (!selectedCategories.includes('all')) {
+    // Kategori filtresi (çoklu seçim) - sadece showOnlyMine false ise
+    if (!showOnlyMine && !selectedCategories.includes('all')) {
       filtered = filtered.filter((g) => selectedCategories.includes(g.category));
     }
     
     return filtered;
-  }, [garments, selectedGender, selectedCategories]);
+  }, [garments, selectedGender, selectedCategories, showOnlyMine]);
+  
+  // Kullanıcının eklediği kıyafet sayısı
+  const myGarmentsCount = useMemo(() => {
+    return garments.filter((g) => g.isUserAdded === true).length;
+  }, [garments]);
 
   // Cinsiyet bazlı sayılar
   const genderCounts = useMemo(() => {
@@ -159,6 +172,10 @@ const CreateScreen = () => {
     counts['unisex'] = garments.filter((g) => g.gender === 'unisex' || !g.gender).length;
     return counts;
   }, [garments]);
+
+  // Gender ve Category filtreleri (dinamik çeviri ile)
+  const genderFilters = useMemo(() => getGenderFilters(t), [t]);
+  const categories = useMemo(() => getCategories(t), [t]);
 
   // Kategori bazlı sayılar (seçili cinsiyete göre)
   const categoryCounts = useMemo(() => {
@@ -171,13 +188,13 @@ const CreateScreen = () => {
     }
     
     const counts: Record<string, number> = { all: filtered.length };
-    CATEGORIES.forEach((cat) => {
+    categories.forEach((cat) => {
       if (cat.key !== 'all') {
         counts[cat.key] = filtered.filter((g) => g.category === cat.key).length;
       }
     });
     return counts;
-  }, [garments, selectedGender]);
+  }, [garments, selectedGender, categories]);
 
   const handleClose = () => {
     clearSelectedGarments();
@@ -238,14 +255,24 @@ const CreateScreen = () => {
     }
   };
 
-  // Profil ekleme
+  // Profil ekleme - önce guide modal'ı göster
   const handleAddProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+    setShowPhotoGuide(true);
+  };
+  
+  // Photo guide'dan devam et
+  const handleContinueFromGuide = () => {
+    setShowPhotoGuide(false);
+    showPhotoSourcePicker();
+  };
+  
+  // Fotoğraf kaynağı seçimi
+  const showPhotoSourcePicker = () => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['İptal', 'Fotoğraf Çek', 'Galeriden Seç'],
+          options: [t('create.photoSource.cancel'), t('create.photoSource.takePhoto'), t('create.photoSource.selectFromGallery')],
           cancelButtonIndex: 0,
         },
         (buttonIndex) => {
@@ -258,12 +285,12 @@ const CreateScreen = () => {
       );
     } else {
       Alert.alert(
-        'Profil Fotoğrafı',
-        'Nasıl eklemek istersin?',
+        t('selectProfile.addNewProfile'),
+        t('selectProfile.info'),
         [
-          { text: 'İptal', style: 'cancel' },
-          { text: 'Fotoğraf Çek', onPress: pickProfileFromCamera },
-          { text: 'Galeriden Seç', onPress: pickProfileFromGallery },
+          { text: t('create.photoSource.cancel'), style: 'cancel' },
+          { text: t('create.photoSource.takePhoto'), onPress: pickProfileFromCamera },
+          { text: t('create.photoSource.selectFromGallery'), onPress: pickProfileFromGallery },
         ]
       );
     }
@@ -272,7 +299,7 @@ const CreateScreen = () => {
   const pickProfileFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('İzin Gerekli', 'Kamera izni gerekli');
+      Alert.alert(t('create.permission.title'), t('create.permission.cameraRequired'));
       return;
     }
 
@@ -327,7 +354,7 @@ const CreateScreen = () => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['İptal', 'Fotoğraf Çek', 'Galeriden Seç'],
+          options: [t('create.photoSource.cancel'), t('create.photoSource.takePhoto'), t('create.photoSource.selectFromGallery')],
           cancelButtonIndex: 0,
         },
         (buttonIndex) => {
@@ -340,12 +367,12 @@ const CreateScreen = () => {
       );
     } else {
       Alert.alert(
-        'Kıyafet Ekle',
-        'Nasıl eklemek istersin?',
+        t('create.addGarment'),
+        t('wardrobe.addGarmentSubtitle'),
         [
-          { text: 'İptal', style: 'cancel' },
-          { text: 'Fotoğraf Çek', onPress: pickGarmentFromCamera },
-          { text: 'Galeriden Seç', onPress: pickGarmentFromGallery },
+          { text: t('create.photoSource.cancel'), style: 'cancel' },
+          { text: t('create.photoSource.takePhoto'), onPress: pickGarmentFromCamera },
+          { text: t('create.photoSource.selectFromGallery'), onPress: pickGarmentFromGallery },
         ]
       );
     }
@@ -354,7 +381,7 @@ const CreateScreen = () => {
   const pickGarmentFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('İzin Gerekli', 'Kamera izni gerekli');
+      Alert.alert(t('create.permission.title'), t('create.permission.cameraRequired'));
       return;
     }
 
@@ -386,8 +413,17 @@ const CreateScreen = () => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          title: 'Kategori Seç',
-          options: ['İptal', 'Üst', 'Alt', 'Elbise/Tulum', 'Dış Giyim', 'Ayakkabı', 'Çanta', 'Aksesuar'],
+          title: t('create.categoryPicker.title'),
+          options: [
+            t('create.photoSource.cancel'),
+            t('create.category.tops'),
+            t('create.category.bottoms'),
+            t('create.category.onepiece'),
+            t('create.category.outerwear'),
+            t('create.category.footwear'),
+            t('create.category.bags'),
+            t('create.category.accessories')
+          ],
           cancelButtonIndex: 0,
         },
         (buttonIndex) => {
@@ -406,13 +442,13 @@ const CreateScreen = () => {
   const createGarmentFromUri = (uri: string, category: GarmentCategory) => {
     const newGarmentId = Date.now().toString();
     const categoryLabels: Record<GarmentCategory, string> = {
-      tops: 'Üst',
-      bottoms: 'Alt',
-      onepiece: 'Elbise',
-      outerwear: 'Dış Giyim',
-      footwear: 'Ayakkabı',
-      bags: 'Çanta',
-      accessories: 'Aksesuar',
+      tops: t('create.category.tops'),
+      bottoms: t('create.category.bottoms'),
+      onepiece: t('create.category.onepiece'),
+      outerwear: t('create.category.outerwear'),
+      footwear: t('create.category.footwear'),
+      bags: t('create.category.bags'),
+      accessories: t('create.category.accessories'),
     };
     
     const newGarment: Garment = {
@@ -477,7 +513,7 @@ const CreateScreen = () => {
     const garmentCategories = selectedGarments.map(g => g.category);
 
     if (!humanImageUri || garmentImageUris.length === 0) {
-      Alert.alert('Hata', 'Görsel bulunamadı');
+      Alert.alert(t('common.error'), t('create.error.imageNotFound'));
       return;
     }
 
@@ -508,6 +544,132 @@ const CreateScreen = () => {
         colors={['#0B0B0C', '#12121a', '#0B0B0C']}
         style={StyleSheet.absoluteFill}
       />
+
+      {/* Photo Guide Modal */}
+      <Modal
+        visible={showPhotoGuide}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowPhotoGuide(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View 
+            entering={FadeIn.duration(200)}
+            style={styles.photoGuideModal}
+          >
+            <LinearGradient
+              colors={['#1a1a2e', '#16162a']}
+              style={StyleSheet.absoluteFill}
+            />
+            
+            {/* Close Button */}
+            <Pressable 
+              style={styles.modalCloseButton}
+              onPress={() => setShowPhotoGuide(false)}
+            >
+              <LabelMedium>✕</LabelMedium>
+            </Pressable>
+            
+            {/* Title */}
+            <View style={styles.photoGuideHeader}>
+              <Image
+                source={require('../../full3dicons/images/profile.png')}
+                style={styles.photoGuideIcon}
+                resizeMode="contain"
+              />
+              <HeadlineMedium style={styles.photoGuideTitle}>
+                {t('create.photoGuide.title')}
+              </HeadlineMedium>
+            </View>
+            
+            {/* Tips */}
+            <View style={styles.photoGuideTips}>
+              <View style={styles.photoGuideTipRow}>
+                <View style={styles.tipIconGood}>
+                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
+                </View>
+                <View style={styles.tipContent}>
+                  <LabelMedium>{t('create.photoGuide.goodLighting')}</LabelMedium>
+                  <BodySmall color="secondary">
+                    {t('create.photoGuide.goodLightingDesc')}
+                  </BodySmall>
+                </View>
+              </View>
+              
+              <View style={styles.photoGuideTipRow}>
+                <View style={styles.tipIconGood}>
+                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
+                </View>
+                <View style={styles.tipContent}>
+                  <LabelMedium>{t('create.photoGuide.fullBody')}</LabelMedium>
+                  <BodySmall color="secondary">
+                    {t('create.photoGuide.fullBodyDesc')}
+                  </BodySmall>
+                </View>
+              </View>
+              
+              <View style={styles.photoGuideTipRow}>
+                <View style={styles.tipIconGood}>
+                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
+                </View>
+                <View style={styles.tipContent}>
+                  <LabelMedium>{t('create.photoGuide.straightPosture')}</LabelMedium>
+                  <BodySmall color="secondary">
+                    {t('create.photoGuide.straightPostureDesc')}
+                  </BodySmall>
+                </View>
+              </View>
+              
+              <View style={styles.photoGuideDivider} />
+              
+              <View style={styles.photoGuideTipRow}>
+                <View style={styles.tipIconBad}>
+                  <LabelSmall style={styles.tipIconText}>✕</LabelSmall>
+                </View>
+                <View style={styles.tipContent}>
+                  <LabelMedium>{t('create.photoGuide.avoidTitle')}</LabelMedium>
+                  <BodySmall color="secondary">
+                    {t('create.photoGuide.avoidDesc')}
+                  </BodySmall>
+                </View>
+              </View>
+            </View>
+            
+            {/* Example Images Placeholder */}
+            <View style={styles.photoGuideExamples}>
+              <View style={styles.exampleImageContainer}>
+                <View style={styles.exampleGood}>
+                  <Image
+                    source={require('../../full3dicons/images/profile.png')}
+                    style={styles.exampleImage}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.exampleBadge}>
+                    <LabelSmall style={styles.exampleBadgeText}>✓ {t('create.photoGuide.good')}</LabelSmall>
+                  </View>
+                </View>
+                <View style={styles.exampleBad}>
+                  <Image
+                    source={require('../../full3dicons/images/profile.png')}
+                    style={[styles.exampleImage, { opacity: 0.3 }]}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.exampleBadgeBad}>
+                    <LabelSmall style={styles.exampleBadgeText}>✕ {t('create.photoGuide.bad')}</LabelSmall>
+                  </View>
+                </View>
+              </View>
+            </View>
+            
+            {/* Continue Button */}
+            <PrimaryButton
+              title={t('create.photoGuide.continue')}
+              onPress={handleContinueFromGuide}
+              style={styles.photoGuideContinueButton}
+            />
+          </Animated.View>
+        </View>
+      </Modal>
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
@@ -662,7 +824,7 @@ const CreateScreen = () => {
                         { backgroundColor: CATEGORY_COLORS[garment.category] }
                       ]}>
                         <LabelSmall style={styles.selectedChipCategoryText}>
-                          {CATEGORIES.find(c => c.key === garment.category)?.label}
+                          {categories.find(c => c.key === garment.category)?.label}
                         </LabelSmall>
                       </View>
                       <Pressable
@@ -677,46 +839,102 @@ const CreateScreen = () => {
               </Animated.View>
             )}
 
-            {/* Gender Tabs */}
-            <View style={styles.filterSection}>
-              <LabelSmall color="secondary" style={styles.filterLabel}>Cinsiyet</LabelSmall>
-              <View style={styles.genderTabs}>
-                {GENDER_FILTERS.map((gender) => (
-                  <Pressable
-                    key={gender.key}
-                    onPress={() => handleSelectGender(gender.key)}
-                    style={[
-                      styles.genderTab,
-                      selectedGender === gender.key && styles.genderTabActive,
-                    ]}
-                  >
-                    <LabelSmall color={selectedGender === gender.key ? 'accent' : 'secondary'}>
-                      {gender.label}
+            {/* Main Tabs - Örnek Kıyafetler / Benim Kıyafetlerim */}
+            <View style={styles.mainTabsContainer}>
+              <Pressable
+                onPress={() => {
+                  setShowOnlyMine(false);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                style={[
+                  styles.mainTab,
+                  !showOnlyMine && styles.mainTabActive,
+                ]}
+              >
+                <Image
+                  source={require('../../full3dicons/images/wardrobe.png')}
+                  style={styles.mainTabIcon}
+                  resizeMode="contain"
+                />
+                <LabelMedium color={!showOnlyMine ? 'accent' : 'secondary'}>
+                  {t('create.exampleGarments')}
+                </LabelMedium>
+              </Pressable>
+              
+              <Pressable
+                onPress={() => {
+                  setShowOnlyMine(true);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                style={[
+                  styles.mainTab,
+                  showOnlyMine && styles.mainTabActive,
+                ]}
+              >
+                <Image
+                  source={require('../../full3dicons/images/profile.png')}
+                  style={styles.mainTabIcon}
+                  resizeMode="contain"
+                />
+                <LabelMedium color={showOnlyMine ? 'accent' : 'secondary'}>
+                  {t('create.myGarments')}
+                </LabelMedium>
+                {myGarmentsCount > 0 && (
+                  <View style={[
+                    styles.mainTabBadge,
+                    showOnlyMine && styles.mainTabBadgeActive
+                  ]}>
+                    <LabelSmall style={styles.mainTabBadgeText}>
+                      {myGarmentsCount}
                     </LabelSmall>
-                    {genderCounts[gender.key] > 0 && (
-                      <View style={[
-                        styles.genderCount,
-                        selectedGender === gender.key && styles.genderCountActive
-                      ]}>
-                        <LabelSmall style={styles.categoryCountText}>
-                          {genderCounts[gender.key]}
-                        </LabelSmall>
-                      </View>
-                    )}
-                  </Pressable>
-                ))}
-              </View>
+                  </View>
+                )}
+              </Pressable>
             </View>
 
-            {/* Category Tabs (Çoklu Seçim) */}
-            <View style={styles.filterSection}>
-              <LabelSmall color="secondary" style={styles.filterLabel}>Kategori (Çoklu Seçim)</LabelSmall>
+            {/* Gender & Category Filters - Sadece Örnek Kıyafetler sekmesinde */}
+            {!showOnlyMine && (
+              <>
+                {/* Gender Tabs */}
+                <View style={styles.filterSection}>
+                  <LabelSmall color="secondary" style={styles.filterLabel}>{t('create.genderLabel')}</LabelSmall>
+                  <View style={styles.genderTabs}>
+                    {genderFilters.map((gender) => (
+                      <Pressable
+                        key={gender.key}
+                        onPress={() => handleSelectGender(gender.key)}
+                        style={[
+                          styles.genderTab,
+                          selectedGender === gender.key && styles.genderTabActive,
+                        ]}
+                      >
+                        <LabelSmall color={selectedGender === gender.key ? 'accent' : 'secondary'}>
+                          {gender.label}
+                        </LabelSmall>
+                        {genderCounts[gender.key] > 0 && (
+                          <View style={[
+                            styles.genderCount,
+                            selectedGender === gender.key && styles.genderCountActive
+                          ]}>
+                            <LabelSmall style={styles.categoryCountText}>
+                              {genderCounts[gender.key]}
+                            </LabelSmall>
+                          </View>
+                        )}
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Category Tabs (Çoklu Seçim) */}
+                <View style={styles.filterSection}>
+                  <LabelSmall color="secondary" style={styles.filterLabel}>{t('create.categoryLabel')}</LabelSmall>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.categoryTabs}
               >
-                {CATEGORIES.map((cat) => {
+                {categories.map((cat) => {
                   const isSelected = selectedCategories.includes(cat.key);
                   return (
                     <Pressable
@@ -746,6 +964,8 @@ const CreateScreen = () => {
                 })}
               </ScrollView>
             </View>
+              </>
+            )}
 
             {/* Add Garment */}
             <Animated.View entering={FadeInDown.delay(200).springify()}>
@@ -810,7 +1030,7 @@ const CreateScreen = () => {
                               { backgroundColor: CATEGORY_COLORS[garment.category] }
                             ]}>
                               <LabelSmall style={styles.garmentCategoryText}>
-                                {CATEGORIES.find(c => c.key === garment.category)?.label}
+                                {categories.find(c => c.key === garment.category)?.label}
                               </LabelSmall>
                             </View>
                           </View>
@@ -1488,6 +1708,184 @@ const styles = StyleSheet.create({
   generateButton: {
     flex: 1,
     minHeight: 52,
+  },
+  // Main Tabs - Örnek Kıyafetler / Benim Kıyafetlerim
+  mainTabsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  mainTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.dark.surface,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  mainTabActive: {
+    backgroundColor: 'rgba(181, 255, 31, 0.1)',
+    borderColor: Colors.accent.primary,
+  },
+  mainTabIcon: {
+    width: 24,
+    height: 24,
+  },
+  mainTabBadge: {
+    backgroundColor: Colors.dark.border,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  mainTabBadgeActive: {
+    backgroundColor: Colors.accent.primary,
+  },
+  mainTabBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  // Photo Guide Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  photoGuideModal: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: BorderRadius.xl,
+    padding: 24,
+    overflow: 'hidden',
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  photoGuideHeader: {
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 24,
+  },
+  photoGuideIcon: {
+    width: 64,
+    height: 64,
+  },
+  photoGuideTitle: {
+    textAlign: 'center',
+    color: '#fff',
+  },
+  photoGuideTips: {
+    gap: 16,
+  },
+  photoGuideTipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  tipIconGood: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipIconBad: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#ef4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipIconText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  tipContent: {
+    flex: 1,
+    gap: 4,
+  },
+  photoGuideDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: 8,
+  },
+  photoGuideExamples: {
+    marginTop: 20,
+    marginBottom: 24,
+  },
+  exampleImageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  exampleGood: {
+    width: 100,
+    height: 130,
+    borderRadius: BorderRadius.md,
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderWidth: 2,
+    borderColor: '#22c55e',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  exampleBad: {
+    width: 100,
+    height: 130,
+    borderRadius: BorderRadius.md,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 2,
+    borderColor: '#ef4444',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  exampleImage: {
+    width: 60,
+    height: 60,
+  },
+  exampleBadge: {
+    position: 'absolute',
+    bottom: 8,
+    backgroundColor: '#22c55e',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  exampleBadgeBad: {
+    position: 'absolute',
+    bottom: 8,
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  exampleBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  photoGuideContinueButton: {
+    marginTop: 8,
   },
 });
 

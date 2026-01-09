@@ -102,9 +102,9 @@ const ProfileScreen = () => {
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: 'Yenile',
-          onPress: () => {
+          onPress: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            loadSampleGarments();
+            await loadSampleGarments();
             Alert.alert('Başarılı', 'Kıyafetler güncellendi!');
           },
         },
