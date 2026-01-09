@@ -28,78 +28,59 @@ import {
 
 const { width } = Dimensions.get('window');
 
-type Category = 'all' | GarmentCategory;
+type GenderFilter = 'all' | 'male' | 'female';
 
-// Kategori ikonları
-const getCategoryIcon = (category: Category) => {
-  switch (category) {
-    case 'tops':
-      return require('../../full3dicons/images/t-shirt.png');
-    case 'bottoms':
-      return require('../../full3dicons/images/clothes-hanger.png');
-    case 'onepiece':
-      return require('../../full3dicons/images/clothes-hanger.png');
-    case 'outerwear':
-      return require('../../full3dicons/images/flannel-shirt.png');
-    case 'footwear':
-      return require('../../full3dicons/images/clothes-hanger.png');
-    case 'bags':
-      return require('../../full3dicons/images/clothes-hanger.png');
-    case 'accessories':
-      return require('../../full3dicons/images/clothes-hanger.png');
+// Filtre ikonları
+const getFilterIcon = (filter: GenderFilter) => {
+  switch (filter) {
+    case 'all':
+      return require('../../full3dicons/images/wardrobe.png');
+    case 'male':
+      return require('../../full3dicons/images/man.png');
+    case 'female':
+      return require('../../full3dicons/images/woman.png');
     default:
       return require('../../full3dicons/images/wardrobe.png');
   }
 };
 
-const CATEGORIES: { key: Category; label: string }[] = [
+const FILTERS: { key: GenderFilter; label: string }[] = [
   { key: 'all', label: 'Tümü' },
-  { key: 'tops', label: 'Üst' },
-  { key: 'bottoms', label: 'Alt' },
-  { key: 'onepiece', label: 'Elbise' },
-  { key: 'outerwear', label: 'Dış Giyim' },
-  { key: 'footwear', label: 'Ayakkabı' },
-  { key: 'bags', label: 'Çanta' },
-  { key: 'accessories', label: 'Aksesuar' },
+  { key: 'male', label: 'Erkek' },
+  { key: 'female', label: 'Kadın' },
 ];
 
 const WardrobeScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const [selectedCategory, setSelectedCategory] = useState<Category>('all');
+  const [selectedFilter, setSelectedFilter] = useState<GenderFilter>('all');
   
   const garments = useSessionStore((s) => s.garments);
   const setSelectedGarmentId = useSessionStore((s) => s.setSelectedGarmentId);
   const removeGarment = useSessionStore((s) => s.removeGarment);
 
-  // Filtrelenmiş kıyafetler
+  // Filtrelenmiş kıyafetler (gender'a göre)
   const filteredGarments = useMemo(() => {
-    if (selectedCategory === 'all') return garments;
-    return garments.filter((g) => g.category === selectedCategory);
-  }, [garments, selectedCategory]);
+    if (selectedFilter === 'all') return garments;
+    return garments.filter((g) => g.gender === selectedFilter);
+  }, [garments, selectedFilter]);
 
-  // Kategori sayıları
-  const categoryCounts = useMemo(() => {
-    const counts: Record<Category, number> = {
+  // Filtre sayıları
+  const filterCounts = useMemo(() => {
+    const counts: Record<GenderFilter, number> = {
       all: garments.length,
-      tops: 0,
-      bottoms: 0,
-      onepiece: 0,
-      outerwear: 0,
-      footwear: 0,
-      bags: 0,
-      accessories: 0,
+      male: 0,
+      female: 0,
     };
     garments.forEach((g) => {
-      if (counts[g.category] !== undefined) {
-        counts[g.category]++;
-      }
+      if (g.gender === 'male') counts.male++;
+      else if (g.gender === 'female') counts.female++;
     });
     return counts;
   }, [garments]);
 
-  const handleCategorySelect = (category: Category) => {
-    setSelectedCategory(category);
+  const handleFilterSelect = (filter: GenderFilter) => {
+    setSelectedFilter(filter);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
@@ -158,42 +139,42 @@ const WardrobeScreen = () => {
           </BodyMedium>
         </Animated.View>
 
-        {/* Category chips */}
+        {/* Gender filter chips */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoriesScroll}
           >
-            {CATEGORIES.map((cat) => (
+            {FILTERS.map((filter) => (
               <Pressable
-                key={cat.key}
-                onPress={() => handleCategorySelect(cat.key)}
+                key={filter.key}
+                onPress={() => handleFilterSelect(filter.key)}
                 style={[
                   styles.categoryChip,
-                  selectedCategory === cat.key && styles.categoryChipActive,
+                  selectedFilter === filter.key && styles.categoryChipActive,
                 ]}
                 accessibilityRole="tab"
-                accessibilityLabel={cat.label}
-                accessibilityState={{ selected: selectedCategory === cat.key }}
+                accessibilityLabel={filter.label}
+                accessibilityState={{ selected: selectedFilter === filter.key }}
               >
                 <Image
-                  source={getCategoryIcon(cat.key)}
+                  source={getFilterIcon(filter.key)}
                   style={[
                     styles.categoryIcon,
-                    selectedCategory === cat.key && styles.categoryIconActive,
+                    selectedFilter === filter.key && styles.categoryIconActive,
                   ]}
                   resizeMode="contain"
                 />
                 <LabelMedium
-                  color={selectedCategory === cat.key ? 'accent' : 'secondary'}
+                  color={selectedFilter === filter.key ? 'accent' : 'secondary'}
                 >
-                  {cat.label}
+                  {filter.label}
                 </LabelMedium>
-                {categoryCounts[cat.key] > 0 && (
+                {filterCounts[filter.key] > 0 && (
                   <View style={styles.categoryCount}>
-                    <LabelSmall color={selectedCategory === cat.key ? 'accent' : 'tertiary'}>
-                      {categoryCounts[cat.key]}
+                    <LabelSmall color={selectedFilter === filter.key ? 'accent' : 'tertiary'}>
+                      {filterCounts[filter.key]}
                     </LabelSmall>
                   </View>
                 )}
@@ -257,7 +238,7 @@ const WardrobeScreen = () => {
                   resizeMode="contain"
                 />
                 <HeadlineSmall style={styles.emptyTitle}>
-                  {selectedCategory === 'all'
+                  {selectedFilter === 'all'
                     ? t('wardrobe.wardrobeEmpty')
                     : t('wardrobe.categoryEmpty')}
                 </HeadlineSmall>

@@ -47,7 +47,8 @@
     "noResults": "Henüz sonuç yok",
     "startFirstTry": "İlk denemenizi yaparak başlayın",
     "startFirstTryButton": "İlk Denemeyi Yap",
-    "credits": "{{count}} Kredi"
+    "credits": "{{count}} Kredi",
+    "credit": "Kredi"
   },
   "profile": {
     "title": "Profil",

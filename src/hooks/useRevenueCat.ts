@@ -31,6 +31,8 @@ export const useRevenueCat = () => {
   const [isEntitled, setIsEntitled] = useState(false);
   
   const setIsPremium = useSessionStore((s) => s.setIsPremium);
+  const addCredits = useSessionStore((s) => s.addCredits);
+  const setCredits = useSessionStore((s) => s.setCredits);
 
   // Initialize RevenueCat
   const initialize = useCallback(async (userId?: string) => {
@@ -51,12 +53,37 @@ export const useRevenueCat = () => {
       // Get offerings
       const currentOfferings = await getOfferings();
       setOfferings(currentOfferings);
+      
+      // Fetch user credits from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        // Try direct table query first (more reliable)
+        const { data: creditData, error: creditError } = await supabase
+          .from('user_credits')
+          .select('balance')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (!creditError && creditData?.balance !== undefined) {
+          setCredits(creditData.balance);
+          console.log('Credits loaded from Supabase:', creditData.balance);
+        } else {
+          // Fallback: try RPC function
+          const { data, error } = await supabase.rpc('get_user_credits', {
+            p_user_id: session.user.id
+          });
+          if (!error && data !== null) {
+            setCredits(data);
+            console.log('Credits loaded via RPC:', data);
+          }
+        }
+      }
     } catch (error) {
       console.error('RevenueCat initialization error:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [setIsPremium]);
+  }, [setIsPremium, setCredits]);
 
   // Check entitlement
   const checkProEntitlement = useCallback(async () => {
@@ -87,6 +114,61 @@ export const useRevenueCat = () => {
       setIsEntitled(entitled);
       setIsPremium(entitled);
       
+      // Add credits based on package type
+      const packageId = packageToPurchase.identifier?.toLowerCase() || '';
+      let creditsToAdd = 0;
+      
+      if (packageId.includes('yearly') || packageId.includes('annual')) {
+        creditsToAdd = 480; // Yıllık: 480 kredi
+      } else if (packageId.includes('monthly')) {
+        creditsToAdd = 40; // Aylık: 40 kredi
+      }
+      
+      if (creditsToAdd > 0) {
+        // Add credits to Supabase and local state
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Always update local state immediately for instant feedback
+        addCredits(creditsToAdd);
+        console.log(`Added ${creditsToAdd} credits locally`);
+        
+        if (session?.user?.id) {
+          // Try to sync with Supabase
+          try {
+            // Try RPC first
+            const { data, error } = await supabase.rpc('add_credits', {
+              p_user_id: session.user.id,
+              p_amount: creditsToAdd
+            });
+            
+            if (!error && data !== null) {
+              setCredits(data); // Sync with server balance
+              console.log(`Synced with Supabase. Server balance: ${data}`);
+            } else {
+              // Fallback: direct upsert
+              const { data: existingCredits } = await supabase
+                .from('user_credits')
+                .select('balance')
+                .eq('user_id', session.user.id)
+                .single();
+              
+              const newBalance = (existingCredits?.balance || 0) + creditsToAdd;
+              
+              await supabase
+                .from('user_credits')
+                .upsert({ 
+                  user_id: session.user.id, 
+                  balance: newBalance 
+                }, { onConflict: 'user_id' });
+              
+              console.log(`Direct upsert to Supabase. New balance: ${newBalance}`);
+            }
+          } catch (syncError) {
+            console.warn('Supabase sync failed, credits saved locally:', syncError);
+          }
+        }
+      }
+      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       return info;
     } catch (error: any) {
@@ -97,7 +179,7 @@ export const useRevenueCat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [setIsPremium]);
+  }, [setIsPremium, addCredits, setCredits]);
 
   // Restore purchases
   const restore = useCallback(async () => {

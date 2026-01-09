@@ -187,6 +187,12 @@ type SessionState = {
   isPremium: boolean;
   setIsPremium: (value: boolean) => void;
 
+  // Credits
+  credits: number;
+  setCredits: (value: number) => void;
+  addCredits: (amount: number) => void;
+  useCredit: () => void;
+
   // Device
   deviceHash: string | null;
   setDeviceHash: (hash: string) => void;
@@ -371,6 +377,12 @@ export const useSessionStore = create<SessionState>()(
       isPremium: false,
       setIsPremium: (value) => set({ isPremium: value }),
 
+      // Credits
+      credits: 0,
+      setCredits: (value) => set({ credits: value }),
+      addCredits: (amount) => set((state) => ({ credits: state.credits + amount })),
+      useCredit: () => set((state) => ({ credits: Math.max(0, state.credits - 1) })),
+
       // Device
       deviceHash: null,
       setDeviceHash: (hash) => set({ deviceHash: hash }),
@@ -446,6 +458,7 @@ export const useSessionStore = create<SessionState>()(
         jobs: state.jobs,
         preferences: state.preferences,
         isPremium: state.isPremium,
+        credits: state.credits,
         deviceHash: state.deviceHash,
         pushToken: state.pushToken,
         sampleGarmentsLoaded: false, // Yeniden yüklensin

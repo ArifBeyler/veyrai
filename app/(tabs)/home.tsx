@@ -37,11 +37,12 @@ const HomeScreen = () => {
   const profiles = useSessionStore((s) => s.profiles);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const isPremium = useSessionStore((s) => s.isPremium);
+  const credits = useSessionStore((s) => s.credits);
 
   // Tamamlanmış üretimler
   const completedJobs = jobs.filter((j) => j.status === 'completed');
   const hasCompletedResults = completedJobs.length > 0;
-  const hasCredits = !freeCreditsUsed || isPremium;
+  const hasCredits = credits > 0 || (!freeCreditsUsed && !isPremium);
 
   // Profil fotoğrafı sayısı
   const totalProfilePhotos = profiles.reduce(
@@ -83,16 +84,16 @@ const HomeScreen = () => {
             <BodySmall color="secondary">{t('home.welcome')} 👋</BodySmall>
             <DisplaySmall>{t('common.appName')}</DisplaySmall>
           </View>
-          <View style={styles.creditBadge}>
+          <Pressable style={styles.creditBadge} onPress={() => router.push('/paywall')}>
             <Image
               source={require('../../full3dicons/images/sparkle.png')}
               style={styles.creditIcon}
               resizeMode="contain"
             />
-            <LabelSmall color={hasCredits ? 'accent' : 'secondary'}>
-              {isPremium ? t('profile.premiumMember') : freeCreditsUsed ? t('home.credits', { count: 0 }) : t('home.credits', { count: 1 })}
-            </LabelSmall>
-          </View>
+            <LabelMedium color={credits > 0 ? 'accent' : 'secondary'} style={styles.creditText}>
+              {credits} {t('home.credit')}
+            </LabelMedium>
+          </Pressable>
         </Animated.View>
 
         {/* Hero Card */}
@@ -389,17 +390,21 @@ const styles = StyleSheet.create({
   creditBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: Colors.dark.surface,
     borderRadius: BorderRadius.pill,
-    borderWidth: 1,
-    borderColor: Colors.dark.strokeLight,
+    borderWidth: 1.5,
+    borderColor: Colors.accent.primary,
   },
   creditIcon: {
-    width: 16,
-    height: 16,
+    width: 22,
+    height: 22,
+  },
+  creditText: {
+    fontWeight: '700',
+    fontSize: 15,
   },
   heroCard: {
     padding: 0,

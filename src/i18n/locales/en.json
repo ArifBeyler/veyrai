@@ -61,7 +61,8 @@
     "noResults": "No results yet",
     "startFirstTry": "Start by making your first try-on",
     "startFirstTryButton": "Make First Try-on",
-    "credits": "{{count}} Credits"
+    "credits": "{{count}} Credits",
+    "credit": "Credits"
   },
   "profile": {
     "title": "Profile",

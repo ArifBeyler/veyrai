@@ -52,6 +52,7 @@ const ProfileScreen = () => {
   }, [showLanguageChangeToast]);
   
   const isPremium = useSessionStore((s) => s.isPremium);
+  const credits = useSessionStore((s) => s.credits);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const profiles = useSessionStore((s) => s.profiles);
   const activeProfileId = useSessionStore((s) => s.activeProfileId);
@@ -221,7 +222,7 @@ const ProfileScreen = () => {
                     />
                   </View>
                 )}
-                {isPremium && (
+                {(isPremium || credits > 0) && (
                   <View style={styles.premiumBadge}>
                     <Image
                       source={require('../../full3dicons/images/sparkle.png')}
@@ -272,9 +273,9 @@ const ProfileScreen = () => {
           </GlassCard>
         </Animated.View>
 
-        {/* Subscription Status */}
+        {/* Subscription Status - Show premium card if user has credits or is premium */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
-          {isPremium ? (
+          {(isPremium || credits > 0) ? (
             <GlassCard style={styles.subscriptionCardPremium}>
               <View style={styles.subscriptionHeader}>
                 <View style={styles.premiumIconContainer}>
@@ -286,7 +287,7 @@ const ProfileScreen = () => {
                 </View>
                 <View style={styles.subscriptionText}>
                   <LabelMedium>{t('profile.premiumMember')}</LabelMedium>
-                  <LabelSmall color="secondary">{t('profile.unlimitedAccess')}</LabelSmall>
+                  <LabelSmall color="secondary">{credits} {t('home.credit')}</LabelSmall>
                 </View>
               </View>
             </GlassCard>

@@ -8,6 +8,7 @@ import {
   Pressable,
   Linking,
   Modal,
+  Image,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -467,11 +468,15 @@ const PaywallScreen = () => {
                   : styles.modalIconError,
               ]}
             >
-              {paymentModal.type === 'success' ? (
-                <LabelLarge style={styles.modalIconText}>✓</LabelLarge>
-              ) : (
-                <LabelLarge style={styles.modalIconText}>✕</LabelLarge>
-              )}
+              <Image
+                source={
+                  paymentModal.type === 'success'
+                    ? require('../full3dicons/images/checkmark.png')
+                    : require('../full3dicons/images/cross.png')
+                }
+                style={styles.modalIcon}
+                resizeMode="contain"
+              />
             </Animated.View>
 
             {/* Title */}
@@ -800,10 +805,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ef4444',
   },
-  modalIconText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+  modalIcon: {
+    width: 44,
+    height: 44,
   },
   modalTitle: {
     color: '#FFFFFF',
