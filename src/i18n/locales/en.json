@@ -114,7 +114,8 @@
     "imagesCount": "{{count}} images",
     "support": "Support",
     "helpAndSupport": "Help & Support",
-    "managePurchases": "Manage Purchases",
+    "buyTokens": "Buy Tokens",
+    "buyTokensSubtitle": "Get tokens for generations",
     "privacyPolicy": "Privacy Policy",
     "changeLanguage": "Change Language",
     "selectLanguage": "Select Language",
@@ -231,7 +232,14 @@
       "good": "Good",
       "bad": "Bad",
       "continue": "Got it, Continue"
-    }
+    },
+    "change": "Change",
+    "selectedParts": "Selected Items",
+    "edit": "Edit",
+    "styleNoteLabel": "Style Note",
+    "aiCreateCombo": "Create Outfit with AI",
+    "aiDescription": "You'll try clothes on your profile photo",
+    "swipeToGenerate": "Swipe to Generate"
   },
   "gallery": {
     "title": "Gallery",
@@ -342,5 +350,82 @@
     "info": "If the garment background is flat and clean, AI will give better results.",
     "save": "Save",
     "defaultTitle": "Garment"
+  },
+  "support": {
+    "title": "Help & Support",
+    "needHelp": "Need help?",
+    "contactDescription": "Contact us with your questions, we'll respond as soon as possible.",
+    "emailUs": "Send Email",
+    "emailSubject": "Wearify Support Request",
+    "faqTitle": "Frequently Asked Questions",
+    "madeWithLove": "Made with ❤️ in Turkey",
+    "faq": {
+      "howToUse": {
+        "question": "How do I use Wearify?",
+        "answer": "Add your profile photo, select clothes from wardrobe and create your outfit with AI."
+      },
+      "credits": {
+        "question": "How do credits work?",
+        "answer": "Each outfit generation costs 1 credit. Premium members can generate unlimited outfits."
+      },
+      "quality": {
+        "question": "How to get the best results?",
+        "answer": "Well-lit, full-body photos with a straight posture give the best results."
+      },
+      "refund": {
+        "question": "What is your refund policy?",
+        "answer": "You can request a refund through the App Store within 14 days of purchase."
+      }
+    }
+  },
+  "buyTokens": {
+    "title": "Buy Tokens",
+    "currentBalance": "Current Balance",
+    "tokens": "tokens",
+    "token": "token",
+    "selectPackage": "Select Package",
+    "popular": "Popular",
+    "bonus": "bonus",
+    "buyNow": "Buy Now",
+    "info1": "Tokens never expire",
+    "info2": "1 token = 1 outfit generation",
+    "info3": "HD quality requires +1 extra token",
+    "purchaseError": "Purchase failed",
+    "success": {
+      "title": "Purchase Successful! 🎉",
+      "message": "{{tokens}} tokens added to your account"
+    },
+    "error": {
+      "title": "Purchase Failed"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "At Wearify, we care about your privacy. This policy explains how we collect, use and protect your data.",
+    "dataCollection": {
+      "title": "Data Collection",
+      "item1": "Profile photos (stored on your device)",
+      "item2": "App usage statistics",
+      "item3": "Purchase information"
+    },
+    "dataUsage": {
+      "title": "Data Usage",
+      "item1": "We process your photos for outfit generation",
+      "item2": "We use it to improve app experience",
+      "item3": "We don't share with third parties"
+    },
+    "dataSecurity": {
+      "title": "Data Security",
+      "item1": "All data is stored encrypted",
+      "item2": "Industry standard security protocols are used"
+    },
+    "userRights": {
+      "title": "User Rights",
+      "item1": "You can request access to your data",
+      "item2": "You can request deletion of your data",
+      "item3": "You can close your account at any time"
+    },
+    "contact": "Contact us with questions:",
+    "lastUpdated": "Last updated"
   }
 }

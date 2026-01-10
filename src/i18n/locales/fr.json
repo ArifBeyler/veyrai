@@ -114,7 +114,8 @@
     "imagesCount": "{{count}} images",
     "support": "Support",
     "helpAndSupport": "Aide et Support",
-    "managePurchases": "Gérer les achats",
+    "buyTokens": "Acheter des Tokens",
+    "buyTokensSubtitle": "Obtenez des tokens pour les générations",
     "privacyPolicy": "Politique de confidentialité",
     "changeLanguage": "Changer la langue",
     "selectLanguage": "Sélectionner la langue",
@@ -231,7 +232,14 @@
       "good": "Bon",
       "bad": "Mauvais",
       "continue": "Compris, Continuer"
-    }
+    },
+    "change": "Modifier",
+    "selectedParts": "Vêtements Sélectionnés",
+    "edit": "Éditer",
+    "styleNoteLabel": "Note de Style",
+    "aiCreateCombo": "Créer une Tenue avec l'IA",
+    "aiDescription": "Tu essaieras des vêtements sur ta photo de profil",
+    "swipeToGenerate": "Glissez pour Générer"
   },
   "gallery": {
     "title": "Galerie",
@@ -342,6 +350,83 @@
     "info": "Si l'arrière-plan du vêtement est plat et propre, l'IA donnera de meilleurs résultats.",
     "save": "Enregistrer",
     "defaultTitle": "Vêtement"
+  },
+  "support": {
+    "title": "Aide et Support",
+    "needHelp": "Besoin d'aide ?",
+    "contactDescription": "Contactez-nous avec vos questions, nous vous répondrons dès que possible.",
+    "emailUs": "Envoyer un e-mail",
+    "emailSubject": "Demande de support Wearify",
+    "faqTitle": "Questions Fréquemment Posées",
+    "madeWithLove": "Fait avec ❤️ en Turquie",
+    "faq": {
+      "howToUse": {
+        "question": "Comment utiliser Wearify ?",
+        "answer": "Ajoutez votre photo de profil, sélectionnez des vêtements dans la garde-robe et créez votre tenue avec l'IA."
+      },
+      "credits": {
+        "question": "Comment fonctionnent les crédits ?",
+        "answer": "Chaque génération de tenue coûte 1 crédit. Les membres Premium peuvent générer des tenues illimitées."
+      },
+      "quality": {
+        "question": "Comment obtenir les meilleurs résultats ?",
+        "answer": "Les photos bien éclairées, en pied et avec une posture droite donnent les meilleurs résultats."
+      },
+      "refund": {
+        "question": "Quelle est votre politique de remboursement ?",
+        "answer": "Vous pouvez demander un remboursement via l'App Store dans les 14 jours suivant l'achat."
+      }
+    }
+  },
+  "buyTokens": {
+    "title": "Acheter des Tokens",
+    "currentBalance": "Solde Actuel",
+    "tokens": "tokens",
+    "token": "token",
+    "selectPackage": "Sélectionner un Forfait",
+    "popular": "Populaire",
+    "bonus": "bonus",
+    "buyNow": "Acheter",
+    "info1": "Les tokens n'expirent jamais",
+    "info2": "1 token = 1 génération de tenue",
+    "info3": "La qualité HD nécessite +1 token supplémentaire",
+    "purchaseError": "L'achat a échoué",
+    "success": {
+      "title": "Achat Réussi ! 🎉",
+      "message": "{{tokens}} tokens ajoutés à votre compte"
+    },
+    "error": {
+      "title": "Achat Échoué"
+    }
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "intro": "Chez Wearify, nous nous soucions de votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos données.",
+    "dataCollection": {
+      "title": "Collecte de Données",
+      "item1": "Photos de profil (stockées sur votre appareil)",
+      "item2": "Statistiques d'utilisation de l'application",
+      "item3": "Informations d'achat"
+    },
+    "dataUsage": {
+      "title": "Utilisation des Données",
+      "item1": "Nous traitons vos photos pour la génération de tenues",
+      "item2": "Nous l'utilisons pour améliorer l'expérience de l'application",
+      "item3": "Nous ne partageons pas avec des tiers"
+    },
+    "dataSecurity": {
+      "title": "Sécurité des Données",
+      "item1": "Toutes les données sont stockées cryptées",
+      "item2": "Les protocoles de sécurité standard de l'industrie sont utilisés"
+    },
+    "userRights": {
+      "title": "Droits des Utilisateurs",
+      "item1": "Vous pouvez demander l'accès à vos données",
+      "item2": "Vous pouvez demander la suppression de vos données",
+      "item3": "Vous pouvez fermer votre compte à tout moment"
+    },
+    "contact": "Contactez-nous pour vos questions :",
+    "lastUpdated": "Dernière mise à jour"
   }
 }
 

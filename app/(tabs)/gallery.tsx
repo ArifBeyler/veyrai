@@ -65,6 +65,7 @@ const GalleryScreen = () => {
       params: {
         id: job.id,
         imageUrl: encodeURIComponent(job.resultImageUrl!),
+        humanImageUri: job.humanImageUri ? encodeURIComponent(job.humanImageUri) : undefined,
       },
     });
   };

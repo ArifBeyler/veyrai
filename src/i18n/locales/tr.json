@@ -100,7 +100,8 @@
     "imagesCount": "{{count}} görsel",
     "support": "Destek",
     "helpAndSupport": "Yardım ve Destek",
-    "managePurchases": "Satın Alımları Yönet",
+    "buyTokens": "Token Satın Al",
+    "buyTokensSubtitle": "Üretim için token al",
     "privacyPolicy": "Gizlilik Politikası",
     "changeLanguage": "Dil Değiştir",
     "selectLanguage": "Dil Seçin",
@@ -217,7 +218,14 @@
       "good": "İyi",
       "bad": "Kötü",
       "continue": "Anladım, Devam Et"
-    }
+    },
+    "change": "Değiştir",
+    "selectedParts": "Seçilen Parçalar",
+    "edit": "Düzenle",
+    "styleNoteLabel": "Stil Notu",
+    "aiCreateCombo": "AI ile Kombin Oluştur",
+    "aiDescription": "Profil fotoğrafın üzerinde kıyafetleri deneyeceksin",
+    "swipeToGenerate": "Kaydırarak Üret"
   },
   "gallery": {
     "title": "Galeri",
@@ -328,6 +336,83 @@
     "info": "Kıyafet arka planı düz ve temiz olursa AI daha iyi sonuç verir.",
     "save": "Kaydet",
     "defaultTitle": "Kıyafet"
+  },
+  "support": {
+    "title": "Yardım ve Destek",
+    "needHelp": "Yardıma mı ihtiyacın var?",
+    "contactDescription": "Sorularınız için bize ulaşın, en kısa sürede yanıtlayalım.",
+    "emailUs": "E-posta Gönder",
+    "emailSubject": "Wearify Destek Talebi",
+    "faqTitle": "Sık Sorulan Sorular",
+    "madeWithLove": "Türkiye'de ❤️ ile yapıldı",
+    "faq": {
+      "howToUse": {
+        "question": "Wearify nasıl kullanılır?",
+        "answer": "Profil fotoğrafınızı ekleyin, gardroptan kıyafet seçin ve AI ile kombininizi oluşturun."
+      },
+      "credits": {
+        "question": "Krediler nasıl çalışır?",
+        "answer": "Her kombin üretimi 1 kredi harcar. Premium üyeler sınırsız üretim yapabilir."
+      },
+      "quality": {
+        "question": "En iyi sonuç için ne yapmalıyım?",
+        "answer": "İyi aydınlatılmış, tam boy ve düz duruşlu fotoğraflar en iyi sonucu verir."
+      },
+      "refund": {
+        "question": "İade politikanız nedir?",
+        "answer": "Satın alımlarınız için App Store üzerinden 14 gün içinde iade talep edebilirsiniz."
+      }
+    }
+  },
+  "buyTokens": {
+    "title": "Token Satın Al",
+    "currentBalance": "Mevcut Bakiye",
+    "tokens": "token",
+    "token": "token",
+    "selectPackage": "Paket Seç",
+    "popular": "Popüler",
+    "bonus": "bonus",
+    "buyNow": "Satın Al",
+    "info1": "Tokenler hiçbir zaman sona ermez",
+    "info2": "1 token = 1 kombin üretimi",
+    "info3": "HD kalite +1 ekstra token gerektirir",
+    "purchaseError": "Satın alma işlemi başarısız oldu",
+    "success": {
+      "title": "Satın Alma Başarılı! 🎉",
+      "message": "{{tokens}} token hesabınıza eklendi"
+    },
+    "error": {
+      "title": "Satın Alma Başarısız"
+    }
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "intro": "Wearify olarak gizliliğinizi önemsiyoruz. Bu politika, verilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.",
+    "dataCollection": {
+      "title": "Toplanan Veriler",
+      "item1": "Profil fotoğrafları (cihazınızda saklanır)",
+      "item2": "Uygulama kullanım istatistikleri",
+      "item3": "Satın alma bilgileri"
+    },
+    "dataUsage": {
+      "title": "Veri Kullanımı",
+      "item1": "Kombin üretimi için fotoğraflarınızı işliyoruz",
+      "item2": "Uygulama deneyimini iyileştirmek için kullanıyoruz",
+      "item3": "Üçüncü taraflarla paylaşmıyoruz"
+    },
+    "dataSecurity": {
+      "title": "Veri Güvenliği",
+      "item1": "Tüm veriler şifrelenerek saklanır",
+      "item2": "Endüstri standardı güvenlik protokolleri kullanılır"
+    },
+    "userRights": {
+      "title": "Kullanıcı Hakları",
+      "item1": "Verilerinize erişim talep edebilirsiniz",
+      "item2": "Verilerinizin silinmesini isteyebilirsiniz",
+      "item3": "İstediğiniz zaman hesabınızı kapatabilirsiniz"
+    },
+    "contact": "Sorularınız için bize ulaşın:",
+    "lastUpdated": "Son güncelleme"
   }
 }
 

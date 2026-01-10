@@ -16,17 +16,16 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeOut,
+  SlideInDown,
+  SlideOutDown,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withDelay,
   withSpring,
-  ZoomIn,
-  ZoomOut,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppLanguage } from '../../src/hooks/useAppLanguage';
-import { useRevenueCat } from '../../src/hooks/useRevenueCat';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { GlassCard } from '../../src/ui/GlassCard';
@@ -152,8 +151,8 @@ const ThemeSelectorModal = ({
           activeOpacity={1}
         />
         <Animated.View 
-          entering={ZoomIn.springify().damping(15)}
-          exiting={ZoomOut.duration(200)}
+          entering={SlideInDown.duration(300)}
+          exiting={SlideOutDown.duration(200)}
           style={[themeModalStyles.container, { paddingBottom: insets.bottom + 20 }]}
         >
           <LinearGradient
@@ -329,8 +328,10 @@ const ProfileScreen = () => {
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const profiles = useSessionStore((s) => s.profiles);
   const activeProfileId = useSessionStore((s) => s.activeProfileId);
-  const generations = useSessionStore((s) => s.generations);
+  // jobs dizisini doğrudan kullan (getter yerine) - reaktif güncellemeler için
+  const jobs = useSessionStore((s) => s.jobs);
   const garments = useSessionStore((s) => s.garments);
+  const totalGenerationsCount = useSessionStore((s) => s.totalGenerationsCount);
   const clearUserData = useSessionStore((s) => s.clearUserData);
   const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
   const loadSampleGarments = useSessionStore((s) => s.loadSampleGarments);
@@ -338,8 +339,8 @@ const ProfileScreen = () => {
   const hasCredits = !freeCreditsUsed || isPremium;
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
   const totalPhotos = profiles.reduce((acc, p) => acc + p.photos.length, 0);
-  // Galeri ile aynı mantık: hem completed hem de resultImageUrl olmalı
-  const completedGenerations = generations.filter((g) => 
+  // Galerideki mevcut görseller
+  const galleryImagesCount = jobs.filter((g) => 
     g.status === 'completed' && g.resultImageUrl
   ).length;
 
@@ -390,31 +391,22 @@ const ProfileScreen = () => {
 
   const handlePrivacy = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Open privacy policy URL
+    router.push('/privacy');
   };
-
-  const { presentCustomerCenter } = useRevenueCat();
 
   const handleSupport = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Open support URL
+    router.push('/support');
   };
 
-  const handleCustomerCenter = async () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await presentCustomerCenter();
-    } catch (error) {
-      console.error('Customer Center error:', error);
-    }
+  const handleBuyTokens = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/buy-tokens');
   };
 
   const handleEditProfile = () => {
-    if (activeProfile) {
-      router.push(`/profile-details?id=${activeProfile.id}`);
-    } else {
-      router.push('/select-profile');
-    }
+    // Profil yönetim sayfasına git
+    router.push('/select-profile');
   };
 
   const handleChangeLanguage = () => {
@@ -561,7 +553,7 @@ const ProfileScreen = () => {
                   </View>
                   <View style={styles.quickStatDivider} />
                   <View style={styles.quickStat}>
-                    <LabelSmall color="accent">{completedGenerations}</LabelSmall>
+                    <LabelSmall color="accent">{totalGenerationsCount}</LabelSmall>
                     <LabelSmall color="tertiary" style={styles.quickStatLabel}>{t('profile.stats.results')}</LabelSmall>
                   </View>
                   <View style={styles.quickStatDivider} />
@@ -647,7 +639,7 @@ const ProfileScreen = () => {
               <View style={styles.statDivider} />
               <StatItem 
                 icon="✨"
-                value={completedGenerations}
+                value={totalGenerationsCount}
                 label={t('profile.stats.combinations')}
                 color="#10B981"
               />
@@ -670,7 +662,7 @@ const ProfileScreen = () => {
             <ActionItem
               icon={require('../../full3dicons/images/photo.png')}
               title={t('profile.goToGallery')}
-              subtitle={t('profile.imagesCount', { count: completedGenerations })}
+              subtitle={t('profile.imagesCount', { count: galleryImagesCount })}
               onPress={() => router.push('/(tabs)/gallery')}
             />
           </GlassCard>
@@ -688,9 +680,10 @@ const ProfileScreen = () => {
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/ai-sparkle.png')}
-              title={t('profile.managePurchases')}
-              onPress={handleCustomerCenter}
+              icon={require('../../full3dicons/images/sparkle.png')}
+              title={t('profile.buyTokens')}
+              subtitle={t('profile.buyTokensSubtitle')}
+              onPress={handleBuyTokens}
             />
             <View style={styles.divider} />
             <ActionItem

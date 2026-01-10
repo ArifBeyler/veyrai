@@ -86,6 +86,7 @@ export type TryOnJob = {
   userPhotoId: string;
   garmentId: string; // Tek kıyafet için (geriye uyumluluk)
   garmentIds?: string[]; // Çoklu kıyafet için (kombin)
+  humanImageUri?: string; // Orijinal profil fotoğrafı (önce/sonra için)
   status: TryOnJobStatus;
   outputUri?: string;
   thumbUri?: string;
@@ -168,6 +169,10 @@ type SessionState = {
   addJob: (job: TryOnJob) => void;
   updateJob: (id: string, updates: Partial<TryOnJob>) => void;
   removeJob: (id: string) => void;
+  
+  // Total generations counter (never decreases, even when jobs are deleted)
+  totalGenerationsCount: number;
+  incrementGenerationsCount: () => void;
   
   // Legacy alias for generations
   generations: TryOnJob[];
@@ -341,17 +346,37 @@ export const useSessionStore = create<SessionState>()(
 
       // Try-on jobs
       jobs: [],
+      totalGenerationsCount: 0,
+      incrementGenerationsCount: () =>
+        set((state) => ({ totalGenerationsCount: state.totalGenerationsCount + 1 })),
       addJob: (job) =>
-        set((state) => ({ jobs: [job, ...state.jobs] })),
-      updateJob: (id, updates) =>
-        set((state) => ({
-          jobs: state.jobs.map((j) =>
-            j.id === id ? { ...j, ...updates } : j
-          ),
+        set((state) => ({ 
+          jobs: [job, ...state.jobs],
+          // Completed job eklendiğinde sayacı artır
+          totalGenerationsCount: job.status === 'completed' 
+            ? state.totalGenerationsCount + 1 
+            : state.totalGenerationsCount
         })),
+      updateJob: (id, updates) =>
+        set((state) => {
+          const oldJob = state.jobs.find(j => j.id === id);
+          const wasCompleted = oldJob?.status === 'completed';
+          const willBeCompleted = updates.status === 'completed';
+          
+          return {
+            jobs: state.jobs.map((j) =>
+              j.id === id ? { ...j, ...updates } : j
+            ),
+            // Job completed olduğunda sayacı artır (sadece ilk kez)
+            totalGenerationsCount: !wasCompleted && willBeCompleted 
+              ? state.totalGenerationsCount + 1 
+              : state.totalGenerationsCount
+          };
+        }),
       removeJob: (id) =>
         set((state) => ({
           jobs: state.jobs.filter((j) => j.id !== id),
+          // Silmede sayaç azalmaz
         })),
 
       // Legacy generations alias (points to jobs)
@@ -456,6 +481,7 @@ export const useSessionStore = create<SessionState>()(
         userPhotos: state.userPhotos,
         garments: state.garments,
         jobs: state.jobs,
+        totalGenerationsCount: state.totalGenerationsCount,
         preferences: state.preferences,
         isPremium: state.isPremium,
         credits: state.credits,

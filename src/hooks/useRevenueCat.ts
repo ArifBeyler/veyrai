@@ -282,6 +282,41 @@ export const useRevenueCat = () => {
     return getPackageByIdentifier(offerings, identifier);
   }, [offerings]);
 
+  // Get token package by identifier (for consumable token purchases)
+  const getTokenPackage = useCallback((identifier: string): PurchasesPackage | null => {
+    if (!offerings?.all) return null;
+    
+    // Token paketleri 'tokens' offering'inde olabilir
+    const tokenOffering = offerings.all['tokens'] || offerings.current;
+    
+    if (!tokenOffering?.availablePackages) return null;
+    
+    // identifier'a göre paketi bul (örn: tokens_10, tokens_50)
+    const pkg = tokenOffering.availablePackages.find(
+      (p) => p.identifier?.toLowerCase() === identifier.toLowerCase()
+    );
+    
+    return pkg || null;
+  }, [offerings]);
+
+  // Purchase token package (consumable)
+  const purchaseTokenPackage = useCallback(async (packageToPurchase: PurchasesPackage) => {
+    try {
+      setIsLoading(true);
+      const info = await purchasePackage(packageToPurchase);
+      setCustomerInfo(info);
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return info;
+    } catch (error: any) {
+      console.error('Token purchase error:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Refresh offerings
   const refreshOfferings = useCallback(async () => {
     try {
@@ -330,12 +365,14 @@ export const useRevenueCat = () => {
     initialize,
     checkEntitlement: checkProEntitlement,
     purchase,
+    purchaseTokenPackage,
     restore,
     presentPaywall,
     presentCustomerCenter: presentCenter,
     setUserId,
     logOut,
     getPackage,
+    getTokenPackage,
     refreshOfferings,
   };
 };

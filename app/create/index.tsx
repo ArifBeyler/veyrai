@@ -21,8 +21,15 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeInRight,
-  SlideInRight
+  SlideInRight,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+  interpolate,
+  Extrapolate,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import {
@@ -522,6 +529,7 @@ const CreateScreen = () => {
     }
 
     const jobId = `job-${Date.now()}`;
+    console.log('Navigating to generation with humanImageUri:', humanImageUri);
     router.replace({
       pathname: '/generation/[id]',
       params: {
@@ -1052,39 +1060,60 @@ const CreateScreen = () => {
           </Animated.View>
         )}
 
-        {/* Step 3: Confirm */}
+        {/* Step 3: Confirm - Yeniden Tasarım */}
         {step === 'confirm' && (
-          <Animated.View entering={SlideInRight} style={styles.confirmContainer}>
-            {/* Large Profile Photo */}
-            <Animated.View entering={FadeIn.delay(100)} style={styles.confirmProfileSection}>
-              <Pressable onPress={() => setStep('profile')} style={styles.confirmProfileCard}>
+          <Animated.View entering={FadeIn} style={styles.confirmContainer}>
+            {/* Hero Profile Section - Tam ekran profil */}
+            <Animated.View entering={FadeIn.delay(100)}>
+              <Pressable onPress={() => setStep('profile')} style={styles.heroProfileCard}>
                 {selectedProfile?.photos[0] && (
                   <Image
                     source={{ uri: selectedProfile.photos[0].uri }}
-                    style={styles.confirmProfileImage}
+                    style={styles.heroProfileImage}
                     resizeMode="cover"
                   />
                 )}
+                {/* Üst gradient - profil adı için */}
                 <LinearGradient
-                  colors={['transparent', 'rgba(0,0,0,0.8)']}
-                  style={styles.confirmProfileGradient}
+                  colors={['rgba(0,0,0,0.6)', 'transparent']}
+                  style={styles.heroTopGradient}
                 >
-                  <View style={styles.confirmProfileInfo}>
-                    <LabelMedium style={styles.confirmProfileName}>
+                  <View style={styles.heroProfileBadge}>
+                    <Image
+                      source={require('../../full3dicons/images/profile.png')}
+                      style={styles.heroProfileBadgeIcon}
+                      resizeMode="contain"
+                    />
+                    <LabelMedium style={styles.heroProfileName}>
                       {selectedProfile?.name}
                     </LabelMedium>
-                    <LabelSmall color="accent">Değiştir</LabelSmall>
                   </View>
+                  <Pressable 
+                    style={styles.heroChangeButton}
+                    onPress={() => setStep('profile')}
+                  >
+                    <LabelSmall color="accent">{t('create.change')}</LabelSmall>
+                  </Pressable>
                 </LinearGradient>
               </Pressable>
             </Animated.View>
 
-            {/* Selected Garments Row */}
-            <Animated.View entering={FadeIn.delay(200)} style={styles.confirmGarmentsSection}>
+            {/* Seçilen Kıyafetler - Kartlar */}
+            <Animated.View entering={FadeInDown.delay(200)} style={styles.confirmGarmentsSection}>
               <View style={styles.confirmGarmentsHeader}>
-                <LabelMedium>Seçilen Parçalar</LabelMedium>
-                <Pressable onPress={() => setStep('garment')}>
-                  <LabelSmall color="accent">Düzenle</LabelSmall>
+                <View style={styles.confirmGarmentsHeaderLeft}>
+                  <LabelMedium>{t('create.selectedParts')}</LabelMedium>
+                  <View style={styles.selectedCountBadge}>
+                    <LabelSmall style={styles.selectedCountText}>
+                      {selectedGarmentIds.length}
+                    </LabelSmall>
+                  </View>
+                </View>
+                <Pressable 
+                  style={styles.editGarmentsButton}
+                  onPress={() => setStep('garment')}
+                >
+                  <LabelSmall color="accent">{t('create.edit')}</LabelSmall>
                 </Pressable>
               </View>
               
@@ -1109,7 +1138,7 @@ const CreateScreen = () => {
                       { backgroundColor: CATEGORY_COLORS[garment.category] }
                     ]}>
                       <LabelSmall style={styles.confirmGarmentBadgeText}>
-                        {garment.category}
+                        {categories.find(c => c.key === garment.category)?.label || garment.category}
                       </LabelSmall>
                     </View>
                   </Animated.View>
@@ -1120,30 +1149,37 @@ const CreateScreen = () => {
             {/* Style Note (if exists) */}
             {styleNoteInput ? (
               <Animated.View entering={FadeIn.delay(400)}>
-                <GlassCard style={styles.confirmStyleNote}>
-                  <LabelSmall color="secondary">💬 Stil Notu</LabelSmall>
+                <View style={styles.confirmStyleNoteCard}>
+                  <LabelSmall color="secondary">💬 {t('create.styleNoteLabel')}</LabelSmall>
                   <BodySmall style={styles.confirmStyleNoteText}>"{styleNoteInput}"</BodySmall>
-                </GlassCard>
+                </View>
               </Animated.View>
             ) : null}
 
-            {/* AI Generation Preview */}
-            <Animated.View entering={FadeIn.delay(500)} style={styles.confirmAISection}>
-              <View style={styles.confirmAIBox}>
-                <Image
-                  source={require('../../full3dicons/images/ai-sparkle.png')}
-                  style={styles.confirmAIIcon}
-                  resizeMode="contain"
-                />
+            {/* AI Generation Box - Modern */}
+            <Animated.View entering={FadeInDown.delay(500)} style={styles.confirmAISection}>
+              <LinearGradient
+                colors={['rgba(181, 255, 31, 0.15)', 'rgba(181, 255, 31, 0.05)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.confirmAIBox}
+              >
+                <View style={styles.confirmAIIconContainer}>
+                  <Image
+                    source={require('../../full3dicons/images/ai-sparkle.png')}
+                    style={styles.confirmAIIcon}
+                    resizeMode="contain"
+                  />
+                </View>
                 <View style={styles.confirmAIText}>
-                  <LabelMedium>AI ile Kombin Oluştur</LabelMedium>
+                  <LabelMedium style={styles.confirmAITitle}>{t('create.aiCreateCombo')}</LabelMedium>
                   <LabelSmall color="secondary">
-                    Profil fotoğrafın üzerinde kıyafetleri deneyeceksin
+                    {t('create.aiDescription')}
                   </LabelSmall>
                 </View>
-              </View>
+              </LinearGradient>
               
-              {/* Credit Info */}
+              {/* Credit Info - Centered */}
               <View style={styles.confirmCreditRow}>
                 <Image
                   source={require('../../full3dicons/images/sparkle.png')}
@@ -1151,7 +1187,7 @@ const CreateScreen = () => {
                   resizeMode="contain"
                 />
                 <LabelSmall color={(isPremium || credits > 0) ? 'accent' : 'tertiary'}>
-                  {isPremium ? t('create.premiumUnlimited') : credits > 0 ? `${credits} ${t('common.credits')}` : t('create.oneCreditWillBeUsed')}
+                  {isPremium ? t('create.premiumUnlimited') : credits > 0 ? t('home.credits', { count: credits }) : t('create.oneCreditWillBeUsed')}
                 </LabelSmall>
               </View>
             </Animated.View>
@@ -1193,10 +1229,9 @@ const CreateScreen = () => {
               size="md"
               style={styles.backButton}
             />
-            <PrimaryButton
-              title={t('create.generate')}
-              onPress={handleGenerate}
-              style={styles.generateButton}
+            <SwipeToConfirm 
+              onConfirm={handleGenerate}
+              label={t('create.swipeToGenerate')}
             />
           </>
         )}
@@ -1218,6 +1253,126 @@ const StepDot: React.FC<{ active: boolean; completed?: boolean }> = ({
     ]}
   />
 );
+
+// Swipe to Confirm Component
+const SWIPE_BUTTON_WIDTH = 70;
+const SWIPE_TRACK_PADDING = 6;
+
+interface SwipeToConfirmProps {
+  onConfirm: () => void;
+  label: string;
+}
+
+const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({ onConfirm, label }) => {
+  const translateX = useSharedValue(0);
+  const trackWidth = width - Spacing.page * 2 - 80; // Geri butonu için yer bırak
+  const maxTranslate = trackWidth - SWIPE_BUTTON_WIDTH - SWIPE_TRACK_PADDING * 2;
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  
+  const triggerHaptic = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+  
+  const triggerSuccessHaptic = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+  
+  const handleConfirm = () => {
+    setIsConfirmed(true);
+    onConfirm();
+  };
+  
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      const newValue = Math.max(0, Math.min(event.translationX, maxTranslate));
+      translateX.value = newValue;
+      
+      // Her %20'de bir haptic feedback
+      const progress = newValue / maxTranslate;
+      const milestone = Math.floor(progress * 5);
+      if (milestone > 0 && milestone !== Math.floor((translateX.value - 5) / maxTranslate * 5)) {
+        runOnJS(triggerHaptic)();
+      }
+    })
+    .onEnd(() => {
+      const progress = translateX.value / maxTranslate;
+      
+      if (progress > 0.85) {
+        // Başarılı - sonuna kaydır ve onayla
+        translateX.value = withSpring(maxTranslate, { damping: 15 });
+        runOnJS(triggerSuccessHaptic)();
+        runOnJS(handleConfirm)();
+      } else {
+        // Başarısız - geri dön
+        translateX.value = withSpring(0, { damping: 15 });
+      }
+    });
+  
+  const buttonStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+  
+  const textStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateX.value,
+      [0, maxTranslate * 0.5, maxTranslate],
+      [1, 0.3, 0],
+      Extrapolate.CLAMP
+    );
+    return { opacity };
+  });
+  
+  const progressStyle = useAnimatedStyle(() => {
+    const progressWidth = interpolate(
+      translateX.value,
+      [0, maxTranslate],
+      [0, trackWidth - SWIPE_TRACK_PADDING * 2],
+      Extrapolate.CLAMP
+    );
+    return { width: progressWidth };
+  });
+  
+  const arrowOpacity = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateX.value,
+      [0, maxTranslate * 0.3],
+      [1, 0],
+      Extrapolate.CLAMP
+    );
+    return { opacity };
+  });
+  
+  return (
+    <View style={[styles.swipeTrack, { width: trackWidth }]}>
+      {/* Progress fill */}
+      <Animated.View style={[styles.swipeProgress, progressStyle]} />
+      
+      {/* Label */}
+      <Animated.View style={[styles.swipeLabelContainer, textStyle]}>
+        <LabelMedium style={styles.swipeLabel}>{label}</LabelMedium>
+        <Animated.View style={arrowOpacity}>
+          <LabelSmall style={styles.swipeArrows}>→→→</LabelSmall>
+        </Animated.View>
+      </Animated.View>
+      
+      {/* Draggable button */}
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[styles.swipeButton, buttonStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.primary, '#9AE600']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.swipeButtonGradient}
+          >
+            <LabelMedium style={styles.swipeButtonIcon}>
+              {isConfirmed ? '✓' : '→'}
+            </LabelMedium>
+          </LinearGradient>
+        </Animated.View>
+      </GestureDetector>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -1530,43 +1685,59 @@ const styles = StyleSheet.create({
   styleNoteHint: {
     marginLeft: 4,
   },
-  // Confirm
+  // Confirm - Yeni Tasarım
   confirmContainer: {
-    gap: 20,
+    gap: 16,
   },
-  // Profile Section - Large Photo
-  confirmProfileSection: {
-    alignItems: 'center',
-  },
-  confirmProfileCard: {
+  // Hero Profile Section
+  heroProfileCard: {
     width: width - Spacing.page * 2,
-    height: 280,
-    borderRadius: BorderRadius.lg,
+    height: 340,
+    borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.dark.surface,
   },
-  confirmProfileImage: {
+  heroProfileImage: {
     width: '100%',
     height: '100%',
   },
-  confirmProfileGradient: {
+  heroTopGradient: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
     height: 80,
-    justifyContent: 'flex-end',
-    padding: 16,
-  },
-  confirmProfileInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    padding: 16,
+    paddingTop: 14,
   },
-  confirmProfileName: {
+  heroProfileBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.pill,
+  },
+  heroProfileBadgeIcon: {
+    width: 18,
+    height: 18,
+  },
+  heroProfileName: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '600',
+  },
+  heroChangeButton: {
+    backgroundColor: 'rgba(181, 255, 31, 0.2)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.pill,
+    borderWidth: 1,
+    borderColor: Colors.accent.primary,
   },
   // Garments Section
   confirmGarmentsSection: {
@@ -1577,15 +1748,40 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  confirmGarmentsHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  selectedCountBadge: {
+    backgroundColor: Colors.accent.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  selectedCountText: {
+    color: '#000',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  editGarmentsButton: {
+    backgroundColor: 'rgba(181, 255, 31, 0.1)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.pill,
+  },
   confirmGarmentsScroll: {
-    gap: 12,
+    gap: 10,
+    paddingVertical: 4,
   },
   confirmGarmentCard: {
-    width: 100,
-    height: 130,
-    borderRadius: BorderRadius.md,
+    width: 110,
+    height: 140,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     backgroundColor: Colors.dark.surface,
+    borderWidth: 1,
+    borderColor: Colors.dark.strokeLight,
   },
   confirmGarmentImage: {
     width: '100%',
@@ -1601,50 +1797,68 @@ const styles = StyleSheet.create({
   },
   confirmGarmentBadgeText: {
     color: '#fff',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
   },
   // Style Note
-  confirmStyleNote: {
+  confirmStyleNoteCard: {
     padding: 14,
     gap: 6,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.dark.strokeLight,
   },
   confirmStyleNoteText: {
     fontStyle: 'italic',
     color: Colors.text.secondary,
   },
-  // AI Section
+  // AI Section - Modern
   confirmAISection: {
-    gap: 12,
-    marginTop: 8,
+    gap: 14,
+    marginTop: 4,
   },
   confirmAIBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: 16,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: 'rgba(181, 255, 31, 0.08)',
+    padding: 18,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.accent.primaryDim,
+    borderColor: 'rgba(181, 255, 31, 0.3)',
+  },
+  confirmAIIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(181, 255, 31, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   confirmAIIcon: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
   },
   confirmAIText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
+  },
+  confirmAITitle: {
+    color: '#fff',
+    fontWeight: '600',
   },
   confirmCreditRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(181, 255, 31, 0.05)',
+    borderRadius: BorderRadius.md,
   },
   confirmCreditIcon: {
-    width: 16,
-    height: 16,
+    width: 18,
+    height: 18,
   },
   // Bottom Actions
   bottomActions: {
@@ -1669,6 +1883,61 @@ const styles = StyleSheet.create({
   generateButton: {
     flex: 1,
     minHeight: 52,
+  },
+  // Swipe to Confirm
+  swipeTrack: {
+    height: 56,
+    backgroundColor: 'rgba(181, 255, 31, 0.1)',
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: 'rgba(181, 255, 31, 0.3)',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  swipeProgress: {
+    position: 'absolute',
+    left: SWIPE_TRACK_PADDING,
+    top: SWIPE_TRACK_PADDING,
+    bottom: SWIPE_TRACK_PADDING,
+    backgroundColor: 'rgba(181, 255, 31, 0.15)',
+    borderRadius: 22,
+  },
+  swipeLabelContainer: {
+    position: 'absolute',
+    left: SWIPE_BUTTON_WIDTH + 10,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  swipeLabel: {
+    color: Colors.accent.primary,
+    fontWeight: '600',
+  },
+  swipeArrows: {
+    color: Colors.accent.primary,
+    letterSpacing: 2,
+    opacity: 0.6,
+  },
+  swipeButton: {
+    position: 'absolute',
+    left: SWIPE_TRACK_PADDING,
+    top: SWIPE_TRACK_PADDING,
+    width: SWIPE_BUTTON_WIDTH,
+    height: 56 - SWIPE_TRACK_PADDING * 2 - 4,
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  swipeButtonGradient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swipeButtonIcon: {
+    color: '#000',
+    fontSize: 20,
+    fontWeight: '700',
   },
   // Main Tabs - Örnek Kıyafetler / Benim Kıyafetlerim
   mainTabsContainer: {

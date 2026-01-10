@@ -183,6 +183,7 @@ const HomeScreen = () => {
                                 params: {
                                   id: job.id,
                                   imageUrl: encodeURIComponent(job.resultImageUrl!),
+                                  humanImageUri: job.humanImageUri ? encodeURIComponent(job.humanImageUri) : undefined,
                                 },
                               });
                             }}
@@ -213,6 +214,7 @@ const HomeScreen = () => {
                               params: {
                                 id: displayJobs[3].id,
                                 imageUrl: encodeURIComponent(displayJobs[3].resultImageUrl!),
+                                humanImageUri: displayJobs[3].humanImageUri ? encodeURIComponent(displayJobs[3].humanImageUri) : undefined,
                               },
                             });
                           }}
@@ -249,6 +251,7 @@ const HomeScreen = () => {
                               params: {
                                 id: job.id,
                                 imageUrl: encodeURIComponent(job.resultImageUrl!),
+                                humanImageUri: job.humanImageUri ? encodeURIComponent(job.humanImageUri) : undefined,
                               },
                             });
                           }}
@@ -288,6 +291,7 @@ const HomeScreen = () => {
                               params: {
                                 id: job.id,
                                 imageUrl: encodeURIComponent(job.resultImageUrl!),
+                                humanImageUri: job.humanImageUri ? encodeURIComponent(job.humanImageUri) : undefined,
                               },
                             });
                           }}

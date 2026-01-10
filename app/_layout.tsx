@@ -120,6 +120,27 @@ const RootLayout = () => {
                 animation: 'slide_from_right',
               }}
             />
+            <Stack.Screen
+              name="support"
+              options={{
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="privacy"
+              options={{
+                presentation: 'card',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="buy-tokens"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
             </Stack>
           </View>
         </QueryClientProvider>

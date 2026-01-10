@@ -82,11 +82,23 @@ const GenerationScreen = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [showOriginal, setShowOriginal] = useState(false);
+  
+  // Get original profile photo
+  const originalPhotoUri = params.humanImageUri ? decodeURIComponent(params.humanImageUri) : null;
+  
+  // Debug log
+  console.log('Generation params:', { 
+    humanImageUri: params.humanImageUri ? 'exists' : 'missing',
+    originalPhotoUri: originalPhotoUri ? 'decoded' : 'null'
+  });
   
   const hasStartedRef = useRef(false);
   const { startTryOn } = useTryOnFlow();
   const isPremium = useSessionStore((s) => s.isPremium);
+  const credits = useSessionStore((s) => s.credits);
   const setFreeCreditsUsed = useSessionStore((s) => s.setFreeCreditsUsed);
+  const useCredit = useSessionStore((s) => s.useCredit);
   const addJob = useSessionStore((s) => s.addJob);
   const removeJob = useSessionStore((s) => s.removeJob);
 
@@ -165,15 +177,29 @@ const GenerationScreen = () => {
           setState('success');
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-          // Update store
+          // Update store - Kredi düşür
           if (!isPremium) {
-            setFreeCreditsUsed(true);
+            if (credits > 0) {
+              // Kredi varsa düşür
+              useCredit();
+              console.log('Kredi kullanıldı, kalan:', credits - 1);
+              
+              // Supabase'de de kredi düşür
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session?.user?.id) {
+                await supabase.rpc('use_credit', { p_user_id: session.user.id });
+              }
+            } else {
+              // İlk ücretsiz kullanım
+              setFreeCreditsUsed(true);
+            }
           }
           
           addJob({
             id: jobId,
             userPhotoId: '',
             garmentId: '',
+            humanImageUri: humanImageUri, // Önce/sonra için orijinal fotoğraf
             status: 'completed',
             resultImageUrl: result.imageUrl,
             createdAt: new Date(),
@@ -425,66 +451,95 @@ const GenerationScreen = () => {
             />
           </Animated.View>
         ) : state === 'success' && resultImageUrl ? (
-          /* ✅ SUCCESS STATE */
+          /* ✅ SUCCESS STATE - Redesigned */
           <Animated.View entering={ZoomIn.springify()} style={styles.resultContainer}>
+            {/* Image Card */}
             <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.resultCardWrapper}>
-              <GlassCard style={styles.resultCard}>
-                {/* Glow effect */}
-                <Animated.View style={[styles.resultGlow, pulseStyle]} />
+              <View style={styles.resultImageContainer}>
+                <Image
+                  source={{ uri: showOriginal && originalPhotoUri ? originalPhotoUri : resultImageUrl }}
+                  style={styles.resultImage}
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
+                />
                 
-                <View style={styles.resultImageContainer}>
-                  <Animated.View style={[styles.resultImageWrapper, imageFadeStyle]}>
-                    <Image
-                      source={{ uri: resultImageUrl }}
-                      style={styles.resultImage}
-                      contentFit="cover"
-                      transition={300}
-                      cachePolicy="memory-disk"
+                {/* Before/After Toggle - Inside Image */}
+                {originalPhotoUri && (
+                  <Pressable 
+                    style={styles.beforeAfterToggle}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowOriginal(!showOriginal);
+                    }}
+                  >
+                    <LinearGradient
+                      colors={showOriginal ? ['#7C3AED', '#9333EA'] : [Colors.accent.primary, '#22c55e']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.beforeAfterGradient}
+                    >
+                      <LabelMedium style={styles.beforeAfterText}>
+                        {showOriginal ? '👤 Önce' : '👔 Sonra'}
+                      </LabelMedium>
+                    </LinearGradient>
+                  </Pressable>
+                )}
+                
+                {/* Shimmer effect */}
+                {!showOriginal && (
+                  <Animated.View style={[styles.successShimmer, successShimmerStyle]}>
+                    <LinearGradient
+                      colors={['transparent', 'rgba(181, 255, 31, 0.3)', 'transparent']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={StyleSheet.absoluteFill}
                     />
-                    {/* Shimmer effect on success */}
-                    <Animated.View style={[styles.successShimmer, successShimmerStyle]}>
-                      <LinearGradient
-                        colors={['transparent', 'rgba(181, 255, 31, 0.4)', 'transparent']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={StyleSheet.absoluteFill}
-                      />
-                    </Animated.View>
                   </Animated.View>
-                </View>
-              </GlassCard>
+                )}
+              </View>
             </Animated.View>
 
-            {/* Success Message */}
-            <Animated.View entering={FadeIn.delay(500)} style={styles.successMessage}>
-              <LabelMedium color="accent" style={styles.successText}>
-                ✨ {t('generation.success')}
-              </LabelMedium>
-            </Animated.View>
+            {/* Bottom Section */}
+            <View style={styles.bottomSection}>
+              {/* Success Message */}
+              <Animated.View entering={FadeIn.delay(400)} style={styles.successMessage}>
+                <LabelMedium color="accent" style={styles.successText}>
+                  ✨ {t('generation.success')}
+                </LabelMedium>
+              </Animated.View>
 
-            <Animated.View entering={FadeIn.delay(600)} style={styles.actionButtons}>
-              <GlassCard style={styles.actionButton} onPress={handleSave}>
-                <View style={styles.actionButtonContent}>
-                  <Image
-                    source={require('../../full3dicons/images/photo.png')}
-                    style={styles.actionIcon}
-                    resizeMode="contain"
-                  />
-                  <LabelMedium>Kaydet</LabelMedium>
-                </View>
-              </GlassCard>
+              {/* Action Buttons - Full Width */}
+              <Animated.View entering={FadeIn.delay(500)} style={styles.actionButtons}>
+                <Pressable style={styles.actionButton} onPress={handleSave}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                    style={styles.actionButtonGradient}
+                  >
+                    <Image
+                      source={require('../../full3dicons/images/photo.png')}
+                      style={styles.actionIcon}
+                      resizeMode="contain"
+                    />
+                    <LabelMedium style={styles.actionButtonText}>Kaydet</LabelMedium>
+                  </LinearGradient>
+                </Pressable>
 
-              <GlassCard style={styles.actionButton} onPress={handleShare}>
-                <View style={styles.actionButtonContent}>
-                  <Image
-                    source={require('../../full3dicons/images/sparkle.png')}
-                    style={styles.actionIcon}
-                    resizeMode="contain"
-                  />
-                  <LabelMedium>Paylaş</LabelMedium>
-                </View>
-              </GlassCard>
-            </Animated.View>
+                <Pressable style={styles.actionButton} onPress={handleShare}>
+                  <LinearGradient
+                    colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                    style={styles.actionButtonGradient}
+                  >
+                    <Image
+                      source={require('../../full3dicons/images/sparkle.png')}
+                      style={styles.actionIcon}
+                      resizeMode="contain"
+                    />
+                    <LabelMedium style={styles.actionButtonText}>Paylaş</LabelMedium>
+                  </LinearGradient>
+                </Pressable>
+              </Animated.View>
+            </View>
           </Animated.View>
         ) : (
           /* ⏳ LOADING STATE */
@@ -776,14 +831,11 @@ const styles = StyleSheet.create({
 
   // Success State
   resultContainer: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
     flex: 1,
-    paddingVertical: 16,
-    position: 'relative',
+    paddingHorizontal: Spacing.page,
   },
   resultCardWrapper: {
-    flex: 1,
+    width: '100%',
     justifyContent: 'center',
     width: '100%',
     alignItems: 'center',
@@ -807,12 +859,44 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
   },
   resultImageContainer: {
-    width: width * 0.88,
-    aspectRatio: 0.72,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: BorderRadius.md,
+    width: '100%',
+    aspectRatio: 0.7,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: Colors.dark.surface,
+  },
+  beforeAfterToggle: {
+    position: 'absolute',
+    top: 16,
+    alignSelf: 'center',
+    zIndex: 10,
+    borderRadius: BorderRadius.pill,
+    overflow: 'hidden',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  beforeAfterGradient: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  beforeAfterText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  bottomSection: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 16,
   },
   resultImageWrapper: {
     width: '100%',
@@ -826,8 +910,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   successMessage: {
-    marginTop: 16,
-    marginBottom: 8,
+    alignItems: 'center',
   },
   successText: {
     fontSize: 18,
@@ -836,14 +919,25 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 16,
+    gap: 12,
   },
   actionButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    minWidth: 145,
+    flex: 1,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+  },
+  actionButtonGradient: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 10,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
   },
   actionButtonContent: {
     flexDirection: 'row',
