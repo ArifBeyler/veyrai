@@ -16,8 +16,18 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.wearify.app",
+      "buildNumber": "1",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "NSCameraUsageDescription": "Wearify fotoğraf çekmenize izin vermek için kamera erişimi gerektirir.",
+        "NSPhotoLibraryUsageDescription": "Wearify fotoğraflarınızı seçmenize izin vermek için galeri erişimi gerektirir.",
+        "NSPhotoLibraryAddUsageDescription": "Wearify oluşturulan görselleri galerinize kaydetmek için erişim gerektirir.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "aps-environment": "production"
       }
     },
     "android": {
@@ -27,7 +37,10 @@
       },
       "package": "com.wearify.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +50,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {
@@ -59,8 +73,10 @@
       "EXPO_PUBLIC_SUPABASE_URL": "https://gclvocafkllnosnbuzvw.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjbHZvY2Fma2xsbm9zbmJ1enZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTY3ODMsImV4cCI6MjA4MzAzMjc4M30.3Qt4ZvCTKaEXLZ9CeGXzLs1binX7JhNl92XdSfl9Mkg",
       "eas": {
-        "projectId": "gclvocafkllnosnbuzvw"
-      }
-    }
+        "projectId": "addeb70b-48b8-49e9-bc41-7b9f6ab21141"
+      },
+      "router": {}
+    },
+    "owner": "arifbeyler"
   }
 }

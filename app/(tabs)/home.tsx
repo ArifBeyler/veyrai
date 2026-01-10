@@ -26,6 +26,7 @@ import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { useTranslation } from '../../src/hooks/useTranslation';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = 16;
@@ -33,6 +34,7 @@ const CARD_GAP = 16;
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const jobs = useSessionStore((s) => s.jobs);
   const profiles = useSessionStore((s) => s.profiles);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
@@ -66,7 +68,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        colors={theme.colors.backgroundGradient as unknown as [string, string, string]}
         style={StyleSheet.absoluteFill}
       />
 

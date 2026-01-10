@@ -264,7 +264,15 @@ export const useRevenueCat = () => {
       setCustomerInfo(null);
       setIsEntitled(false);
       setIsPremium(false);
-    } catch (error) {
+    } catch (error: any) {
+      // Ignore 429 "request in flight" error - logout was already triggered
+      if (error?.code === 16 || error?.info?.backendErrorCode === 7638) {
+        console.log('RevenueCat logout already in progress, ignoring...');
+        setCustomerInfo(null);
+        setIsEntitled(false);
+        setIsPremium(false);
+        return;
+      }
       console.error('Error logging out:', error);
     }
   }, [setIsPremium]);

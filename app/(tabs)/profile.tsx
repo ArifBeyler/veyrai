@@ -2,10 +2,11 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
+  Modal,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -14,7 +15,14 @@ import {
 import Animated, {
   FadeIn,
   FadeInDown,
-  FadeOut
+  FadeOut,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  withSpring,
+  ZoomIn,
+  ZoomOut,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppLanguage } from '../../src/hooks/useAppLanguage';
@@ -25,6 +33,7 @@ import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
+  BodyLarge,
   BodySmall,
   DisplaySmall,
   HeadlineMedium,
@@ -32,14 +41,278 @@ import {
   LabelMedium,
   LabelSmall
 } from '../../src/ui/Typography';
+import { supabase } from '../../src/services/supabase';
+import { useTheme, getAllThemes, Theme, ThemeId } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
+
+// Language config
+const LANGUAGE_CONFIG: Record<string, { name: string; flag: string }> = {
+  tr: { name: 'Türkçe', flag: '🇹🇷' },
+  en: { name: 'English', flag: '🇬🇧' },
+  fr: { name: 'Français', flag: '🇫🇷' },
+};
+
+// Language Transition Overlay Component
+const LanguageTransitionOverlay = ({ 
+  isVisible, 
+  flag, 
+  languageName 
+}: { 
+  isVisible: boolean; 
+  flag: string; 
+  languageName: string;
+}) => {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.5);
+  const flagScale = useSharedValue(0.3);
+  const textOpacity = useSharedValue(0);
+
+  React.useEffect(() => {
+    if (isVisible) {
+      opacity.value = withTiming(1, { duration: 200 });
+      flagScale.value = withDelay(100, withSpring(1, { damping: 12, stiffness: 100 }));
+      scale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 100 }));
+      textOpacity.value = withDelay(200, withTiming(1, { duration: 200 }));
+    } else {
+      opacity.value = withTiming(0, { duration: 300 });
+      flagScale.value = 0.3;
+      scale.value = 0.5;
+      textOpacity.value = 0;
+    }
+  }, [isVisible]);
+
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    pointerEvents: isVisible ? 'auto' : 'none',
+  }));
+
+  const contentStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const flagStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: flagScale.value }],
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  if (!isVisible && opacity.value === 0) return null;
+
+  return (
+    <Animated.View style={[styles.transitionOverlay, overlayStyle]}>
+      <LinearGradient
+        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        style={StyleSheet.absoluteFill}
+      />
+      <Animated.View style={[styles.transitionContent, contentStyle]}>
+        <Animated.Text style={[styles.transitionFlag, flagStyle]}>
+          {flag}
+        </Animated.Text>
+        <Animated.View style={textStyle}>
+          <BodyLarge color="primary" style={styles.transitionText}>
+            {languageName}
+          </BodyLarge>
+        </Animated.View>
+      </Animated.View>
+    </Animated.View>
+  );
+};
+
+// Theme Selector Modal Component
+const ThemeSelectorModal = ({
+  visible,
+  onClose,
+  currentThemeId,
+  onSelectTheme,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  currentThemeId: ThemeId;
+  onSelectTheme: (id: ThemeId) => void;
+}) => {
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const themes = getAllThemes();
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={themeModalStyles.overlay}>
+        <TouchableOpacity 
+          style={StyleSheet.absoluteFill} 
+          onPress={onClose}
+          activeOpacity={1}
+        />
+        <Animated.View 
+          entering={ZoomIn.springify().damping(15)}
+          exiting={ZoomOut.duration(200)}
+          style={[themeModalStyles.container, { paddingBottom: insets.bottom + 20 }]}
+        >
+          <LinearGradient
+            colors={['#1a1a2e', '#16213e', '#1a1a2e']}
+            style={StyleSheet.absoluteFill}
+          />
+          
+          {/* Header */}
+          <View style={themeModalStyles.header}>
+            <HeadlineSmall>{t('profile.selectTheme')}</HeadlineSmall>
+            <TouchableOpacity onPress={onClose} style={themeModalStyles.closeButton}>
+              <BodyLarge color="secondary">✕</BodyLarge>
+            </TouchableOpacity>
+          </View>
+
+          {/* Theme Grid */}
+          <ScrollView 
+            style={themeModalStyles.scrollView}
+            contentContainerStyle={themeModalStyles.grid}
+            showsVerticalScrollIndicator={false}
+          >
+            {themes.map((theme) => (
+              <TouchableOpacity
+                key={theme.id}
+                style={[
+                  themeModalStyles.themeItem,
+                  currentThemeId === theme.id && themeModalStyles.themeItemSelected,
+                ]}
+                onPress={() => onSelectTheme(theme.id)}
+                activeOpacity={0.7}
+              >
+                {/* Theme Preview Gradient */}
+                <LinearGradient
+                  colors={[theme.preview[0], theme.preview[1]]}
+                  style={themeModalStyles.themePreview}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  {/* Accent Color Dot */}
+                  <View style={[themeModalStyles.accentDot, { backgroundColor: theme.colors.accent }]} />
+                </LinearGradient>
+                
+                {/* Theme Info */}
+                <View style={themeModalStyles.themeInfo}>
+                  <LabelMedium style={themeModalStyles.themeEmoji}>{theme.emoji}</LabelMedium>
+                  <LabelSmall color={currentThemeId === theme.id ? 'accent' : 'primary'}>
+                    {theme.name}
+                  </LabelSmall>
+                </View>
+
+                {/* Selected Indicator */}
+                {currentThemeId === theme.id && (
+                  <View style={[themeModalStyles.selectedBadge, { backgroundColor: theme.colors.accent }]}>
+                    <LabelSmall style={{ color: '#000', fontSize: 10 }}>✓</LabelSmall>
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+};
+
+const themeModalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    backgroundColor: '#1a1a2e',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 16,
+    gap: 12,
+  },
+  themeItem: {
+    width: (Dimensions.get('window').width - 56) / 2,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  themeItemSelected: {
+    borderColor: Colors.accent.primary,
+  },
+  themePreview: {
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accentDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  themeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  themeEmoji: {
+    fontSize: 18,
+  },
+  selectedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setLang, resolvedLang, supportedLanguages } = useAppLanguage();
-  const [showLanguageChangeToast, setShowLanguageChangeToast] = React.useState(false);
+  const { theme, themeId, setTheme } = useTheme();
+  const [showLanguageChangeToast, setShowLanguageChangeToast] = useState(false);
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
+  const [transitionLang, setTransitionLang] = useState<string | null>(null);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   
   // Auto-hide toast after 1.5 seconds
   useEffect(() => {
@@ -84,8 +357,10 @@ const ProfileScreen = () => {
         {
           text: t('profile.logout'),
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            // Supabase'den çıkış yap
+            await supabase.auth.signOut();
             clearUserData();
             setHasCompletedOnboarding(false);
             router.replace('/welcome');
@@ -144,24 +419,14 @@ const ProfileScreen = () => {
 
   const handleChangeLanguage = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    const languageNames: Record<string, string> = {
-      tr: 'Türkçe',
-      en: 'English',
-      fr: 'Français',
-    };
 
     Alert.alert(
       t('profile.selectLanguage'),
       '',
       [
         ...supportedLanguages.map((lang) => ({
-          text: languageNames[lang],
-          onPress: () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setShowLanguageChangeToast(true);
-            setLang(lang);
-          },
+          text: `${LANGUAGE_CONFIG[lang].flag} ${LANGUAGE_CONFIG[lang].name}`,
+          onPress: () => handleSelectLanguage(lang),
           style: resolvedLang === lang ? 'default' : undefined,
         })),
         { text: t('common.cancel'), style: 'cancel' },
@@ -170,11 +435,57 @@ const ProfileScreen = () => {
     );
   };
 
+  const handleSelectLanguage = async (lang: string) => {
+    if (lang === resolvedLang) return;
+    
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    
+    // Show transition overlay
+    setTransitionLang(lang);
+    setIsChangingLanguage(true);
+    
+    // Wait a bit for animation
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    // Change language
+    await setLang(lang);
+    
+    // Keep overlay visible briefly after change
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    // Hide overlay
+    setIsChangingLanguage(false);
+    setTransitionLang(null);
+  };
+
+  const handleOpenThemeSelector = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowThemeModal(true);
+  };
+
+  const handleSelectTheme = async (id: ThemeId) => {
+    if (id === themeId) {
+      setShowThemeModal(false);
+      return;
+    }
+    
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await setTheme(id);
+    setShowThemeModal(false);
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        colors={theme.colors.backgroundGradient as unknown as [string, string, string]}
         style={StyleSheet.absoluteFill}
+      />
+
+      {/* Language Transition Overlay */}
+      <LanguageTransitionOverlay
+        isVisible={isChangingLanguage}
+        flag={transitionLang ? LANGUAGE_CONFIG[transitionLang]?.flag || '🌐' : '🌐'}
+        languageName={transitionLang ? LANGUAGE_CONFIG[transitionLang]?.name || '' : ''}
       />
 
       <ScrollView
@@ -223,7 +534,7 @@ const ProfileScreen = () => {
                   </View>
                 )}
                 {(isPremium || credits > 0) && (
-                  <View style={styles.premiumBadge}>
+                  <View style={[styles.premiumBadge, { backgroundColor: theme.colors.accent }]}>
                     <Image
                       source={require('../../full3dicons/images/sparkle.png')}
                       style={styles.premiumIcon}
@@ -276,12 +587,12 @@ const ProfileScreen = () => {
         {/* Subscription Status - Show premium card if user has credits or is premium */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
           {(isPremium || credits > 0) ? (
-            <GlassCard style={styles.subscriptionCardPremium}>
+            <GlassCard style={[styles.subscriptionCardPremium, { borderColor: theme.colors.accent }]}>
               <View style={styles.subscriptionHeader}>
-                <View style={styles.premiumIconContainer}>
+                <View style={[styles.premiumIconContainer, { backgroundColor: theme.colors.accentDim }]}>
                   <Image
                     source={require('../../full3dicons/images/sparkle.png')}
-                    style={styles.subscriptionIcon}
+                    style={[styles.subscriptionIcon, { tintColor: theme.colors.accent }]}
                     resizeMode="contain"
                   />
                 </View>
@@ -396,6 +707,13 @@ const ProfileScreen = () => {
             />
             <View style={styles.divider} />
             <ActionItem
+              icon={require('../../full3dicons/images/sparkle.png')}
+              title={t('profile.changeTheme')}
+              subtitle={`${theme.emoji} ${theme.name}`}
+              onPress={handleOpenThemeSelector}
+            />
+            <View style={styles.divider} />
+            <ActionItem
               icon={require('../../full3dicons/images/wardrobe.png')}
               title="Kıyafetleri Yenile"
               subtitle="Yeni kombinleri yükle"
@@ -452,6 +770,14 @@ const ProfileScreen = () => {
           </GlassCard>
         </Animated.View>
       )}
+
+      {/* Theme Selector Modal */}
+      <ThemeSelectorModal
+        visible={showThemeModal}
+        onClose={() => setShowThemeModal(false)}
+        currentThemeId={themeId}
+        onSelectTheme={handleSelectTheme}
+      />
     </View>
   );
 };
@@ -806,6 +1132,25 @@ const styles = StyleSheet.create({
   toastIcon: {
     width: 20,
     height: 20,
+  },
+  // Language Transition Overlay
+  transitionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2000,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  transitionContent: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  transitionFlag: {
+    fontSize: 80,
+  },
+  transitionText: {
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

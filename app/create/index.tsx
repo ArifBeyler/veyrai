@@ -97,6 +97,7 @@ const CreateScreen = () => {
   const addGarment = useSessionStore((s) => s.addGarment);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const isPremium = useSessionStore((s) => s.isPremium);
+  const credits = useSessionStore((s) => s.credits);
   
   // Store'dan seçili profil ID'sini al
   const storeSelectedProfileId = useSessionStore((s) => s.selectedProfileId);
@@ -117,8 +118,8 @@ const CreateScreen = () => {
     }
   }, [storeSelectedProfileId, activeProfileId, profiles]);
 
-  // Trial logic: First generation is free, then show paywall
-  const shouldShowPaywall = freeCreditsUsed && !isPremium;
+  // Trial logic: Show paywall only if free credits used AND not premium AND no credits
+  const shouldShowPaywall = freeCreditsUsed && !isPremium && credits <= 0;
 
   const selectedProfile = useMemo(
     () => profiles.find((p) => p.id === selectedProfileId),
@@ -264,7 +265,10 @@ const CreateScreen = () => {
   // Photo guide'dan devam et
   const handleContinueFromGuide = () => {
     setShowPhotoGuide(false);
-    showPhotoSourcePicker();
+    // Modal kapandıktan sonra action sheet aç
+    setTimeout(() => {
+      showPhotoSourcePicker();
+    }, 400);
   };
   
   // Fotoğraf kaynağı seçimi
@@ -545,7 +549,7 @@ const CreateScreen = () => {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Photo Guide Modal */}
+      {/* Photo Guide Modal - Simple Text Alert */}
       <Modal
         visible={showPhotoGuide}
         animationType="fade"
@@ -572,50 +576,36 @@ const CreateScreen = () => {
             
             {/* Title */}
             <View style={styles.photoGuideHeader}>
-              <Image
-                source={require('../../full3dicons/images/profile.png')}
-                style={styles.photoGuideIcon}
-                resizeMode="contain"
-              />
               <HeadlineMedium style={styles.photoGuideTitle}>
                 {t('create.photoGuide.title')}
               </HeadlineMedium>
             </View>
             
-            {/* Tips */}
+            {/* Tips - Text Only */}
             <View style={styles.photoGuideTips}>
               <View style={styles.photoGuideTipRow}>
-                <View style={styles.tipIconGood}>
-                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
-                </View>
+                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
                 <View style={styles.tipContent}>
-                  <LabelMedium>{t('create.photoGuide.goodLighting')}</LabelMedium>
-                  <BodySmall color="secondary">
-                    {t('create.photoGuide.goodLightingDesc')}
+                  <BodySmall color="primary">
+                    {t('create.photoGuide.goodLighting')} - {t('create.photoGuide.goodLightingDesc')}
                   </BodySmall>
                 </View>
               </View>
               
               <View style={styles.photoGuideTipRow}>
-                <View style={styles.tipIconGood}>
-                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
-                </View>
+                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
                 <View style={styles.tipContent}>
-                  <LabelMedium>{t('create.photoGuide.fullBody')}</LabelMedium>
-                  <BodySmall color="secondary">
-                    {t('create.photoGuide.fullBodyDesc')}
+                  <BodySmall color="primary">
+                    {t('create.photoGuide.fullBody')} - {t('create.photoGuide.fullBodyDesc')}
                   </BodySmall>
                 </View>
               </View>
               
               <View style={styles.photoGuideTipRow}>
-                <View style={styles.tipIconGood}>
-                  <LabelSmall style={styles.tipIconText}>✓</LabelSmall>
-                </View>
+                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
                 <View style={styles.tipContent}>
-                  <LabelMedium>{t('create.photoGuide.straightPosture')}</LabelMedium>
-                  <BodySmall color="secondary">
-                    {t('create.photoGuide.straightPostureDesc')}
+                  <BodySmall color="primary">
+                    {t('create.photoGuide.straightPosture')} - {t('create.photoGuide.straightPostureDesc')}
                   </BodySmall>
                 </View>
               </View>
@@ -623,40 +613,11 @@ const CreateScreen = () => {
               <View style={styles.photoGuideDivider} />
               
               <View style={styles.photoGuideTipRow}>
-                <View style={styles.tipIconBad}>
-                  <LabelSmall style={styles.tipIconText}>✕</LabelSmall>
-                </View>
+                <LabelMedium style={[styles.tipBullet, { color: '#ef4444' }]}>✕</LabelMedium>
                 <View style={styles.tipContent}>
-                  <LabelMedium>{t('create.photoGuide.avoidTitle')}</LabelMedium>
                   <BodySmall color="secondary">
-                    {t('create.photoGuide.avoidDesc')}
+                    {t('create.photoGuide.avoidTitle')}: {t('create.photoGuide.avoidDesc')}
                   </BodySmall>
-                </View>
-              </View>
-            </View>
-            
-            {/* Example Images Placeholder */}
-            <View style={styles.photoGuideExamples}>
-              <View style={styles.exampleImageContainer}>
-                <View style={styles.exampleGood}>
-                  <Image
-                    source={require('../../full3dicons/images/profile.png')}
-                    style={styles.exampleImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.exampleBadge}>
-                    <LabelSmall style={styles.exampleBadgeText}>✓ {t('create.photoGuide.good')}</LabelSmall>
-                  </View>
-                </View>
-                <View style={styles.exampleBad}>
-                  <Image
-                    source={require('../../full3dicons/images/profile.png')}
-                    style={[styles.exampleImage, { opacity: 0.3 }]}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.exampleBadgeBad}>
-                    <LabelSmall style={styles.exampleBadgeText}>✕ {t('create.photoGuide.bad')}</LabelSmall>
-                  </View>
                 </View>
               </View>
             </View>
@@ -693,7 +654,7 @@ const CreateScreen = () => {
               resizeMode="contain"
             />
             <LabelSmall color="accent">
-              {isPremium ? '∞' : freeCreditsUsed ? '0' : '1'}
+              {isPremium ? '∞' : credits > 0 ? credits : freeCreditsUsed ? '0' : '1'}
             </LabelSmall>
           </View>
         )}
@@ -1148,7 +1109,7 @@ const CreateScreen = () => {
                       { backgroundColor: CATEGORY_COLORS[garment.category] }
                     ]}>
                       <LabelSmall style={styles.confirmGarmentBadgeText}>
-                        {CATEGORIES.find(c => c.key === garment.category)?.label}
+                        {garment.category}
                       </LabelSmall>
                     </View>
                   </Animated.View>
@@ -1189,8 +1150,8 @@ const CreateScreen = () => {
                   style={styles.confirmCreditIcon}
                   resizeMode="contain"
                 />
-                <LabelSmall color={isPremium ? 'accent' : 'tertiary'}>
-                  {isPremium ? t('create.premiumUnlimited') : t('create.oneCreditWillBeUsed')}
+                <LabelSmall color={(isPremium || credits > 0) ? 'accent' : 'tertiary'}>
+                  {isPremium ? t('create.premiumUnlimited') : credits > 0 ? `${credits} ${t('common.credits')}` : t('create.oneCreditWillBeUsed')}
                 </LabelSmall>
               </View>
             </Animated.View>
@@ -1805,6 +1766,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#22c55e',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tipBullet: {
+    width: 20,
+    color: Colors.accent.primary,
+    fontSize: 16,
   },
   tipIconBad: {
     width: 28,

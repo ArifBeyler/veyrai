@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,33 +8,86 @@ import {
   Alert,
   Image,
   ActivityIndicator,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  FadeOut,
+  SlideInRight,
+  SlideInLeft,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  interpolateColor,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Spacing } from '../src/ui/theme';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
+import { BlurView } from 'expo-blur';
+import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
 import {
+  DisplaySmall,
   HeadlineMedium,
+  HeadlineSmall,
   BodyMedium,
+  BodySmall,
   LabelMedium,
+  LabelSmall,
 } from '../src/ui/Typography';
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { supabase } from '../src/services/supabase';
 import { useSessionStore } from '../src/state/useSessionStore';
+import { useTranslation } from '../src/hooks/useTranslation';
+
+const { width } = Dimensions.get('window');
 
 const AuthScreen = () => {
   const insets = useSafeAreaInsets();
-  const [isLogin, setIsLogin] = useState(true);
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [appleAuthAvailable, setAppleAuthAvailable] = useState(false);
+  
+  const tabIndicatorPosition = useSharedValue(0);
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
   
   const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
   const clearUserData = useSessionStore((s) => s.clearUserData);
+
+  // Tab indicator animation
+  const tabIndicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: withSpring(tabIndicatorPosition.value * (width - 48) / 2) }],
+  }));
+
+  const handleTabChange = (tab: 'login' | 'register') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setActiveTab(tab);
+    tabIndicatorPosition.value = tab === 'login' ? 0 : 1;
+  };
+
+  // Check if Apple Auth is available
+  useEffect(() => {
+    const checkAppleAuth = async () => {
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      setAppleAuthAvailable(isAvailable);
+    };
+    checkAppleAuth();
+  }, []);
 
   // Check if already logged in
   useEffect(() => {
@@ -42,7 +95,6 @@ const AuthScreen = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          // Already logged in
           setHasCompletedOnboarding(true);
           router.replace('/(tabs)/home');
         }
@@ -54,9 +106,7 @@ const AuthScreen = () => {
     };
     checkSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
       if (event === 'SIGNED_IN' && session?.user) {
         setHasCompletedOnboarding(true);
         router.replace('/(tabs)/home');
@@ -68,12 +118,12 @@ const AuthScreen = () => {
 
   const handleAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Email ve şifre gerekli');
+      Alert.alert(t('common.error'), t('auth.emailAndPasswordRequired'));
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Hata', 'Şifre en az 6 karakter olmalı');
+      Alert.alert(t('common.error'), t('auth.passwordMinLength'));
       return;
     }
 
@@ -81,53 +131,41 @@ const AuthScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      if (isLogin) {
-        // LOGIN
+      if (activeTab === 'login') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim().toLowerCase(),
           password,
         });
         
-        if (error) {
-          console.error('Login error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
-        console.log('Login success:', data.user?.email);
         clearUserData();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setHasCompletedOnboarding(true);
         router.replace('/(tabs)/home');
       } else {
-        // SIGNUP
         const { data, error } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password,
+          options: {
+            data: { full_name: name.trim() || undefined },
+          },
         });
         
-        if (error) {
-          console.error('Signup error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
-        console.log('Signup success:', data.user?.email);
-        
-        // Email doğrulama yok - direkt otomatik giriş
         if (data.user && data.session) {
           clearUserData();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setHasCompletedOnboarding(true);
           router.replace('/(tabs)/home');
         } else if (data.user) {
-          // User created but no session - try to sign in
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          const { error: signInError } = await supabase.auth.signInWithPassword({
             email: email.trim().toLowerCase(),
             password,
           });
           
-          if (signInError) {
-            throw signInError;
-          }
+          if (signInError) throw signInError;
           
           clearUserData();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -136,17 +174,16 @@ const AuthScreen = () => {
         }
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
-      let msg = 'Bir hata oluştu';
+      let msg = t('auth.genericError');
       if (error.message?.includes('Invalid login') || error.message?.includes('Invalid credentials')) {
-        msg = 'Email veya şifre hatalı';
+        msg = t('auth.invalidCredentials');
       } else if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
-        msg = 'Bu email zaten kayıtlı. Giriş yapmayı deneyin.';
-        setIsLogin(true); // Switch to login tab
+        msg = t('auth.alreadyRegistered');
+        handleTabChange('login');
       } else if (error.message) {
         msg = error.message;
       }
-      Alert.alert('Hata', msg);
+      Alert.alert(t('common.error'), msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -157,6 +194,96 @@ const AuthScreen = () => {
     clearUserData();
     setHasCompletedOnboarding(true);
     router.replace('/(tabs)/home');
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setIsAppleLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const rawNonce = Array.from(
+        await Crypto.getRandomBytesAsync(32)
+      ).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
+
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+        nonce: hashedNonce,
+      });
+
+      if (!credential.identityToken) {
+        throw new Error(t('auth.appleSignInError.authFailed'));
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+        nonce: rawNonce,
+      });
+
+      if (error) throw error;
+
+      if (credential.fullName?.givenName || credential.fullName?.familyName) {
+        const fullName = [
+          credential.fullName.givenName,
+          credential.fullName.familyName,
+        ].filter(Boolean).join(' ');
+
+        if (fullName && data.user) {
+          await supabase.auth.updateUser({
+            data: { full_name: fullName },
+          });
+        }
+      }
+
+      clearUserData();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setHasCompletedOnboarding(true);
+      router.replace('/(tabs)/home');
+    } catch (error: any) {
+      // Detaylı hata logla
+      console.log('🍎 Apple Sign In Error:', JSON.stringify(error, null, 2));
+      console.log('🍎 Error message:', error.message);
+      console.log('🍎 Error code:', error.code);
+      
+      if (error.code === 'ERR_REQUEST_CANCELED' || error.code === 'ERR_CANCELED') {
+        return;
+      }
+      
+      let title = t('auth.appleSignInError.genericTitle');
+      let message = '';
+      
+      const errorMessage = error.message?.toLowerCase() || '';
+      const errorCode = error.code || '';
+      
+      if (errorMessage.includes('unknown reason') || errorMessage.includes('failed for an unknown')) {
+        title = t('auth.appleSignInError.unknownTitle');
+        message = t('auth.appleSignInError.unknownMessage');
+      } else if (errorMessage.includes('network') || errorMessage.includes('internet')) {
+        title = t('auth.appleSignInError.networkTitle');
+        message = t('auth.appleSignInError.networkMessage');
+      } else if (errorMessage.includes('invalid') || errorMessage.includes('token')) {
+        title = t('auth.appleSignInError.validationTitle');
+        message = t('auth.appleSignInError.validationMessage');
+      } else if (errorCode === 'ERR_REQUEST_UNKNOWN') {
+        title = t('auth.appleSignInError.serverTitle');
+        message = t('auth.appleSignInError.serverMessage');
+      } else {
+        message = t('auth.appleSignInError.genericMessage');
+      }
+      
+      Alert.alert(title, message, [{ text: t('auth.appleSignInError.ok'), style: 'default' }]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsAppleLoading(false);
+    }
   };
 
   if (checkingSession) {
@@ -171,82 +298,226 @@ const AuthScreen = () => {
     );
   }
 
+  const isLogin = activeTab === 'login';
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Background */}
       <LinearGradient
-        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        colors={isLogin ? ['#0B0B0C', '#0f1629', '#0B0B0C'] : ['#0B0B0C', '#1a0f29', '#0B0B0C']}
         style={StyleSheet.absoluteFill}
       />
-
-      <View style={[styles.content, { paddingTop: insets.top + 40 }]}>
-        {/* Logo */}
-        <Animated.View entering={FadeIn.delay(100)} style={styles.logoContainer}>
-          <Image
-            source={require('../full3dicons/images/t-shirts.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <HeadlineMedium>Wearify</HeadlineMedium>
-          <BodyMedium color="secondary">
-            {isLogin ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
-          </BodyMedium>
-        </Animated.View>
-
-        {/* Form */}
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.form}>
-          <GlassCard style={styles.inputCard}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor={Colors.text.tertiary}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-            />
-          </GlassCard>
-
-          <GlassCard style={styles.inputCard}>
-            <TextInput
-              style={styles.input}
-              placeholder="Şifre (min 6 karakter)"
-              placeholderTextColor={Colors.text.tertiary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="password"
-            />
-          </GlassCard>
-
-          <PrimaryButton
-            title={isLogin ? 'Giriş Yap' : 'Kayıt Ol'}
-            onPress={handleAuth}
-            loading={isLoading}
-          />
-
-          <GlassCard
-            style={styles.switchButton}
-            onPress={() => setIsLogin(!isLogin)}
-          >
-            <LabelMedium color="secondary">
-              {isLogin ? 'Hesabın yok mu? Kayıt ol' : 'Hesabın var mı? Giriş yap'}
-            </LabelMedium>
-          </GlassCard>
-        </Animated.View>
-
-        {/* Skip button */}
-        <Animated.View entering={FadeIn.delay(400)}>
-          <GlassCard style={styles.skipButton} onPress={handleSkip}>
-            <LabelMedium color="tertiary">Demo modunda devam et →</LabelMedium>
-          </GlassCard>
-        </Animated.View>
+      
+      {/* Accent Glow */}
+      <View style={styles.glowContainer}>
+        <Animated.View 
+          style={[
+            styles.glowOrb,
+            { backgroundColor: isLogin ? '#7C3AED' : '#EC4899' },
+          ]} 
+        />
       </View>
+
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <DisplaySmall style={styles.appName}>Wearify</DisplaySmall>
+        </Animated.View>
+
+        {/* Tab Switcher */}
+        <Animated.View entering={FadeInDown.delay(200)} style={styles.tabContainer}>
+          <View style={styles.tabBackground}>
+            <Animated.View style={[styles.tabIndicator, tabIndicatorStyle]} />
+            
+            <TouchableOpacity
+              style={styles.tab}
+              onPress={() => handleTabChange('login')}
+              activeOpacity={0.7}
+            >
+              <BodyMedium 
+                color={isLogin ? 'primary' : 'tertiary'} 
+                style={[styles.tabText, isLogin && styles.tabTextActive]}
+              >
+                {t('auth.login')}
+              </BodyMedium>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.tab}
+              onPress={() => handleTabChange('register')}
+              activeOpacity={0.7}
+            >
+              <BodyMedium 
+                color={!isLogin ? 'primary' : 'tertiary'} 
+                style={[styles.tabText, !isLogin && styles.tabTextActive]}
+              >
+                {t('auth.register')}
+              </BodyMedium>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+
+        {/* Form Card */}
+        <Animated.View 
+          entering={FadeInDown.delay(300).springify()} 
+          style={styles.formContainer}
+        >
+          <GlassCard style={styles.formCard}>
+            {/* Title */}
+            <View style={styles.formHeader}>
+              <HeadlineSmall>
+                {isLogin ? `👋 ${t('auth.welcomeBack')}` : `✨ ${t('auth.createAccount')}`}
+              </HeadlineSmall>
+              <BodySmall color="secondary" style={styles.formSubtitle}>
+                {isLogin 
+                  ? t('auth.loginDescription')
+                  : t('auth.registerDescription')}
+              </BodySmall>
+            </View>
+
+            {/* Name Input (only for register) */}
+            {!isLogin && (
+              <Animated.View entering={FadeInUp.delay(100)} exiting={FadeOut}>
+                <View style={styles.inputWrapper}>
+                  <View style={styles.inputIconContainer}>
+                    <Image
+                      source={require('../full3dicons/images/profile-icon.png')}
+                      style={styles.inputIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={t('auth.nameOptional')}
+                    placeholderTextColor={Colors.text.tertiary}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    onSubmitEditing={() => emailInputRef.current?.focus()}
+                  />
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Email Input */}
+            <View style={styles.inputWrapper}>
+              <View style={styles.inputIconContainer}>
+                <LabelMedium style={styles.inputIconEmoji}>📧</LabelMedium>
+              </View>
+              <TextInput
+                ref={emailInputRef}
+                style={styles.input}
+                placeholder={t('auth.emailPlaceholder')}
+                placeholderTextColor={Colors.text.tertiary}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
+              />
+            </View>
+
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <View style={styles.inputIconContainer}>
+                <LabelMedium style={styles.inputIconEmoji}>🔒</LabelMedium>
+              </View>
+              <TextInput
+                ref={passwordInputRef}
+                style={styles.input}
+                placeholder={isLogin ? t('auth.password') : t('auth.passwordPlaceholder')}
+                placeholderTextColor={Colors.text.tertiary}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete="password"
+                returnKeyType="done"
+                onSubmitEditing={handleAuth}
+              />
+            </View>
+
+            {/* Submit Button */}
+            <PrimaryButton
+              title={isLogin ? t('auth.login') : t('auth.createAccount')}
+              onPress={handleAuth}
+              loading={isLoading}
+              style={[
+                styles.submitButton,
+                !isLogin && styles.submitButtonRegister,
+              ]}
+            />
+
+            {/* Apple Sign In */}
+            {Platform.OS === 'ios' && appleAuthAvailable && (
+              <View style={styles.appleSection}>
+                <View style={styles.dividerContainer}>
+                  <View style={styles.dividerLine} />
+                  <LabelSmall color="tertiary">{t('auth.or')}</LabelSmall>
+                  <View style={styles.dividerLine} />
+                </View>
+                
+                <View style={styles.appleButtonWrapper}>
+                  <AppleAuthentication.AppleAuthenticationButton
+                    buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                    buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                    cornerRadius={12}
+                    style={styles.appleButton}
+                    onPress={handleAppleSignIn}
+                  />
+                  
+                  {isAppleLoading && (
+                    <View style={styles.appleLoadingOverlay}>
+                      <ActivityIndicator size="small" color={Colors.accent.primary} />
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+          </GlassCard>
+        </Animated.View>
+
+        {/* Skip Button */}
+        <Animated.View entering={FadeIn.delay(500)} style={styles.skipContainer}>
+          <TouchableOpacity
+            style={styles.skipButton}
+            onPress={handleSkip}
+            activeOpacity={0.7}
+          >
+            <BodySmall color="tertiary">{t('auth.continueWithoutLogin')}</BodySmall>
+            <LabelSmall color="accent"> →</LabelSmall>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Footer */}
+        <Animated.View entering={FadeIn.delay(600)} style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+          <BodySmall color="tertiary" style={styles.footerText}>
+            {t('auth.termsNotice', {
+              terms: t('auth.termsOfService'),
+              privacy: t('auth.privacyPolicy'),
+            })}
+          </BodySmall>
+        </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -260,41 +531,181 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.page,
-    justifyContent: 'center',
-    gap: 32,
+  },
+  glowContainer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  glowOrb: {
+    width: width * 1.5,
+    height: width * 1.5,
+    borderRadius: width,
+    opacity: 0.08,
+    position: 'absolute',
+    top: -width * 0.8,
+  },
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
   logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 24,
+    backgroundColor: 'transparent',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
+    borderRadius: 24,
   },
-  form: {
+  appName: {
+    letterSpacing: 1,
+  },
+  // Tab Switcher
+  tabContainer: {
+    marginBottom: 24,
+  },
+  tabBackground: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: BorderRadius.lg,
+    padding: 4,
+    position: 'relative',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: (width - 48 - 8) / 2,
+    height: '100%',
+    backgroundColor: Colors.accent.primary,
+    borderRadius: BorderRadius.md,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  tabText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    fontWeight: '700',
+    color: '#000',
+  },
+  // Form
+  formContainer: {
+    marginBottom: 24,
+  },
+  formCard: {
+    padding: 24,
     gap: 16,
   },
-  inputCard: {
-    padding: 0,
+  formHeader: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+  },
+  inputIconContainer: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputIcon: {
+    width: 22,
+    height: 22,
+    opacity: 0.6,
+  },
+  inputIconEmoji: {
+    fontSize: 18,
   },
   input: {
+    flex: 1,
     color: Colors.text.primary,
-    fontSize: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    fontSize: 15,
+    paddingVertical: 14,
+    paddingRight: 16,
   },
-  switchButton: {
+  submitButton: {
+    marginTop: 8,
+  },
+  submitButtonRegister: {
+    backgroundColor: '#EC4899',
+  },
+  // Apple
+  appleSection: {
+    marginTop: 8,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    gap: 12,
+    marginBottom: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  appleButtonWrapper: {
+    position: 'relative',
+  },
+  appleButton: {
+    width: '100%',
+    height: 50,
+  },
+  appleLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Skip
+  skipContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
   skipButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  // Footer
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  footerText: {
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
 

@@ -31,7 +31,38 @@
     "registerError": "Failed to sign up",
     "emailExists": "This email is already in use. Try signing in.",
     "loginSubtitle": "Sign in to your account",
-    "registerSubtitle": "Create a new account"
+    "registerSubtitle": "Create a new account",
+    "welcomeBack": "Welcome Back!",
+    "createAccount": "Create Account",
+    "loginDescription": "Sign in to try on your outfits",
+    "registerDescription": "Create a free account and get started",
+    "nameOptional": "Name (optional)",
+    "emailPlaceholder": "Email address",
+    "or": "or",
+    "continueWithoutLogin": "Continue without signing in",
+    "termsNotice": "By continuing, you agree to our {{terms}} and {{privacy}}.",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "appleSignInError": {
+      "title": "Apple Sign In Error",
+      "unknownTitle": "🍎 Apple Sign In Error",
+      "unknownMessage": "Unable to sign in with Apple right now.\n\n📱 Possible reasons:\n• You may not be signed in to your iCloud account\n• \"Sign in with Apple\" may be disabled in your Apple ID settings\n• There may be an internet connection issue\n\n💡 Solution:\nCheck Settings → Apple ID → Password & Security → Sign in with Apple.",
+      "networkTitle": "🌐 Connection Error",
+      "networkMessage": "Please check your internet connection and try again.",
+      "validationTitle": "🔐 Verification Error",
+      "validationMessage": "Apple authentication failed.\n\nPlease try again or sign in with email.",
+      "serverTitle": "🍎 Apple Sign In Error",
+      "serverMessage": "Unable to connect to Apple servers.\n\n• Make sure your iCloud account is active\n• Try again in a few minutes",
+      "genericTitle": "Apple Sign In Failed",
+      "genericMessage": "An unexpected error occurred.\n\nYou can try signing in with email or try again later.",
+      "authFailed": "Apple authentication failed",
+      "ok": "OK"
+    },
+    "emailAndPasswordRequired": "Email and password are required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "invalidCredentials": "Invalid email or password",
+    "alreadyRegistered": "This email is already registered. Try signing in.",
+    "genericError": "An error occurred"
   },
   "onboarding": {
     "step1": {
@@ -88,6 +119,9 @@
     "changeLanguage": "Change Language",
     "selectLanguage": "Select Language",
     "changingLanguage": "Changing language...",
+    "changeTheme": "Change Theme",
+    "selectTheme": "Select Theme",
+    "themeChanged": "Theme changed",
     "logout": "Sign Out",
     "logoutConfirm": "All your data will be deleted and you will be redirected to the start screen. Are you sure?",
     "stats": {
@@ -276,7 +310,7 @@
       "description": "Upload your photo, select the pieces you want, see the result."
     },
     "step2": {
-      "title": "Not just one piece, complete outfit",
+      "title": "Complete Outfits",
       "description": "Skirt, blouse, shoes, bag... Select as many pieces as you want"
     },
     "step3": {

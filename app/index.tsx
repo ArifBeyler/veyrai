@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Image, Dimensions } from 'react-native';
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withDelay,
+  withSequence,
+  withSpring,
   runOnJS,
+  Easing,
+  interpolate,
 } from 'react-native-reanimated';
 import { Colors } from '../src/ui/theme';
 import { DisplayLarge, BodyMedium } from '../src/ui/Typography';
@@ -15,35 +20,38 @@ import { useTranslation } from '../src/hooks/useTranslation';
 import { generateDeviceHash } from '../src/utils/deviceHash';
 import { supabase } from '../src/services/supabase';
 
+const { width, height } = Dimensions.get('window');
+
 const SplashScreen = () => {
   const { t } = useTranslation();
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.8);
+  
+  // Animation values
+  const logoScale = useSharedValue(0.3);
+  const logoOpacity = useSharedValue(0);
+  const logoRotate = useSharedValue(-10);
+  const ringScale = useSharedValue(0);
+  const ringOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
-  const [isChecking, setIsChecking] = useState(true);
+  const textTranslateY = useSharedValue(20);
+  const backgroundOpacity = useSharedValue(0);
+  const glowScale = useSharedValue(0.5);
+  const glowOpacity = useSharedValue(0);
 
   const setDeviceHash = useSessionStore((s) => s.setDeviceHash);
   const hasCompletedOnboarding = useSessionStore((s) => s.hasCompletedOnboarding);
 
   const navigateToNext = async () => {
     try {
-      // Check onboarding status first
       if (!hasCompletedOnboarding) {
-        // User hasn't seen onboarding -> go to onboarding
         router.replace('/onboarding');
         return;
       }
 
-      // Check if user is authenticated
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      console.log('Session check:', session?.user?.email || 'no session', error?.message || '');
+      const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
-        // User is logged in -> go to home
         router.replace('/(tabs)/home');
       } else {
-        // User not logged in -> go to auth
         router.replace('/auth');
       }
     } catch (e) {
@@ -64,42 +72,108 @@ const SplashScreen = () => {
     };
     init();
 
-    // Animate splash
-    opacity.value = withTiming(1, { duration: 400 });
-    scale.value = withTiming(1, { duration: 600 });
-    textOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    // === ANIMATION SEQUENCE ===
+    
+    // 1. Background fade in
+    backgroundOpacity.value = withTiming(1, { duration: 400 });
+    
+    // 2. Glow effect
+    glowOpacity.value = withDelay(200, withTiming(0.6, { duration: 600 }));
+    glowScale.value = withDelay(200, withTiming(1.2, { duration: 800, easing: Easing.out(Easing.cubic) }));
+    
+    // 3. Logo entrance - bounce effect
+    logoOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    logoScale.value = withDelay(300, withSpring(1, { damping: 12, stiffness: 100 }));
+    logoRotate.value = withDelay(300, withSpring(0, { damping: 15, stiffness: 80 }));
+    
+    // 4. Ring pulse effect
+    ringOpacity.value = withDelay(600, withTiming(0.5, { duration: 300 }));
+    ringScale.value = withDelay(600, withSequence(
+      withTiming(1, { duration: 400 }),
+      withTiming(1.3, { duration: 600 }),
+    ));
+    ringOpacity.value = withDelay(1000, withTiming(0, { duration: 400 }));
+    
+    // 5. Text fade in
+    textOpacity.value = withDelay(800, withTiming(1, { duration: 400 }));
+    textTranslateY.value = withDelay(800, withSpring(0, { damping: 15, stiffness: 100 }));
 
-    // Navigate after delay (0.8-1.5s as per docs)
-    const splashDuration = 1200; // 1.2s
+    // Navigate after animation completes
     const timeout = setTimeout(() => {
-      setIsChecking(false);
-      opacity.value = withTiming(0, { duration: 300 }, () => {
+      // Fade out everything
+      logoOpacity.value = withTiming(0, { duration: 300 });
+      textOpacity.value = withTiming(0, { duration: 300 });
+      glowOpacity.value = withTiming(0, { duration: 300 });
+      backgroundOpacity.value = withTiming(0, { duration: 400 }, () => {
         runOnJS(navigateToNext)();
       });
-    }, splashDuration);
+    }, 2000);
 
     return () => clearTimeout(timeout);
   }, []);
 
+  // Animated styles
+  const backgroundStyle = useAnimatedStyle(() => ({
+    opacity: backgroundOpacity.value,
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: glowScale.value }],
+  }));
+
   const logoStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    opacity: logoOpacity.value,
+    transform: [
+      { scale: logoScale.value },
+      { rotate: `${logoRotate.value}deg` },
+    ],
+  }));
+
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ringOpacity.value,
+    transform: [{ scale: ringScale.value }],
   }));
 
   const textStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
+    transform: [{ translateY: textTranslateY.value }],
   }));
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.logoContainer, logoStyle]}>
-        <Image
-          source={require('../full3dicons/images/t-shirt.png')}
-          style={styles.logo}
-          resizeMode="contain"
+      {/* Animated Background */}
+      <Animated.View style={[StyleSheet.absoluteFill, backgroundStyle]}>
+        <LinearGradient
+          colors={['#0B0B0C', '#151520', '#0B0B0C']}
+          style={StyleSheet.absoluteFill}
         />
       </Animated.View>
 
+      {/* Glow Effect */}
+      <Animated.View style={[styles.glowContainer, glowStyle]}>
+        <LinearGradient
+          colors={['transparent', Colors.accent.primary + '30', 'transparent']}
+          style={styles.glowGradient}
+        />
+      </Animated.View>
+
+      {/* Logo Container */}
+      <View style={styles.centerContainer}>
+        {/* Ring Effect */}
+        <Animated.View style={[styles.ring, ringStyle]} />
+        
+        {/* Logo */}
+        <Animated.View style={[styles.logoWrapper, logoStyle]}>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </Animated.View>
+      </View>
+
+      {/* Text */}
       <Animated.View style={[styles.textContainer, textStyle]}>
         <DisplayLarge style={styles.title}>Wearify</DisplayLarge>
         <BodyMedium color="secondary" style={styles.subtitle}>
@@ -107,6 +181,7 @@ const SplashScreen = () => {
         </BodyMedium>
       </Animated.View>
 
+      {/* Footer */}
       <Animated.View style={[styles.footer, textStyle]}>
         <BodyMedium color="tertiary">{t('splash.footer')}</BodyMedium>
       </Animated.View>
@@ -117,26 +192,61 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: '#0B0B0C',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoContainer: {
-    width: 120,
-    height: 120,
+  glowContainer: {
+    position: 'absolute',
+    width: width * 2,
+    height: width * 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  glowGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: width,
+  },
+  centerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 2,
+    borderColor: Colors.accent.primary,
+  },
+  logoWrapper: {
+    width: 140,
+    height: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    shadowColor: Colors.accent.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 20,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 140,
+    height: 140,
+    borderRadius: 32,
   },
   textContainer: {
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 32,
   },
   title: {
-    color: Colors.accent.primary,
+    color: Colors.text.primary,
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: 2,
   },
   subtitle: {
     marginTop: 8,

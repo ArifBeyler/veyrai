@@ -25,6 +25,7 @@ import {
   LabelMedium,
   LabelSmall,
 } from '../../src/ui/Typography';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -53,6 +54,7 @@ const FILTERS: { key: GenderFilter; label: string }[] = [
 const WardrobeScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [selectedFilter, setSelectedFilter] = useState<GenderFilter>('all');
   
   const garments = useSessionStore((s) => s.garments);
@@ -117,7 +119,7 @@ const WardrobeScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        colors={theme.colors.backgroundGradient as unknown as [string, string, string]}
         style={StyleSheet.absoluteFill}
       />
 

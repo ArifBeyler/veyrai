@@ -11,6 +11,7 @@ import { usePushNotifications } from '../src/hooks/usePushNotifications';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
 import { I18nProvider } from '../src/providers/I18nProvider';
+import { ThemeProvider } from '../src/theme';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -61,10 +62,11 @@ const RootLayout = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <View style={styles.container}>
-            <StatusBar style="light" />
-            <Stack
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <View style={styles.container}>
+              <StatusBar style="light" />
+              <Stack
               screenOptions={{
                 headerShown: false,
                 contentStyle: { backgroundColor: Colors.dark.background },
@@ -118,9 +120,10 @@ const RootLayout = () => {
                 animation: 'slide_from_right',
               }}
             />
-          </Stack>
-        </View>
-      </QueryClientProvider>
+            </Stack>
+          </View>
+        </QueryClientProvider>
+        </ThemeProvider>
       </I18nProvider>
     </GestureHandlerRootView>
   );

@@ -13,6 +13,7 @@ const { width } = Dimensions.get('window');
 
 const WelcomeScreen = () => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const handleStart = () => {
     router.push('/auth');

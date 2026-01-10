@@ -31,7 +31,38 @@
     "registerError": "Kayıt olunamadı",
     "emailExists": "Bu email zaten kullanılıyor. Giriş yapmayı deneyin.",
     "loginSubtitle": "Hesabına giriş yap",
-    "registerSubtitle": "Yeni hesap oluştur"
+    "registerSubtitle": "Yeni hesap oluştur",
+    "welcomeBack": "Tekrar Hoş Geldin!",
+    "createAccount": "Hesap Oluştur",
+    "loginDescription": "Kıyafetlerini denemek için giriş yap",
+    "registerDescription": "Ücretsiz hesap oluştur ve hemen başla",
+    "nameOptional": "Adın (opsiyonel)",
+    "emailPlaceholder": "Email adresi",
+    "or": "veya",
+    "continueWithoutLogin": "Giriş yapmadan devam et",
+    "termsNotice": "Devam ederek {{terms}} ve {{privacy}}'nı kabul etmiş olursunuz.",
+    "termsOfService": "Kullanım Şartları",
+    "privacyPolicy": "Gizlilik Politikası",
+    "appleSignInError": {
+      "title": "Apple Giriş Hatası",
+      "unknownTitle": "🍎 Apple Giriş Hatası",
+      "unknownMessage": "Apple ile giriş şu an yapılamıyor.\n\n📱 Olası nedenler:\n• iCloud hesabınıza giriş yapmamış olabilirsiniz\n• Apple ID ayarlarınızda \"Sign in with Apple\" kapalı olabilir\n• İnternet bağlantınızda sorun olabilir\n\n💡 Çözüm:\nAyarlar → Apple ID → Parola ve Güvenlik → Apple ile Giriş Yap bölümünü kontrol edin.",
+      "networkTitle": "🌐 Bağlantı Hatası",
+      "networkMessage": "İnternet bağlantınızı kontrol edip tekrar deneyin.",
+      "validationTitle": "🔐 Doğrulama Hatası",
+      "validationMessage": "Apple kimlik doğrulaması başarısız oldu.\n\nLütfen tekrar deneyin veya email ile giriş yapın.",
+      "serverTitle": "🍎 Apple Giriş Hatası",
+      "serverMessage": "Apple sunucularına bağlanılamadı.\n\n• iCloud hesabınızın aktif olduğundan emin olun\n• Birkaç dakika sonra tekrar deneyin",
+      "genericTitle": "Apple ile Giriş Başarısız",
+      "genericMessage": "Beklenmeyen bir hata oluştu.\n\nEmail ile giriş yapmayı deneyebilir veya daha sonra tekrar deneyebilirsiniz.",
+      "authFailed": "Apple kimlik doğrulama başarısız",
+      "ok": "Tamam"
+    },
+    "emailAndPasswordRequired": "Email ve şifre gerekli",
+    "passwordMinLength": "Şifre en az 6 karakter olmalı",
+    "invalidCredentials": "Email veya şifre hatalı",
+    "alreadyRegistered": "Bu email zaten kayıtlı. Giriş yapmayı deneyin.",
+    "genericError": "Bir hata oluştu"
   },
   "home": {
     "welcome": "Hoş geldin",
@@ -74,6 +105,9 @@
     "changeLanguage": "Dil Değiştir",
     "selectLanguage": "Dil Seçin",
     "changingLanguage": "Dil değiştiriliyor...",
+    "changeTheme": "Tema Seç",
+    "selectTheme": "Tema Seç",
+    "themeChanged": "Tema değiştirildi",
     "logout": "Çıkış Yap",
     "logoutConfirm": "Tüm verileriniz silinecek ve başlangıç ekranına yönlendirileceksiniz. Emin misiniz?",
     "stats": {
@@ -268,7 +302,8 @@
     "step3": {
       "title": "Ürettiğin sonucu kaydet, tekrar dene",
       "description": "Sonucu kaydet, paylaş veya yeni kombinler dene"
-    }
+    },
+    "start": "Başla"
   },
   "welcome": {
     "title": "Kıyafetleri Üzerinde Gör",

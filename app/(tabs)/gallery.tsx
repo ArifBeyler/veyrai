@@ -25,6 +25,7 @@ import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { useTranslation } from '../../src/hooks/useTranslation';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +34,7 @@ type TimeFilter = 'all' | 'today' | 'week';
 const GalleryScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
   const jobs = useSessionStore((s) => s.jobs);
 
@@ -74,7 +76,7 @@ const GalleryScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0B0B0C', '#12121a', '#0B0B0C']}
+        colors={theme.colors.backgroundGradient as unknown as [string, string, string]}
         style={StyleSheet.absoluteFill}
       />
 

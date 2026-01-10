@@ -56,6 +56,13 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
   try {
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
     
+    // Development modunda projectId olmadan push notification çalışmaz
+    // Bu durumda sessizce null döneriz
+    if (!projectId) {
+      console.log('Push notifications: projectId not configured (development mode)');
+      return null;
+    }
+    
     const tokenResponse = await Notifications.getExpoPushTokenAsync({
       projectId: projectId,
     });
@@ -66,7 +73,8 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
     // Store token in session
     useSessionStore.getState().setPushToken(token);
   } catch (error) {
-    console.error('Error getting push token:', error);
+    // Development modunda bu hata normal, sessizce geçelim
+    console.log('Push notifications not available:', (error as Error).message);
     return null;
   }
 
