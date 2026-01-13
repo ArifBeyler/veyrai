@@ -362,15 +362,15 @@ const GenerationScreen = () => {
       if (isAvailable) {
         await Sharing.shareAsync(downloadResult.uri, {
           mimeType: 'image/jpeg',
-          dialogTitle: 'Görseli Kaydet',
+          dialogTitle: t('generation.saveImage'),
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
-        Alert.alert('Hata', 'Paylaşım bu cihazda desteklenmiyor.');
+        Alert.alert(t('common.error'), t('generation.shareNotAvailable'));
       }
     } catch (error) {
       console.error('Save error:', error);
-      Alert.alert('Hata', 'Görsel kaydedilemedi.');
+      Alert.alert(t('common.error'), t('generation.saveError'));
     }
   };
 
@@ -384,15 +384,15 @@ const GenerationScreen = () => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Görseli Sil',
-      'Bu görseli silmek istediğinize emin misiniz?',
+      t('generation.deleteImage'),
+      t('generation.deleteConfirm'),
       [
         {
-          text: 'İptal',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Sil',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             if (params.id) {
@@ -420,13 +420,13 @@ const GenerationScreen = () => {
         <IconButton
           icon={require('../../full3dicons/images/home.png')}
           onPress={handleClose}
-          accessibilityLabel="Ana Sayfa"
+          accessibilityLabel={t('generation.home')}
           variant="glass"
           size="sm"
         />
         {state === 'success' && resultImageUrl && (
           <Pressable onPress={handleDelete} style={styles.deleteButton}>
-            <LabelMedium color="error">Sil</LabelMedium>
+            <LabelMedium color="error">{t('common.delete')}</LabelMedium>
           </Pressable>
         )}
         {state !== 'success' && <View style={{ width: 36 }} />}
@@ -440,12 +440,12 @@ const GenerationScreen = () => {
             <View style={styles.errorIconContainer}>
               <LabelMedium style={styles.errorEmoji}>😔</LabelMedium>
             </View>
-            <HeadlineMedium style={styles.errorTitle}>Bir Sorun Oluştu</HeadlineMedium>
+            <HeadlineMedium style={styles.errorTitle}>{t('generation.error')}</HeadlineMedium>
             <BodyMedium color="secondary" style={styles.errorText}>
-              {errorMessage || 'Lütfen tekrar deneyin'}
+              {errorMessage || t('generation.pleaseRetry')}
             </BodyMedium>
             <PrimaryButton
-              title="Tekrar Dene"
+              title={t('common.retry')}
               onPress={handleRetry}
               style={styles.retryButton}
             />
@@ -480,7 +480,7 @@ const GenerationScreen = () => {
                       style={styles.beforeAfterGradient}
                     >
                       <LabelMedium style={styles.beforeAfterText}>
-                        {showOriginal ? '👤 Önce' : '👔 Sonra'}
+                        {showOriginal ? `👤 ${t('generation.before')}` : `👔 ${t('generation.after')}`}
                       </LabelMedium>
                     </LinearGradient>
                   </Pressable>
@@ -521,7 +521,7 @@ const GenerationScreen = () => {
                       style={styles.actionIcon}
                       resizeMode="contain"
                     />
-                    <LabelMedium style={styles.actionButtonText}>Kaydet</LabelMedium>
+                    <LabelMedium style={styles.actionButtonText}>{t('common.save')}</LabelMedium>
                   </LinearGradient>
                 </Pressable>
 
@@ -535,7 +535,7 @@ const GenerationScreen = () => {
                       style={styles.actionIcon}
                       resizeMode="contain"
                     />
-                    <LabelMedium style={styles.actionButtonText}>Paylaş</LabelMedium>
+                    <LabelMedium style={styles.actionButtonText}>{t('generation.share')}</LabelMedium>
                   </LinearGradient>
                 </Pressable>
               </Animated.View>
@@ -588,19 +588,19 @@ const GenerationScreen = () => {
 
             <View style={styles.stepsContainer}>
               <ProgressStep 
-                label="Yükleniyor" 
+                label={t('generation.loading')} 
                 completed={progress > 20} 
                 active={progress <= 20} 
               />
               <View style={styles.stepConnector} />
               <ProgressStep 
-                label="İşleniyor" 
+                label={t('generation.processing')} 
                 completed={progress > 60} 
                 active={progress > 20 && progress <= 60} 
               />
               <View style={styles.stepConnector} />
               <ProgressStep 
-                label="Tamamlanıyor" 
+                label={t('generation.completing')} 
                 completed={progress > 90} 
                 active={progress > 60 && progress <= 90} 
               />
@@ -608,7 +608,7 @@ const GenerationScreen = () => {
 
             <GlassCard style={styles.tipCard}>
               <BodySmall color="secondary" style={styles.tipText}>
-                💡 Bu işlem genellikle 15-30 saniye sürer
+                {t('generation.tip')}
               </BodySmall>
             </GlassCard>
           </Animated.View>
@@ -622,7 +622,7 @@ const GenerationScreen = () => {
           style={[styles.bottomActions, { paddingBottom: insets.bottom + 16 }]}
         >
           <PrimaryButton
-            title="Tamam"
+            title={t('common.done')}
             onPress={handleDone}
             style={styles.bigButton}
           />

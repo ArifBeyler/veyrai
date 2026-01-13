@@ -19,7 +19,7 @@ const MALE_COMBINE_6 = require('../../assets/images/combines/outfit-2.jpg');
 // ========================================
 export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
   {
-    title: 'Erkek Kombin 1',
+    title: 'Male Outfit 1',
     category: 'onepiece',
     imageUri: MALE_COMBINE_1,
     tags: ['casual', 'streetwear'],
@@ -27,7 +27,7 @@ export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
     isUserAdded: false,
   },
   {
-    title: 'Erkek Kombin 2',
+    title: 'Male Outfit 2',
     category: 'onepiece',
     imageUri: MALE_COMBINE_2,
     tags: ['casual', 'streetwear'],
@@ -35,7 +35,7 @@ export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
     isUserAdded: false,
   },
   {
-    title: 'Erkek Kombin 3',
+    title: 'Male Outfit 3',
     category: 'onepiece',
     imageUri: MALE_COMBINE_3,
     tags: ['casual', 'streetwear'],
@@ -43,7 +43,7 @@ export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
     isUserAdded: false,
   },
   {
-    title: 'Erkek Kombin 4',
+    title: 'Male Outfit 4',
     category: 'onepiece',
     imageUri: MALE_COMBINE_4,
     tags: ['casual', 'streetwear'],
@@ -51,7 +51,7 @@ export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
     isUserAdded: false,
   },
   {
-    title: 'Erkek Kombin 5',
+    title: 'Male Outfit 5',
     category: 'onepiece',
     imageUri: MALE_COMBINE_5,
     tags: ['casual', 'streetwear'],
@@ -59,7 +59,7 @@ export const MALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
     isUserAdded: false,
   },
   {
-    title: 'Erkek Kombin 6',
+    title: 'Male Outfit 6',
     category: 'onepiece',
     imageUri: MALE_COMBINE_6,
     tags: ['elegant', 'formal'],
@@ -85,15 +85,15 @@ const FEMALE_COMBINE_8 = require('../../assets/images/combines/female/female-out
 const FEMALE_COMBINE_9 = require('../../assets/images/combines/female/female-outfit-9.png');
 
 export const FEMALE_OUTFITS: Omit<Garment, 'id' | 'createdAt'>[] = [
-  { title: 'Kadın Kombin 1', category: 'onepiece', imageUri: FEMALE_COMBINE_1, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 2', category: 'onepiece', imageUri: FEMALE_COMBINE_2, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 3', category: 'onepiece', imageUri: FEMALE_COMBINE_3, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 4', category: 'onepiece', imageUri: FEMALE_COMBINE_4, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 5', category: 'onepiece', imageUri: FEMALE_COMBINE_5, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 6', category: 'onepiece', imageUri: FEMALE_COMBINE_6, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 7', category: 'onepiece', imageUri: FEMALE_COMBINE_7, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 8', category: 'onepiece', imageUri: FEMALE_COMBINE_8, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
-  { title: 'Kadın Kombin 9', category: 'onepiece', imageUri: FEMALE_COMBINE_9, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 1', category: 'onepiece', imageUri: FEMALE_COMBINE_1, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 2', category: 'onepiece', imageUri: FEMALE_COMBINE_2, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 3', category: 'onepiece', imageUri: FEMALE_COMBINE_3, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 4', category: 'onepiece', imageUri: FEMALE_COMBINE_4, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 5', category: 'onepiece', imageUri: FEMALE_COMBINE_5, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 6', category: 'onepiece', imageUri: FEMALE_COMBINE_6, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 7', category: 'onepiece', imageUri: FEMALE_COMBINE_7, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 8', category: 'onepiece', imageUri: FEMALE_COMBINE_8, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
+  { title: 'Female Outfit 9', category: 'onepiece', imageUri: FEMALE_COMBINE_9, tags: ['casual', 'elegant'], gender: 'female', isUserAdded: false },
 ];
 
 // Tüm örnek kıyafetleri al (local fallback)

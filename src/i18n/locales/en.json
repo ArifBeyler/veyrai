@@ -66,16 +66,16 @@
   },
   "onboarding": {
     "step1": {
-      "title": "Try outfits in seconds",
-      "description": "See clothes on you with AI, get instant results"
+      "title": "AI-assisted virtual try-on",
+      "description": "Upload your photo, select outfits. Create outfit visualizations with AI - results may vary, no realism guarantee."
     },
     "step2": {
       "title": "Not just one piece, complete outfit",
       "description": "Select multiple items, see the full outfit"
     },
     "step3": {
-      "title": "Save your result, try again",
-      "description": "Keep results in your gallery, try again anytime"
+      "title": "Save results, try again",
+      "description": "Save AI-generated visuals, share or try new combinations"
     }
   },
   "home": {
@@ -106,6 +106,7 @@
     "unlimitedAccess": "Unlimited trial access",
     "oneFreeCredit": "1 free credit",
     "noCredits": "No credits",
+    "freeTrialUsed": "Free trial has been used",
     "upgradeToPremium": "Upgrade to Premium",
     "quickActions": "Quick Actions",
     "manageProfiles": "Manage Profiles",
@@ -130,11 +131,19 @@
       "combinations": "Combinations",
       "garments": "Garment",
       "results": "Result"
+    },
+    "refreshGarments": {
+      "title": "Refresh Garments",
+      "message": "New sample garments and outfits will be loaded.",
+      "button": "Refresh",
+      "success": "Success",
+      "successMessage": "Garments updated!",
+      "subtitle": "Load new outfits"
     }
   },
   "paywall": {
     "title": "Wearify Pro",
-    "subtitle": "Generate with your credits",
+    "subtitle": "Generate AI-assisted visualizations with your credits",
     "subscribe": "Subscribe",
     "startTrial": "Try 7 Days Free",
     "save": "off",
@@ -146,6 +155,11 @@
     "month": "month",
     "year": "year",
     "restore": "Restore",
+    "benefit1": "Generate AI-assisted visualizations with your credits",
+    "benefit2": "Priority processing speed",
+    "benefit3": "HD quality option (HD = +1 credit)",
+    "benefit4": "Ad-free experience",
+    "trialInfo": "7-day free trial. 1 credit per day, total 7 credits. Subscription auto-renews after trial ends. Cancel anytime.",
     "terms": "Terms of Use",
     "privacy": "Privacy Policy",
     "purchaseSuccess": {
@@ -191,6 +205,7 @@
     "styleNote": "Style Note (Optional)",
     "confirm": "Confirm",
     "oneCreditWillBeUsed": "1 Credit will be used",
+    "freeCreditInfo": "You have 1 free trial. After this trial is used, subscription is required.",
     "premiumUnlimited": "Premium Member - Unlimited Trials",
     "continue": "Continue",
     "back": "Back",
@@ -219,6 +234,7 @@
       "bags": "Bags",
       "accessories": "Accessories"
     },
+    "multiSelect": "Multi-select",
     "photoGuide": {
       "title": "What Should the Ideal Photo Be?",
       "goodLighting": "Good Lighting",
@@ -237,8 +253,10 @@
     "selectedParts": "Selected Items",
     "edit": "Edit",
     "styleNoteLabel": "Style Note",
-    "aiCreateCombo": "Create Outfit with AI",
-    "aiDescription": "You'll try clothes on your profile photo",
+    "aiCreateCombo": "AI-Assisted Visualization",
+    "aiDescription": "Create outfit visualizations with AI. Results may vary, no realism guarantee.",
+    "aiDisclaimer": "AI-assisted visualization. Results may vary, no realism guarantee.",
+    "freeTrialInfo": "You have 1 free trial. After this trial is used, subscription is required.",
     "swipeToGenerate": "Swipe to Generate"
   },
   "gallery": {
@@ -253,7 +271,10 @@
     "totalTrials": "Total Trials",
     "emptyTitle": "Gallery is empty",
     "emptySubtitle": "You haven't made any trials yet",
-    "startFirstTry": "Make First Try-on"
+    "startFirstTry": "Make First Try-on",
+    "results": "Results",
+    "imageCount": "{{count}} image",
+    "imageCountPlural": "{{count}} images"
   },
   "generation": {
     "loadingMessages": {
@@ -271,7 +292,22 @@
       "almostReady": "Almost ready..."
     },
     "success": "Combination ready!",
-    "shareMessage": "I tried on clothes with Wearify! 👕✨"
+    "shareMessage": "I tried on clothes with Wearify! 👕✨",
+    "deleteImage": "Delete Image",
+    "deleteConfirm": "Are you sure you want to delete this image?",
+    "saveImage": "Save Image",
+    "share": "Share",
+    "error": "An Error Occurred",
+    "pleaseRetry": "Please try again",
+    "before": "Before",
+    "after": "After",
+    "loading": "Loading",
+    "processing": "Processing",
+    "completing": "Completing",
+    "tip": "💡 This process usually takes 15-30 seconds",
+    "shareNotAvailable": "Sharing is not available on this device.",
+    "saveError": "Image could not be saved.",
+    "home": "Home"
   },
   "wardrobe": {
     "title": "Wardrobe",
@@ -286,7 +322,12 @@
     "categoryEmpty": "No garments in this category",
     "addGarmentsToStart": "Start by adding garments",
     "addAndTry": "Add your garments and try them on",
-    "tryOn": "Try"
+    "tryOn": "Try",
+    "all": "All",
+    "male": "Male",
+    "female": "Female",
+    "try": "Try",
+    "deleteGarmentConfirm": "Are you sure you want to delete this garment?"
   },
   "splash": {
     "subtitle": "Try clothes on yourself",
@@ -328,11 +369,11 @@
     "start": "Let's Start"
   },
   "welcome": {
-    "title": "See Clothes On You",
-    "subtitle": "Upload your photo, select the outfit you want. AI will show you how it looks on you.",
+    "title": "AI-Assisted Virtual Try-On",
+    "subtitle": "Upload your photo, select outfits. Create visualizations with AI - for inspiration. Results may vary, no realism guarantee.",
     "feature1": "Upload photo",
     "feature2": "Select outfit",
-    "feature3": "See result",
+    "feature3": "See AI visualization",
     "start": "Start",
     "freeTrial": "1 free trial"
   },

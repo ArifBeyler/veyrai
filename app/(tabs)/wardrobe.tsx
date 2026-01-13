@@ -15,6 +15,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { Garment, GarmentCategory, useSessionStore } from '../../src/state/useSessionStore';
+import { translateGarmentTitle } from '../../src/utils/garmentTitle';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
@@ -45,11 +46,7 @@ const getFilterIcon = (filter: GenderFilter) => {
   }
 };
 
-const FILTERS: { key: GenderFilter; label: string }[] = [
-  { key: 'all', label: 'Tümü' },
-  { key: 'male', label: 'Erkek' },
-  { key: 'female', label: 'Kadın' },
-];
+// FILTERS will be created dynamically using translations
 
 const WardrobeScreen = () => {
   const insets = useSafeAreaInsets();
@@ -95,12 +92,12 @@ const WardrobeScreen = () => {
   const handleGarmentLongPress = (garment: Garment) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     Alert.alert(
-      garment.title,
-      'Bu kıyafeti silmek istiyor musunuz?',
+      translateGarmentTitle(garment.title),
+      t('wardrobe.deleteGarmentConfirm'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             removeGarment(garment.id);
@@ -148,40 +145,45 @@ const WardrobeScreen = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoriesScroll}
           >
-            {FILTERS.map((filter) => (
-              <Pressable
-                key={filter.key}
-                onPress={() => handleFilterSelect(filter.key)}
-                style={[
-                  styles.categoryChip,
-                  selectedFilter === filter.key && styles.categoryChipActive,
-                ]}
-                accessibilityRole="tab"
-                accessibilityLabel={filter.label}
-                accessibilityState={{ selected: selectedFilter === filter.key }}
-              >
-                <Image
-                  source={getFilterIcon(filter.key)}
+            {(['all', 'male', 'female'] as GenderFilter[]).map((filter) => {
+              const label = filter === 'all' ? t('wardrobe.all') : 
+                           filter === 'male' ? t('wardrobe.male') : 
+                           t('wardrobe.female');
+              return (
+                <Pressable
+                  key={filter}
+                  onPress={() => handleFilterSelect(filter)}
                   style={[
-                    styles.categoryIcon,
-                    selectedFilter === filter.key && styles.categoryIconActive,
+                    styles.categoryChip,
+                    selectedFilter === filter && styles.categoryChipActive,
                   ]}
-                  resizeMode="contain"
-                />
-                <LabelMedium
-                  color={selectedFilter === filter.key ? 'accent' : 'secondary'}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: selectedFilter === filter }}
                 >
-                  {filter.label}
-                </LabelMedium>
-                {filterCounts[filter.key] > 0 && (
-                  <View style={styles.categoryCount}>
-                    <LabelSmall color={selectedFilter === filter.key ? 'accent' : 'tertiary'}>
-                      {filterCounts[filter.key]}
-                    </LabelSmall>
-                  </View>
-                )}
-              </Pressable>
-            ))}
+                  <Image
+                    source={getFilterIcon(filter)}
+                    style={[
+                      styles.categoryIcon,
+                      selectedFilter === filter && styles.categoryIconActive,
+                    ]}
+                    resizeMode="contain"
+                  />
+                  <LabelMedium
+                    color={selectedFilter === filter ? 'accent' : 'secondary'}
+                  >
+                    {label}
+                  </LabelMedium>
+                  {filterCounts[filter] > 0 && (
+                    <View style={styles.categoryCount}>
+                      <LabelSmall color={selectedFilter === filter ? 'accent' : 'tertiary'}>
+                        {filterCounts[filter]}
+                      </LabelSmall>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
           </ScrollView>
         </Animated.View>
 
@@ -268,7 +270,9 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
   onPress,
   onLongPress,
   delay,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <Animated.View entering={FadeInDown.delay(delay).springify()}>
     <Pressable onPress={onPress} onLongPress={onLongPress}>
       <GlassCard style={styles.garmentCard}>
@@ -302,11 +306,11 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
               style={styles.tryOnIcon}
               resizeMode="contain"
             />
-            <LabelSmall style={styles.tryOnText}>Dene</LabelSmall>
+            <LabelSmall style={styles.tryOnText}>{t('wardrobe.try')}</LabelSmall>
           </View>
         </View>
         <View style={styles.garmentInfo}>
-          <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
+          <LabelMedium numberOfLines={1}>{translateGarmentTitle(garment.title)}</LabelMedium>
           {garment.brand && (
             <LabelSmall color="secondary">{garment.brand}</LabelSmall>
           )}
@@ -314,7 +318,8 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
       </GlassCard>
     </Pressable>
   </Animated.View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

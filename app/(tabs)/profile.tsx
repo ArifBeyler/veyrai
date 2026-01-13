@@ -373,16 +373,19 @@ const ProfileScreen = () => {
 
   const handleRefreshGarments = () => {
     Alert.alert(
-      'Kıyafetleri Yenile',
-      'Yeni eklenen örnek kıyafetler ve kombinler yüklenecek.',
+      t('profile.refreshGarments.title'),
+      t('profile.refreshGarments.message'),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Yenile',
+          text: t('profile.refreshGarments.button'),
           onPress: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await loadSampleGarments();
-            Alert.alert('Başarılı', 'Kıyafetler güncellendi!');
+            Alert.alert(
+              t('profile.refreshGarments.success'),
+              t('profile.refreshGarments.successMessage')
+            );
           },
         },
       ]
@@ -708,8 +711,8 @@ const ProfileScreen = () => {
             <View style={styles.divider} />
             <ActionItem
               icon={require('../../full3dicons/images/wardrobe.png')}
-              title="Kıyafetleri Yenile"
-              subtitle="Yeni kombinleri yükle"
+              title={t('profile.refreshGarments.title')}
+              subtitle={t('profile.refreshGarments.subtitle')}
               onPress={handleRefreshGarments}
             />
           </GlassCard>

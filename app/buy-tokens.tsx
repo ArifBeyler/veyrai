@@ -41,10 +41,10 @@ import { useSessionStore } from '../src/state/useSessionStore';
 
 const { width } = Dimensions.get('window');
 
-// Token paketleri
+// Token paketleri - Product ID'ler App Store Connect ile eşleşmeli
 const TOKEN_PACKAGES = [
   {
-    id: 'tokens_10',
+    id: 'com.wearify.tokens10',
     tokens: 10,
     price: 2.99,
     priceString: '$2.99',
@@ -52,7 +52,7 @@ const TOKEN_PACKAGES = [
     popular: false,
   },
   {
-    id: 'tokens_50',
+    id: 'com.wearify.tokens50',
     tokens: 50,
     price: 9.99,
     priceString: '$9.99',
@@ -61,7 +61,7 @@ const TOKEN_PACKAGES = [
     bonus: 10, // +10 bonus token
   },
   {
-    id: 'tokens_100',
+    id: 'com.wearify.tokens100',
     tokens: 100,
     price: 14.99,
     priceString: '$14.99',
@@ -70,7 +70,7 @@ const TOKEN_PACKAGES = [
     bonus: 30, // +30 bonus token
   },
   {
-    id: 'tokens_250',
+    id: 'com.wearify.tokens250',
     tokens: 250,
     price: 29.99,
     priceString: '$29.99',
@@ -84,7 +84,7 @@ const BuyTokensScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const [selectedPackage, setSelectedPackage] = useState<string>('tokens_50');
+  const [selectedPackage, setSelectedPackage] = useState<string>('com.wearify.tokens50');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentModal, setPaymentModal] = useState<{
     visible: boolean;

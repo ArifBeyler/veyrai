@@ -17,7 +17,7 @@ export type LanguageSetting = 'system' | SupportedLanguage;
 // Map device locales to supported languages
 export const mapDeviceLocale = (deviceLocale: string | null | undefined): SupportedLanguage => {
   if (!deviceLocale || typeof deviceLocale !== 'string') {
-    return 'tr';
+    return 'en';
   }
   
   const langCode = deviceLocale.split('-')[0].toLowerCase();
@@ -27,7 +27,7 @@ export const mapDeviceLocale = (deviceLocale: string | null | undefined): Suppor
   }
   
   // Default fallback
-  return 'tr';
+  return 'en';
 };
 
 // Get initial language
@@ -45,10 +45,10 @@ export const getInitialLanguage = async (): Promise<SupportedLanguage> => {
       return stored as SupportedLanguage;
     }
     
-    return 'tr';
+    return 'en';
   } catch (error) {
     console.error('Error getting initial language:', error);
-    return 'tr';
+    return 'en';
   }
 };
 
@@ -79,8 +79,8 @@ i18n
       en: { translation: en },
       fr: { translation: fr },
     },
-    lng: 'tr', // Will be set dynamically
-    fallbackLng: 'tr',
+    lng: 'en', // Will be set dynamically
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // React already escapes
     },

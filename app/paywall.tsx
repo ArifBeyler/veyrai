@@ -291,16 +291,16 @@ const PaywallScreen = () => {
         {/* Benefits */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.benefitsSection}>
           <View style={styles.benefitRow}>
-            <BodySmall style={styles.benefitText}>✓ Kredin kadar üretim yap</BodySmall>
+            <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit1')}</BodySmall>
           </View>
           <View style={styles.benefitRow}>
-            <BodySmall style={styles.benefitText}>✓ Öncelikli işlem hızı</BodySmall>
+            <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit2')}</BodySmall>
           </View>
           <View style={styles.benefitRow}>
-            <BodySmall style={styles.benefitText}>✓ HD kalite (HD = +1 kredi)</BodySmall>
+            <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit3')}</BodySmall>
           </View>
           <View style={styles.benefitRow}>
-            <BodySmall style={styles.benefitText}>✓ Reklamsız deneyim</BodySmall>
+            <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit4')}</BodySmall>
           </View>
         </Animated.View>
 
@@ -420,7 +420,7 @@ const PaywallScreen = () => {
         {/* Trial & Auto-renew Info */}
         <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.trialInfoSection}>
           <BodySmall style={styles.trialInfoText}>
-            7 gün ücretsiz deneme (günlük 1 kredi, maks. 7). Deneme bitince abonelik otomatik yenilenir. İstediğin zaman iptal edebilirsin.
+            {t('paywall.trialInfo')}
           </BodySmall>
         </Animated.View>
 

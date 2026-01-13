@@ -130,6 +130,14 @@
       "combinations": "Combinaisons",
       "garments": "Vêtement",
       "results": "Résultat"
+    },
+    "refreshGarments": {
+      "title": "Actualiser les vêtements",
+      "message": "De nouveaux vêtements d'exemple et tenues seront chargés.",
+      "button": "Actualiser",
+      "success": "Succès",
+      "successMessage": "Vêtements mis à jour !",
+      "subtitle": "Charger de nouvelles tenues"
     }
   },
   "paywall": {
@@ -219,6 +227,7 @@
       "bags": "Sacs",
       "accessories": "Accessoires"
     },
+    "multiSelect": "Sélection multiple",
     "photoGuide": {
       "title": "Comment devrait être la photo idéale ?",
       "goodLighting": "Bon Éclairage",

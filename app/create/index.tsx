@@ -32,6 +32,7 @@ import Animated, {
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../src/hooks/useTranslation';
+import { translateGarmentTitle } from '../../src/utils/garmentTitle';
 import {
   Garment,
   GarmentCategory,
@@ -1005,9 +1006,9 @@ const CreateScreen = () => {
                           </View>
                           
                           <View style={styles.garmentInfo}>
-                            <LabelMedium numberOfLines={1}>{garment.title}</LabelMedium>
+                            <LabelMedium numberOfLines={1}>{translateGarmentTitle(garment.title)}</LabelMedium>
                             {isMultiSelect && (
-                              <LabelSmall color="tertiary">Çoklu seçim</LabelSmall>
+                              <LabelSmall color="tertiary">{t('create.multiSelect')}</LabelSmall>
                             )}
                           </View>
                           
@@ -1187,7 +1188,29 @@ const CreateScreen = () => {
                   resizeMode="contain"
                 />
                 <LabelSmall color={(isPremium || credits > 0) ? 'accent' : 'tertiary'}>
-                  {isPremium ? t('create.premiumUnlimited') : credits > 0 ? t('home.credits', { count: credits }) : t('create.oneCreditWillBeUsed')}
+                  {isPremium 
+                    ? t('create.premiumUnlimited') 
+                    : credits > 0 
+                      ? t('home.credits', { count: credits }) 
+                      : freeCreditsUsed
+                        ? t('profile.freeTrialUsed')
+                        : t('create.oneCreditWillBeUsed')}
+                </LabelSmall>
+              </View>
+              
+              {/* Free Credit Info */}
+              {!freeCreditsUsed && !isPremium && credits === 0 && (
+                <View style={styles.freeCreditInfoRow}>
+                  <LabelSmall color="secondary" style={styles.freeCreditInfoText}>
+                    {t('create.freeCreditInfo')}
+                  </LabelSmall>
+                </View>
+              )}
+              
+              {/* AI Disclaimer */}
+              <View style={styles.aiDisclaimerRow}>
+                <LabelSmall color="tertiary" style={styles.aiDisclaimerText}>
+                  {t('create.aiDisclaimer')}
                 </LabelSmall>
               </View>
             </Animated.View>
@@ -1859,6 +1882,27 @@ const styles = StyleSheet.create({
   confirmCreditIcon: {
     width: 18,
     height: 18,
+  },
+  freeCreditInfoRow: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  freeCreditInfoText: {
+    textAlign: 'center',
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  aiDisclaimerRow: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  aiDisclaimerText: {
+    textAlign: 'center',
+    fontSize: 11,
+    lineHeight: 15,
+    opacity: 0.7,
   },
   // Bottom Actions
   bottomActions: {

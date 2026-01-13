@@ -33,7 +33,7 @@ type TimeFilter = 'all' | 'today' | 'week';
 
 const GalleryScreen = () => {
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const { theme } = useTheme();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
   const jobs = useSessionStore((s) => s.jobs);
@@ -131,9 +131,11 @@ const GalleryScreen = () => {
             style={styles.gallerySection}
           >
             <View style={styles.sectionHeader}>
-              <HeadlineSmall>Sonuçlar</HeadlineSmall>
+              <HeadlineSmall>{t('gallery.results')}</HeadlineSmall>
               <LabelSmall color="secondary">
-                {filteredJobs.length} görsel
+                {filteredJobs.length === 1 
+                  ? t('gallery.imageCount', { count: filteredJobs.length })
+                  : t('gallery.imageCountPlural', { count: filteredJobs.length })}
               </LabelSmall>
             </View>
 
@@ -169,10 +171,13 @@ const GalleryScreen = () => {
 
                     <View style={styles.galleryCardInfo}>
                       <LabelSmall color="secondary">
-                        {new Date(job.createdAt).toLocaleDateString('tr-TR', {
-                          day: 'numeric',
-                          month: 'short',
-                        })}
+                        {new Date(job.createdAt).toLocaleDateString(
+                          currentLanguage === 'tr' ? 'tr-TR' : 'en-US',
+                          {
+                            day: 'numeric',
+                            month: 'short',
+                          }
+                        )}
                       </LabelSmall>
                     </View>
                   </GlassCard>

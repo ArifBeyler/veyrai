@@ -21,9 +21,9 @@
         "UIBackgroundModes": [
           "remote-notification"
         ],
-        "NSCameraUsageDescription": "Wearify fotoğraf çekmenize izin vermek için kamera erişimi gerektirir.",
-        "NSPhotoLibraryUsageDescription": "Wearify fotoğraflarınızı seçmenize izin vermek için galeri erişimi gerektirir.",
-        "NSPhotoLibraryAddUsageDescription": "Wearify oluşturulan görselleri galerinize kaydetmek için erişim gerektirir.",
+        "NSCameraUsageDescription": "Your photo is used only to generate AI-assisted visual results for virtual try-on. Photos are processed to create outfit visualizations.",
+        "NSPhotoLibraryUsageDescription": "Your photo is used only to generate AI-assisted visual results for virtual try-on. Photos are processed to create outfit visualizations.",
+        "NSPhotoLibraryAddUsageDescription": "Generated outfit visualizations will be saved to your photo library.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
@@ -54,8 +54,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Fotoğraflarınızı seçmenize izin verin.",
-          "cameraPermission": "Fotoğraf çekmenize izin verin."
+          "photosPermission": "Your photo is used only to generate AI-assisted visual results for virtual try-on.",
+          "cameraPermission": "Your photo is used only to generate AI-assisted visual results for virtual try-on."
         }
       ],
       [

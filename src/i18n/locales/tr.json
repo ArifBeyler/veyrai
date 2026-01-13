@@ -92,6 +92,7 @@
     "unlimitedAccess": "Sınırsız deneme hakkı",
     "oneFreeCredit": "1 ücretsiz kredi",
     "noCredits": "Kredi yok",
+    "freeTrialUsed": "Ücretsiz deneme kullanıldı",
     "upgradeToPremium": "Premium'a Yükselt",
     "quickActions": "Hızlı İşlemler",
     "manageProfiles": "Profilleri Yönet",
@@ -116,13 +117,23 @@
       "combinations": "Kombinleme",
       "garments": "Kıyafet",
       "results": "Sonuç"
+    },
+    "refreshGarments": {
+      "title": "Kıyafetleri Yenile",
+      "message": "Yeni eklenen örnek kıyafetler ve kombinler yüklenecek.",
+      "button": "Yenile",
+      "success": "Başarılı",
+      "successMessage": "Kıyafetler güncellendi!",
+      "subtitle": "Yeni kombinleri yükle"
     }
   },
   "paywall": {
     "title": "Wearify Pro",
-    "subtitle": "Kredin kadar üretim yap",
+    "subtitle": "Kredin kadar AI destekli görselleştirme yap",
     "subscribe": "Abone Ol",
     "startTrial": "7 Gün Ücretsiz Dene",
+    "trialInfo": "7 gün ücretsiz deneme. Günlük 1 kredi, toplam 7 kredi. Deneme süresi bitince abonelik otomatik yenilenir. İstediğin zaman iptal edebilirsin.",
+    "whatYouGet": "Abonelikle neler alırsın:",
     "save": "indirim",
     "planNotFound": "Seçilen plan bulunamadı. Lütfen daha sonra tekrar deneyin.",
     "plans": {
@@ -132,6 +143,10 @@
     "month": "ay",
     "year": "yıl",
     "restore": "Geri Yükle",
+    "benefit1": "Kredin kadar AI destekli görselleştirme yap",
+    "benefit2": "Öncelikli işlem hızı",
+    "benefit3": "HD kalite seçeneği (HD = +1 kredi)",
+    "benefit4": "Reklamsız deneyim",
     "terms": "Kullanım Şartları",
     "privacy": "Gizlilik Politikası",
     "purchaseSuccess": {
@@ -177,7 +192,10 @@
     "styleNote": "Stil Notu (Opsiyonel)",
     "confirm": "Onayla",
     "oneCreditWillBeUsed": "1 Kredi Kullanılacak",
+    "freeCreditInfo": "1 ücretsiz deneme hakkınız var. Bu deneme kullanıldıktan sonra abonelik gerekir.",
     "premiumUnlimited": "Premium Üye - Sınırsız Deneme",
+    "aiDisclaimer": "AI destekli görselleştirme. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
+    "freeTrialInfo": "1 ücretsiz deneme hakkınız var. Bu deneme kullanıldıktan sonra abonelik gerekir.",
     "continue": "Devam",
     "back": "Geri",
     "generate": "Üret",
@@ -205,6 +223,7 @@
       "bags": "Çanta",
       "accessories": "Aksesuar"
     },
+    "multiSelect": "Çoklu seçim",
     "photoGuide": {
       "title": "İdeal Fotoğraf Nasıl Olmalı?",
       "goodLighting": "İyi Aydınlatma",
@@ -223,8 +242,8 @@
     "selectedParts": "Seçilen Parçalar",
     "edit": "Düzenle",
     "styleNoteLabel": "Stil Notu",
-    "aiCreateCombo": "AI ile Kombin Oluştur",
-    "aiDescription": "Profil fotoğrafın üzerinde kıyafetleri deneyeceksin",
+    "aiCreateCombo": "AI Destekli Görselleştirme",
+    "aiDescription": "AI ile kombin görselleştirmesi oluştur. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
     "swipeToGenerate": "Kaydırarak Üret"
   },
   "gallery": {
@@ -239,7 +258,10 @@
     "totalTrials": "Toplam Deneme",
     "emptyTitle": "Galeri boş",
     "emptySubtitle": "Henüz bir deneme yapmadınız",
-    "startFirstTry": "İlk Denemeyi Yap"
+    "startFirstTry": "İlk Denemeyi Yap",
+    "results": "Sonuçlar",
+    "imageCount": "{{count}} görsel",
+    "imageCountPlural": "{{count}} görsel"
   },
   "wardrobe": {
     "title": "Gardrop",
@@ -254,7 +276,12 @@
     "categoryEmpty": "Bu kategoride kıyafet yok",
     "addGarmentsToStart": "Kıyafet ekleyerek başlayın",
     "addAndTry": "Kıyafetlerini ekle ve dene",
-    "tryOn": "Dene"
+    "tryOn": "Dene",
+    "all": "Tümü",
+    "male": "Erkek",
+    "female": "Kadın",
+    "try": "Dene",
+    "deleteGarmentConfirm": "Bu kıyafeti silmek istiyor musunuz?"
   },
   "generation": {
     "loadingMessages": {
@@ -272,7 +299,22 @@
       "almostReady": "Birazdan hazır..."
     },
     "success": "Kombin hazır!",
-    "shareMessage": "Wearify ile kıyafet denedim! 👕✨"
+    "shareMessage": "Wearify ile kıyafet denedim! 👕✨",
+    "deleteImage": "Görseli Sil",
+    "deleteConfirm": "Bu görseli silmek istediğinize emin misiniz?",
+    "saveImage": "Görseli Kaydet",
+    "share": "Paylaş",
+    "error": "Bir Sorun Oluştu",
+    "pleaseRetry": "Lütfen tekrar deneyin",
+    "before": "Önce",
+    "after": "Sonra",
+    "loading": "Yükleniyor",
+    "processing": "İşleniyor",
+    "completing": "Tamamlanıyor",
+    "tip": "💡 Bu işlem genellikle 15-30 saniye sürer",
+    "shareNotAvailable": "Paylaşım bu cihazda desteklenmiyor.",
+    "saveError": "Görsel kaydedilemedi.",
+    "home": "Ana Sayfa"
   },
   "splash": {
     "subtitle": "Kıyafetleri üzerinde dene",
@@ -300,25 +342,25 @@
   },
   "onboarding": {
     "step1": {
-      "title": "Kombin denemek artık saniyeler",
-      "description": "Fotoğrafını yükle, istediğin parçaları seç, sonucu gör."
+      "title": "AI destekli sanal deneme",
+      "description": "Fotoğrafını yükle, kıyafetleri seç. AI ile kombin görsellerini oluştur - sonuçlar değişebilir, gerçekçilik garantisi yoktur."
     },
     "step2": {
       "title": "Tek parça değil, komple kombin",
       "description": "Etek, bluz, ayakkabı, çanta... İstediğin kadar parça seç"
     },
     "step3": {
-      "title": "Ürettiğin sonucu kaydet, tekrar dene",
-      "description": "Sonucu kaydet, paylaş veya yeni kombinler dene"
+      "title": "Sonuçları kaydet, tekrar dene",
+      "description": "AI ile oluşturulan görselleri kaydet, paylaş veya yeni kombinler dene"
     },
     "start": "Başla"
   },
   "welcome": {
-    "title": "Kıyafetleri Üzerinde Gör",
-    "subtitle": "Fotoğrafını yükle, istediğin kıyafeti seç. AI sana nasıl göründüğünü göstersin.",
+    "title": "AI Destekli Sanal Deneme",
+    "subtitle": "Fotoğrafını yükle, kıyafet seç. AI ile görselleştirme oluştur - ilham için. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
     "feature1": "Fotoğraf yükle",
     "feature2": "Kıyafet seç",
-    "feature3": "Sonucu gör",
+    "feature3": "AI görselleştirme gör",
     "start": "Başla",
     "freeTrial": "1 ücretsiz deneme"
   },

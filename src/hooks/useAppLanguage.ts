@@ -14,7 +14,7 @@ import i18n from '../i18n/config';
 
 export const useAppLanguage = () => {
   const [languageSetting, setLanguageSetting] = useState<LanguageSetting>('system');
-  const [resolvedLang, setResolvedLang] = useState<SupportedLanguage>('tr');
+  const [resolvedLang, setResolvedLang] = useState<SupportedLanguage>('en');
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize language on mount
@@ -36,7 +36,7 @@ export const useAppLanguage = () => {
           initialLang = stored as SupportedLanguage;
         } else {
           langSetting = 'system';
-          initialLang = 'tr';
+          initialLang = 'en';
         }
         
         setResolvedLang(initialLang);
@@ -44,9 +44,9 @@ export const useAppLanguage = () => {
         await i18n.changeLanguage(initialLang);
       } catch (error) {
         console.error('Error initializing language:', error);
-        setResolvedLang('tr');
+        setResolvedLang('en');
         setLanguageSetting('system');
-        await i18n.changeLanguage('tr');
+        await i18n.changeLanguage('en');
       } finally {
         setIsLoading(false);
       }
