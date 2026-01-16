@@ -122,6 +122,8 @@ export const useRevenueCat = () => {
         creditsToAdd = 480; // Yıllık: 480 kredi
       } else if (packageId.includes('monthly')) {
         creditsToAdd = 40; // Aylık: 40 kredi
+      } else if (packageId.includes('weekly')) {
+        creditsToAdd = 7; // Haftalık: 7 kredi (7 günlük deneme)
       }
       
       if (creditsToAdd > 0) {
@@ -278,7 +280,7 @@ export const useRevenueCat = () => {
   }, [setIsPremium]);
 
   // Get package by identifier
-  const getPackage = useCallback((identifier: 'monthly' | 'yearly' | 'lifetime'): PurchasesPackage | null => {
+  const getPackage = useCallback((identifier: 'weekly' | 'monthly' | 'yearly' | 'lifetime'): PurchasesPackage | null => {
     return getPackageByIdentifier(offerings, identifier);
   }, [offerings]);
 

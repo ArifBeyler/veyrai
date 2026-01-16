@@ -138,6 +138,18 @@
       "success": "Succès",
       "successMessage": "Vêtements mis à jour !",
       "subtitle": "Charger de nouvelles tenues"
+    },
+    "restorePurchases": {
+      "title": "Restaurer les achats",
+      "subtitle": "Restaurer vos achats précédents",
+      "success": "Succès",
+      "successMessage": "Achats restaurés avec succès !"
+    },
+    "replayOnboarding": {
+      "title": "Revoir l'introduction",
+      "subtitle": "Afficher à nouveau les écrans d'introduction",
+      "message": "Cela réinitialisera le drapeau d'introduction. Vous verrez à nouveau les écrans d'introduction au prochain lancement de l'application.",
+      "button": "Réinitialiser"
     }
   },
   "paywall": {
@@ -149,10 +161,18 @@
     "planNotFound": "Plan sélectionné introuvable. Veuillez réessayer plus tard.",
     "plans": {
       "monthly": "Mensuel",
-      "yearly": "Annuel"
+      "yearly": "Annuel",
+      "weekly": "Hebdomadaire"
     },
     "month": "mois",
-    "year": "an",
+    "year": "année",
+    "week": "semaine",
+    "creditsPerMonth": "crédits/mois",
+    "creditsPerWeek": "crédits/semaine",
+    "totalCreditsPerYear": "Total {{count}} crédits/an",
+    "creditSystemInfo": "1 crédit = 1 génération · HD/upscale +1 crédit · Remboursement automatique des crédits en cas d'erreur serveur",
+    "close": "Fermer",
+    "restorePurchases": "Restaurer les achats",
     "restore": "Restaurer",
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
@@ -240,7 +260,20 @@
       "avoidDesc": "Photos floues, environnements sombres, poses où le visage ou le corps est caché",
       "good": "Bon",
       "bad": "Mauvais",
-      "continue": "Compris, Continuer"
+      "goodExample": "Bon Exemple",
+      "badExample": "Mauvais Exemple",
+      "continue": "Continuer",
+      "selectPhotoSource": "Sélectionner la source de la photo",
+      "takePhoto": "Prendre une photo",
+      "chooseFromGallery": "Choisir dans la galerie",
+      "cancel": "Annuler",
+      "cameraPermissionDenied": "L'autorisation de la caméra est requise. Veuillez accorder l'autorisation dans les paramètres.",
+      "galleryPermissionDenied": "L'autorisation de la galerie est requise. Veuillez accorder l'autorisation dans les paramètres.",
+      "cameraError": "Une erreur s'est produite lors de l'ouverture de la caméra.",
+      "galleryError": "Une erreur s'est produite lors de l'ouverture de la galerie.",
+      "photoExamples": "Exemples de Photos",
+      "badLight": "Mauvais Éclairage",
+      "goodLight": "Bon Éclairage"
     },
     "change": "Modifier",
     "selectedParts": "Vêtements Sélectionnés",

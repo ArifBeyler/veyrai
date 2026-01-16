@@ -67,7 +67,7 @@
   "onboarding": {
     "step1": {
       "title": "AI-assisted virtual try-on",
-      "description": "Upload your photo, select outfits. Create outfit visualizations with AI - results may vary, no realism guarantee."
+      "description": "Upload your photo, select outfits. Create outfit visualizations with AI and discover how they look on you."
     },
     "step2": {
       "title": "Not just one piece, complete outfit",
@@ -139,6 +139,18 @@
       "success": "Success",
       "successMessage": "Garments updated!",
       "subtitle": "Load new outfits"
+    },
+    "restorePurchases": {
+      "title": "Restore Purchases",
+      "subtitle": "Restore your previous purchases",
+      "success": "Success",
+      "successMessage": "Purchases restored successfully!"
+    },
+    "replayOnboarding": {
+      "title": "Replay Onboarding",
+      "subtitle": "Show onboarding screens again",
+      "message": "This will reset the onboarding flag. You'll see the onboarding screens again on next app launch.",
+      "button": "Reset"
     }
   },
   "paywall": {
@@ -150,10 +162,18 @@
     "planNotFound": "Selected plan not found. Please try again later.",
     "plans": {
       "monthly": "Monthly",
-      "yearly": "Yearly"
+      "yearly": "Yearly",
+      "weekly": "Weekly"
     },
     "month": "month",
     "year": "year",
+    "week": "week",
+    "creditsPerMonth": "credits/month",
+    "creditsPerWeek": "credits/week",
+    "totalCreditsPerYear": "Total {{count}} credits/year",
+    "creditSystemInfo": "1 credit = 1 generation · HD/upscale +1 credit · Automatic credit refund for server errors",
+    "close": "Close",
+    "restorePurchases": "Restore Purchases",
     "restore": "Restore",
     "benefit1": "Generate AI-assisted visualizations with your credits",
     "benefit2": "Priority processing speed",
@@ -247,15 +267,28 @@
       "avoidDesc": "Blurry photos, dark environments, poses where face or body is hidden",
       "good": "Good",
       "bad": "Bad",
-      "continue": "Got it, Continue"
+      "goodExample": "Good Example",
+      "badExample": "Bad Example",
+      "continue": "Continue",
+      "selectPhotoSource": "Select Photo Source",
+      "takePhoto": "Take Photo",
+      "chooseFromGallery": "Choose from Gallery",
+      "cancel": "Cancel",
+      "cameraPermissionDenied": "Camera permission is required. Please grant permission in settings.",
+      "galleryPermissionDenied": "Gallery permission is required. Please grant permission in settings.",
+      "cameraError": "An error occurred while opening the camera.",
+      "galleryError": "An error occurred while opening the gallery.",
+      "photoExamples": "Photo Examples",
+      "badLight": "Bad Light",
+      "goodLight": "Good Light"
     },
     "change": "Change",
     "selectedParts": "Selected Items",
     "edit": "Edit",
     "styleNoteLabel": "Style Note",
     "aiCreateCombo": "AI-Assisted Visualization",
-    "aiDescription": "Create outfit visualizations with AI. Results may vary, no realism guarantee.",
-    "aiDisclaimer": "AI-assisted visualization. Results may vary, no realism guarantee.",
+    "aiDescription": "Create outfit visualizations with AI and discover how they look on you.",
+    "aiDisclaimer": "AI-assisted visualization.",
     "freeTrialInfo": "You have 1 free trial. After this trial is used, subscription is required.",
     "swipeToGenerate": "Swipe to Generate"
   },
@@ -370,7 +403,7 @@
   },
   "welcome": {
     "title": "AI-Assisted Virtual Try-On",
-    "subtitle": "Upload your photo, select outfits. Create visualizations with AI - for inspiration. Results may vary, no realism guarantee.",
+    "subtitle": "Upload your photo, select outfits. Create visualizations with AI and discover how they look on you.",
     "feature1": "Upload photo",
     "feature2": "Select outfit",
     "feature3": "See AI visualization",

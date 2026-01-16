@@ -27,6 +27,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppLanguage } from '../../src/hooks/useAppLanguage';
 import { useTranslation } from '../../src/hooks/useTranslation';
+import { useRevenueCat } from '../../src/hooks/useRevenueCat';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -40,7 +41,6 @@ import {
   LabelMedium,
   LabelSmall
 } from '../../src/ui/Typography';
-import { supabase } from '../../src/services/supabase';
 import { useTheme, getAllThemes, Theme, ThemeId } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
@@ -307,6 +307,7 @@ const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setLang, resolvedLang, supportedLanguages } = useAppLanguage();
+  const { restore: restorePurchases } = useRevenueCat();
   const { theme, themeId, setTheme } = useTheme();
   const [showLanguageChangeToast, setShowLanguageChangeToast] = useState(false);
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
@@ -349,26 +350,19 @@ const ProfileScreen = () => {
     router.push('/paywall');
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      t('profile.logout'),
-      t('profile.logoutConfirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('profile.logout'),
-          style: 'destructive',
-          onPress: async () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            // Supabase'den çıkış yap
-            await supabase.auth.signOut();
-            clearUserData();
-            setHasCompletedOnboarding(false);
-            router.replace('/welcome');
-          },
-        },
-      ]
-    );
+  const handleRestorePurchases = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await restorePurchases();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(
+        t('profile.restorePurchases.success'),
+        t('profile.restorePurchases.successMessage')
+      );
+    } catch (error: any) {
+      // Error is already handled in restorePurchases function
+      console.error('Restore purchases error:', error);
+    }
   };
 
   const handleRefreshGarments = () => {
@@ -386,6 +380,30 @@ const ProfileScreen = () => {
               t('profile.refreshGarments.success'),
               t('profile.refreshGarments.successMessage')
             );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReplayOnboarding = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      t('profile.replayOnboarding.title'),
+      t('profile.replayOnboarding.message'),
+      [
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('profile.replayOnboarding.button'),
+          style: 'destructive',
+          onPress: () => {
+            const setHasCompletedOnboarding = useSessionStore.getState().setHasCompletedOnboarding;
+            setHasCompletedOnboarding(false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            router.replace('/onboarding');
           },
         },
       ]
@@ -715,27 +733,21 @@ const ProfileScreen = () => {
               subtitle={t('profile.refreshGarments.subtitle')}
               onPress={handleRefreshGarments}
             />
+            <View style={styles.divider} />
+            <ActionItem
+              icon={require('../../full3dicons/images/checkmark.png')}
+              title={t('profile.restorePurchases.title')}
+              subtitle={t('profile.restorePurchases.subtitle')}
+              onPress={handleRestorePurchases}
+            />
+            <View style={styles.divider} />
+            <ActionItem
+              icon={require('../../full3dicons/images/home.png')}
+              title={t('profile.replayOnboarding.title')}
+              subtitle={t('profile.replayOnboarding.subtitle')}
+              onPress={handleReplayOnboarding}
+            />
           </GlassCard>
-        </Animated.View>
-
-        {/* Logout Button */}
-        <Animated.View entering={FadeInDown.delay(750).springify()}>
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={['rgba(239, 68, 68, 0.15)', 'rgba(239, 68, 68, 0.05)']}
-              style={styles.logoutGradient}
-            />
-            <Image
-              source={require('../../full3dicons/images/home.png')}
-              style={styles.logoutIcon}
-              resizeMode="contain"
-            />
-            <LabelMedium color="error">{t('profile.logout')}</LabelMedium>
-          </TouchableOpacity>
         </Animated.View>
 
         {/* Version */}
@@ -1082,25 +1094,6 @@ const styles = StyleSheet.create({
   },
   settingsCard: {
     padding: 0,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 16,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    overflow: 'hidden',
-  },
-  logoutGradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  logoutIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#FF3B30',
   },
   versionContainer: {
     alignItems: 'center',

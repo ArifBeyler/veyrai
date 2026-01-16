@@ -2,13 +2,12 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
   Dimensions,
-  Modal,
   Platform,
   Pressable,
   Image as RNImage,
@@ -91,17 +90,26 @@ const CATEGORY_COLORS: Record<GarmentCategory, string> = {
 const CreateScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const params = useLocalSearchParams<{ selectedPhotoUri?: string }>();
   const [step, setStep] = useState<Step>('profile');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [selectedGender, setSelectedGender] = useState<GarmentGender | 'all'>('all');
   const [selectedCategories, setSelectedCategories] = useState<(GarmentCategory | 'all')[]>(['all']);
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [styleNoteInput, setStyleNoteInput] = useState('');
-  const [showPhotoGuide, setShowPhotoGuide] = useState(false);
 
   const profiles = useSessionStore((s) => s.profiles);
   const garments = useSessionStore((s) => s.garments);
   const addProfile = useSessionStore((s) => s.addProfile);
+
+  // Handle photo from photo-guide screen
+  useEffect(() => {
+    if (params.selectedPhotoUri) {
+      createProfileFromUri(params.selectedPhotoUri);
+      // Clear the parameter to avoid re-processing
+      router.setParams({ selectedPhotoUri: undefined });
+    }
+  }, [params.selectedPhotoUri]);
   const addGarment = useSessionStore((s) => s.addGarment);
   const freeCreditsUsed = useSessionStore((s) => s.freeCreditsUsed);
   const isPremium = useSessionStore((s) => s.isPremium);
@@ -264,19 +272,10 @@ const CreateScreen = () => {
     }
   };
 
-  // Profil ekleme - önce guide modal'ı göster
+  // Profil ekleme - önce guide ekranına git
   const handleAddProfile = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setShowPhotoGuide(true);
-  };
-  
-  // Photo guide'dan devam et
-  const handleContinueFromGuide = () => {
-    setShowPhotoGuide(false);
-    // Modal kapandıktan sonra action sheet aç
-    setTimeout(() => {
-      showPhotoSourcePicker();
-    }, 400);
+    router.push('/photo-guide');
   };
   
   // Fotoğraf kaynağı seçimi
@@ -558,88 +557,6 @@ const CreateScreen = () => {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Photo Guide Modal - Simple Text Alert */}
-      <Modal
-        visible={showPhotoGuide}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowPhotoGuide(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View 
-            entering={FadeIn.duration(200)}
-            style={styles.photoGuideModal}
-          >
-            <LinearGradient
-              colors={['#1a1a2e', '#16162a']}
-              style={StyleSheet.absoluteFill}
-            />
-            
-            {/* Close Button */}
-            <Pressable 
-              style={styles.modalCloseButton}
-              onPress={() => setShowPhotoGuide(false)}
-            >
-              <LabelMedium>✕</LabelMedium>
-            </Pressable>
-            
-            {/* Title */}
-            <View style={styles.photoGuideHeader}>
-              <HeadlineMedium style={styles.photoGuideTitle}>
-                {t('create.photoGuide.title')}
-              </HeadlineMedium>
-            </View>
-            
-            {/* Tips - Text Only */}
-            <View style={styles.photoGuideTips}>
-              <View style={styles.photoGuideTipRow}>
-                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
-                <View style={styles.tipContent}>
-                  <BodySmall color="primary">
-                    {t('create.photoGuide.goodLighting')} - {t('create.photoGuide.goodLightingDesc')}
-                  </BodySmall>
-                </View>
-              </View>
-              
-              <View style={styles.photoGuideTipRow}>
-                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
-                <View style={styles.tipContent}>
-                  <BodySmall color="primary">
-                    {t('create.photoGuide.fullBody')} - {t('create.photoGuide.fullBodyDesc')}
-                  </BodySmall>
-                </View>
-              </View>
-              
-              <View style={styles.photoGuideTipRow}>
-                <LabelMedium style={styles.tipBullet}>•</LabelMedium>
-                <View style={styles.tipContent}>
-                  <BodySmall color="primary">
-                    {t('create.photoGuide.straightPosture')} - {t('create.photoGuide.straightPostureDesc')}
-                  </BodySmall>
-                </View>
-              </View>
-              
-              <View style={styles.photoGuideDivider} />
-              
-              <View style={styles.photoGuideTipRow}>
-                <LabelMedium style={[styles.tipBullet, { color: '#ef4444' }]}>✕</LabelMedium>
-                <View style={styles.tipContent}>
-                  <BodySmall color="secondary">
-                    {t('create.photoGuide.avoidTitle')}: {t('create.photoGuide.avoidDesc')}
-                  </BodySmall>
-                </View>
-              </View>
-            </View>
-            
-            {/* Continue Button */}
-            <PrimaryButton
-              title={t('create.photoGuide.continue')}
-              onPress={handleContinueFromGuide}
-              style={styles.photoGuideContinueButton}
-            />
-          </Animated.View>
-        </View>
-      </Modal>
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
@@ -2023,148 +1940,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 11,
     fontWeight: '600',
-  },
-  // Photo Guide Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  photoGuideModal: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: BorderRadius.xl,
-    padding: 24,
-    overflow: 'hidden',
-  },
-  modalCloseButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
-  photoGuideHeader: {
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 24,
-  },
-  photoGuideIcon: {
-    width: 64,
-    height: 64,
-  },
-  photoGuideTitle: {
-    textAlign: 'center',
-    color: '#fff',
-  },
-  photoGuideTips: {
-    gap: 16,
-  },
-  photoGuideTipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  tipIconGood: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#22c55e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tipBullet: {
-    width: 20,
-    color: Colors.accent.primary,
-    fontSize: 16,
-  },
-  tipIconBad: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#ef4444',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tipIconText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  tipContent: {
-    flex: 1,
-    gap: 4,
-  },
-  photoGuideDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginVertical: 8,
-  },
-  photoGuideExamples: {
-    marginTop: 20,
-    marginBottom: 24,
-  },
-  exampleImageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  exampleGood: {
-    width: 100,
-    height: 130,
-    borderRadius: BorderRadius.md,
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
-    borderWidth: 2,
-    borderColor: '#22c55e',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  exampleBad: {
-    width: 100,
-    height: 130,
-    borderRadius: BorderRadius.md,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderWidth: 2,
-    borderColor: '#ef4444',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  exampleImage: {
-    width: 60,
-    height: 60,
-  },
-  exampleBadge: {
-    position: 'absolute',
-    bottom: 8,
-    backgroundColor: '#22c55e',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  exampleBadgeBad: {
-    position: 'absolute',
-    bottom: 8,
-    backgroundColor: '#ef4444',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  exampleBadgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  photoGuideContinueButton: {
-    marginTop: 8,
   },
 });
 

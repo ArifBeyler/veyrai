@@ -125,6 +125,18 @@
       "success": "Başarılı",
       "successMessage": "Kıyafetler güncellendi!",
       "subtitle": "Yeni kombinleri yükle"
+    },
+    "restorePurchases": {
+      "title": "Satın Alımları Geri Yükle",
+      "subtitle": "Önceki satın alımlarınızı geri yükleyin",
+      "success": "Başarılı",
+      "successMessage": "Satın alımlar başarıyla geri yüklendi!"
+    },
+    "replayOnboarding": {
+      "title": "Tanıtımı Tekrar Göster",
+      "subtitle": "Tanıtım ekranlarını tekrar göster",
+      "message": "Bu işlem tanıtım bayrağını sıfırlayacak. Uygulamayı bir sonraki açışınızda tanıtım ekranlarını tekrar göreceksiniz.",
+      "button": "Sıfırla"
     }
   },
   "paywall": {
@@ -138,10 +150,18 @@
     "planNotFound": "Seçilen plan bulunamadı. Lütfen daha sonra tekrar deneyin.",
     "plans": {
       "monthly": "Aylık",
-      "yearly": "Yıllık"
+      "yearly": "Yıllık",
+      "weekly": "Haftalık"
     },
     "month": "ay",
     "year": "yıl",
+    "week": "hafta",
+    "creditsPerMonth": "kredi/ay",
+    "creditsPerWeek": "kredi/hafta",
+    "totalCreditsPerYear": "Toplam {{count}} kredi/yıl",
+    "creditSystemInfo": "1 kredi = 1 üretim · HD/upscale +1 kredi · Sunucu hatalarında otomatik kredi iadesi",
+    "close": "Kapat",
+    "restorePurchases": "Satın Alımları Geri Yükle",
     "restore": "Geri Yükle",
     "benefit1": "Kredin kadar AI destekli görselleştirme yap",
     "benefit2": "Öncelikli işlem hızı",
@@ -194,7 +214,7 @@
     "oneCreditWillBeUsed": "1 Kredi Kullanılacak",
     "freeCreditInfo": "1 ücretsiz deneme hakkınız var. Bu deneme kullanıldıktan sonra abonelik gerekir.",
     "premiumUnlimited": "Premium Üye - Sınırsız Deneme",
-    "aiDisclaimer": "AI destekli görselleştirme. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
+    "aiDisclaimer": "AI destekli görselleştirme.",
     "freeTrialInfo": "1 ücretsiz deneme hakkınız var. Bu deneme kullanıldıktan sonra abonelik gerekir.",
     "continue": "Devam",
     "back": "Geri",
@@ -236,14 +256,27 @@
       "avoidDesc": "Bulanık fotoğraflar, karanlık ortamlar, yüzün veya vücudun saklandığı pozlar",
       "good": "İyi",
       "bad": "Kötü",
-      "continue": "Anladım, Devam Et"
+      "goodExample": "Uygun Örnek",
+      "badExample": "Uygun Olmayan Örnek",
+      "continue": "Devam Et",
+      "selectPhotoSource": "Fotoğraf Kaynağı Seç",
+      "takePhoto": "Fotoğraf Çek",
+      "chooseFromGallery": "Galeriden Seç",
+      "cancel": "İptal",
+      "cameraPermissionDenied": "Kamera izni gerekli. Lütfen ayarlardan izin verin.",
+      "galleryPermissionDenied": "Galeri izni gerekli. Lütfen ayarlardan izin verin.",
+      "cameraError": "Kamera açılırken bir hata oluştu.",
+      "galleryError": "Galeri açılırken bir hata oluştu.",
+      "photoExamples": "Fotoğraf Örnekleri",
+      "badLight": "Kötü Işıklandırma",
+      "goodLight": "İyi Işıklandırma"
     },
     "change": "Değiştir",
     "selectedParts": "Seçilen Parçalar",
     "edit": "Düzenle",
     "styleNoteLabel": "Stil Notu",
     "aiCreateCombo": "AI Destekli Görselleştirme",
-    "aiDescription": "AI ile kombin görselleştirmesi oluştur. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
+    "aiDescription": "AI ile kombin görselleştirmesi oluştur ve üzerinde nasıl görüneceğini keşfet.",
     "swipeToGenerate": "Kaydırarak Üret"
   },
   "gallery": {
@@ -343,7 +376,7 @@
   "onboarding": {
     "step1": {
       "title": "AI destekli sanal deneme",
-      "description": "Fotoğrafını yükle, kıyafetleri seç. AI ile kombin görsellerini oluştur - sonuçlar değişebilir, gerçekçilik garantisi yoktur."
+      "description": "Fotoğrafını yükle, kıyafetleri seç. AI ile kombin görsellerini oluştur ve üzerinde nasıl görüneceğini keşfet."
     },
     "step2": {
       "title": "Tek parça değil, komple kombin",
@@ -357,7 +390,7 @@
   },
   "welcome": {
     "title": "AI Destekli Sanal Deneme",
-    "subtitle": "Fotoğrafını yükle, kıyafet seç. AI ile görselleştirme oluştur - ilham için. Sonuçlar değişebilir, gerçekçilik garantisi yoktur.",
+    "subtitle": "Fotoğrafını yükle, kıyafet seç. AI ile görselleştirme oluştur ve üzerinde nasıl görüneceğini keşfet.",
     "feature1": "Fotoğraf yükle",
     "feature2": "Kıyafet seç",
     "feature3": "AI görselleştirme gör",

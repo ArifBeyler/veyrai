@@ -41,12 +41,12 @@ import { useTranslation } from '../src/hooks/useTranslation';
 
 const { width, height } = Dimensions.get('window');
 
-type Plan = 'monthly' | 'yearly';
+type Plan = 'weekly' | 'monthly' | 'yearly';
 
 const PaywallScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const [selectedPlan, setSelectedPlan] = useState<Plan>('yearly');
+  const [selectedPlan, setSelectedPlan] = useState<Plan>('weekly');
   const [showClose, setShowClose] = useState(false);
   const [paymentModal, setPaymentModal] = useState<{
     visible: boolean;
@@ -97,14 +97,17 @@ const PaywallScreen = () => {
 
   // ============ DYNAMIC PRICE CALCULATIONS ============
   const planData = useMemo(() => {
+    const weeklyPkg = getPackage('weekly');
     const monthlyPkg = getPackage('monthly');
     const yearlyPkg = getPackage('yearly');
     
     // Default fallback prices (based on docs/pricesrules.md)
+    const WEEKLY_PRICE = weeklyPkg?.product?.price ?? 2.99;
     const MONTHLY_PRICE = monthlyPkg?.product?.price ?? 9.99;
     const YEARLY_PRICE = yearlyPkg?.product?.price ?? 69.99;
     
     // Use StoreKit localized price strings when available
+    const weeklyPriceString = weeklyPkg?.product?.priceString ?? '$2.99';
     const monthlyPriceString = monthlyPkg?.product?.priceString ?? '$9.99';
     const yearlyPriceString = yearlyPkg?.product?.priceString ?? '$69.99';
     
@@ -119,6 +122,12 @@ const PaywallScreen = () => {
     const showDiscount = discountPercent > 0 && discountPercent < 100;
     
     return {
+      weekly: {
+        price: WEEKLY_PRICE,
+        priceString: weeklyPriceString,
+        credits: 7,
+        label: t('paywall.plans.weekly'),
+      },
       monthly: {
         price: MONTHLY_PRICE,
         priceString: monthlyPriceString,
@@ -264,11 +273,11 @@ const PaywallScreen = () => {
         {/* Header Buttons - Safe Area Aware */}
         {showClose && (
           <Animated.View style={[styles.headerButtons, { top: insets.top + 8 }, closeStyle]}>
-            <Pressable onPress={handleClose} style={styles.closeButton} accessibilityLabel="Kapat">
+            <Pressable onPress={handleClose} style={styles.closeButton} accessibilityLabel={t('paywall.close')}>
               <LabelMedium style={styles.closeIcon}>✕</LabelMedium>
             </Pressable>
             
-            <Pressable onPress={handleRestorePurchases} style={styles.restoreButton} accessibilityLabel="Satın alımları geri yükle">
+            <Pressable onPress={handleRestorePurchases} style={styles.restoreButton} accessibilityLabel={t('paywall.restorePurchases')}>
               <LabelSmall style={styles.restoreText}>{t('paywall.restore')}</LabelSmall>
             </Pressable>
           </Animated.View>
@@ -307,6 +316,46 @@ const PaywallScreen = () => {
         {/* Plan Cards */}
         <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.plansContainer}>
           
+          {/* Weekly Plan - 7 Day Trial */}
+          <Pressable
+            onPress={() => handleSelectPlan('weekly')}
+            style={styles.planCardWrapper}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: selectedPlan === 'weekly' }}
+          >
+            <View style={[
+              styles.planCard,
+              selectedPlan === 'weekly' && styles.planCardSelected,
+            ]}>
+              <View style={styles.planRadio}>
+                {selectedPlan === 'weekly' ? (
+                  <View style={styles.radioSelected}>
+                    <View style={styles.radioInner} />
+                  </View>
+                ) : (
+                  <View style={styles.radioUnselected} />
+                )}
+              </View>
+              
+              <View style={styles.planInfo}>
+                <HeadlineMedium style={styles.planName}>{planData.weekly.label}</HeadlineMedium>
+                <BodySmall style={styles.planSubtext}>
+                  {planData.weekly.credits} {t('paywall.creditsPerWeek')}
+                </BodySmall>
+              </View>
+              
+              <View style={styles.planPriceContainer}>
+                <HeadlineMedium style={[
+                  styles.planPrice,
+                  selectedPlan === 'weekly' && styles.planPriceSelected
+                ]}>
+                  {planData.weekly.priceString}
+                </HeadlineMedium>
+                <BodySmall style={styles.planPeriod}>/{t('paywall.week')}</BodySmall>
+              </View>
+            </View>
+          </Pressable>
+
           {/* Yearly Plan - Recommended */}
           <Pressable
             onPress={() => handleSelectPlan('yearly')}
@@ -339,10 +388,10 @@ const PaywallScreen = () => {
               <View style={styles.planInfo}>
                 <HeadlineMedium style={styles.planName}>{planData.yearly.label}</HeadlineMedium>
                 <BodySmall style={styles.planSubtext}>
-                  {planData.yearly.monthlyEquivalent}/{t('paywall.month')} · {planData.yearly.creditsPerMonth} kredi/ay
+                  {planData.yearly.monthlyEquivalent}/{t('paywall.month')} · {planData.yearly.creditsPerMonth} {t('paywall.creditsPerMonth')}
                 </BodySmall>
                 <LabelSmall style={styles.planCredits}>
-                  Toplam {planData.yearly.credits} kredi/yıl
+                  {t('paywall.totalCreditsPerYear', { count: planData.yearly.credits })}
                 </LabelSmall>
               </View>
               
@@ -382,7 +431,7 @@ const PaywallScreen = () => {
               <View style={styles.planInfo}>
                 <HeadlineMedium style={styles.planName}>{planData.monthly.label}</HeadlineMedium>
                 <BodySmall style={styles.planSubtext}>
-                  {planData.monthly.credits} kredi/ay
+                  {planData.monthly.credits} {t('paywall.creditsPerMonth')}
                 </BodySmall>
               </View>
               
@@ -402,7 +451,7 @@ const PaywallScreen = () => {
         {/* Credit System Info */}
         <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.creditInfoSection}>
           <BodySmall style={styles.creditInfoText}>
-            1 kredi = 1 üretim · HD/upscale +1 kredi · Sunucu hatalarında otomatik kredi iadesi
+            {t('paywall.creditSystemInfo')}
           </BodySmall>
         </Animated.View>
 

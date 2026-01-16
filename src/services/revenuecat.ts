@@ -183,12 +183,13 @@ export const setUserId = async (userId: string): Promise<CustomerInfo> => {
  */
 export const getPackageByIdentifier = (
   offering: PurchasesOffering | null,
-  identifier: 'monthly' | 'yearly' | 'lifetime'
+  identifier: 'weekly' | 'monthly' | 'yearly' | 'lifetime'
 ): PurchasesPackage | null => {
   if (!offering) return null;
   
   // Lifetime genellikle availablePackages içinde değil, özel olarak kontrol et
   const packageMap: Record<string, PurchasesPackage | null> = {
+    weekly: offering.availablePackages.find(pkg => pkg.identifier === 'weekly' || pkg.packageType === 'WEEKLY') || null,
     monthly: offering.availablePackages.find(pkg => pkg.identifier === 'monthly' || pkg.packageType === 'MONTHLY') || null,
     yearly: offering.availablePackages.find(pkg => pkg.identifier === 'yearly' || pkg.packageType === 'ANNUAL') || null,
     lifetime: offering.availablePackages.find(pkg => pkg.identifier === 'lifetime' || pkg.packageType === 'LIFETIME') || null,

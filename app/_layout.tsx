@@ -75,7 +75,7 @@ const RootLayout = () => {
             >
             <Stack.Screen name="index" />
             <Stack.Screen name="welcome" />
-            <Stack.Screen name="auth" />
+            {/* Auth screen removed - app runs in anonymous mode */}
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
@@ -118,6 +118,13 @@ const RootLayout = () => {
               options={{
                 presentation: 'card',
                 animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="photo-guide"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
               }}
             />
             <Stack.Screen

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Image, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +18,8 @@ import { DisplayLarge, BodyMedium } from '../src/ui/Typography';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
 import { generateDeviceHash } from '../src/utils/deviceHash';
-import { supabase } from '../src/services/supabase';
+import { getOrCreateDeviceUserId } from '../src/utils/deviceUserId';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,37 +40,75 @@ const SplashScreen = () => {
 
   const setDeviceHash = useSessionStore((s) => s.setDeviceHash);
   const hasCompletedOnboarding = useSessionStore((s) => s.hasCompletedOnboarding);
+  const [isStoreHydrated, setIsStoreHydrated] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
+  const hasNavigatedRef = useRef(false);
 
   const navigateToNext = async () => {
+    // Prevent multiple navigations
+    if (hasNavigatedRef.current) {
+      return;
+    }
+
     try {
+      // Wait for both store hydration AND animation to complete
+      if (!isStoreHydrated || !animationComplete) {
+        return;
+      }
+
+      hasNavigatedRef.current = true;
+
+      // Check onboarding completion flag from persisted storage
       if (!hasCompletedOnboarding) {
         router.replace('/onboarding');
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        router.replace('/(tabs)/home');
-      } else {
-        router.replace('/auth');
-      }
+      // No auth check - go directly to home
+      router.replace('/(tabs)/home');
     } catch (e) {
       console.error('Navigation error:', e);
-      router.replace('/auth');
+      router.replace('/(tabs)/home');
     }
   };
 
+  // Initialize store hydration check
   useEffect(() => {
-    // Initialize device hash
-    const init = async () => {
+    // Wait for Zustand store to hydrate from AsyncStorage
+    const checkStoreHydration = async () => {
       try {
-        const hash = await generateDeviceHash();
-        setDeviceHash(hash);
+        // Zustand persist automatically hydrates, but we need to wait a bit
+        // Check AsyncStorage directly to ensure it's loaded
+        await AsyncStorage.getItem('wearify-session');
+        // Small delay to ensure Zustand has finished hydrating
+        await new Promise(resolve => setTimeout(resolve, 150));
+        setIsStoreHydrated(true);
       } catch (e) {
-        console.log('Device hash error:', e);
+        console.log('Store hydration check error:', e);
+        // If error, proceed anyway after a short delay
+        setTimeout(() => setIsStoreHydrated(true), 200);
       }
     };
+    
+    checkStoreHydration();
+  }, []);
+
+  // Initialize device and run animations
+  useEffect(() => {
+    // Initialize device hash and device user ID
+    const init = async () => {
+      try {
+        // Initialize device hash (for backward compatibility)
+        const hash = await generateDeviceHash();
+        setDeviceHash(hash);
+        
+        // Initialize device user ID (for anonymous mode)
+        await getOrCreateDeviceUserId();
+      } catch (e) {
+        console.log('Device initialization error:', e);
+      }
+    };
+    
     init();
 
     // === ANIMATION SEQUENCE ===
@@ -98,19 +137,26 @@ const SplashScreen = () => {
     textOpacity.value = withDelay(800, withTiming(1, { duration: 400 }));
     textTranslateY.value = withDelay(800, withSpring(0, { damping: 15, stiffness: 100 }));
 
-    // Navigate after animation completes
+    // Navigate after animation completes (minimum 2 seconds)
     const timeout = setTimeout(() => {
       // Fade out everything
       logoOpacity.value = withTiming(0, { duration: 300 });
       textOpacity.value = withTiming(0, { duration: 300 });
       glowOpacity.value = withTiming(0, { duration: 300 });
       backgroundOpacity.value = withTiming(0, { duration: 400 }, () => {
-        runOnJS(navigateToNext)();
+        runOnJS(setAnimationComplete)(true);
       });
     }, 2000);
 
     return () => clearTimeout(timeout);
   }, []);
+
+  // Navigate when both conditions are met
+  useEffect(() => {
+    if (isStoreHydrated && animationComplete) {
+      navigateToNext();
+    }
+  }, [isStoreHydrated, animationComplete]);
 
   // Animated styles
   const backgroundStyle = useAnimatedStyle(() => ({

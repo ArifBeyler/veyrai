@@ -38,6 +38,7 @@ import { useTranslation } from '../src/hooks/useTranslation';
 import { useAppLanguage } from '../src/hooks/useAppLanguage';
 import { Video, ResizeMode } from 'expo-av';
 import { GlassCard } from '../src/ui/GlassCard';
+import { useSessionStore } from '../src/state/useSessionStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -294,7 +295,13 @@ const OnboardingScreen = () => {
 
   const handleComplete = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace('/auth');
+    
+    // Mark onboarding as completed - this persists to AsyncStorage
+    const setHasCompletedOnboarding = useSessionStore.getState().setHasCompletedOnboarding;
+    setHasCompletedOnboarding(true);
+    
+    // Go directly to home - no auth screen
+    router.replace('/(tabs)/home');
   };
 
   return (
