@@ -30,6 +30,7 @@ import { useTranslation } from '../../src/hooks/useTranslation';
 import { useRevenueCat } from '../../src/hooks/useRevenueCat';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { GlassCard } from '../../src/ui/GlassCard';
+import { AppIcon } from '../../src/utils/iconHelper';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
@@ -336,6 +337,8 @@ const ProfileScreen = () => {
   const clearUserData = useSessionStore((s) => s.clearUserData);
   const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
   const loadSampleGarments = useSessionStore((s) => s.loadSampleGarments);
+  const use3DIcons = useSessionStore((s) => s.use3DIcons);
+  const setUse3DIcons = useSessionStore((s) => s.setUse3DIcons);
 
   const hasCredits = !freeCreditsUsed || isPremium;
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
@@ -485,6 +488,11 @@ const ProfileScreen = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     await setTheme(id);
     setShowThemeModal(false);
+  };
+
+  const handleToggleIconStyle = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setUse3DIcons(!use3DIcons);
   };
 
   return (
@@ -728,6 +736,14 @@ const ProfileScreen = () => {
             />
             <View style={styles.divider} />
             <ActionItem
+              iconName={use3DIcons ? "sparkle" : "sparkle"}
+              icon={require('../../full3dicons/images/sparkle.png')}
+              title={use3DIcons ? t('profile.useNormalIcons') : t('profile.use3DIcons')}
+              subtitle={use3DIcons ? t('profile.normalIconsSubtitle') : t('profile.3DIconsSubtitle')}
+              onPress={handleToggleIconStyle}
+            />
+            <View style={styles.divider} />
+            <ActionItem
               icon={require('../../full3dicons/images/wardrobe.png')}
               title={t('profile.refreshGarments.title')}
               subtitle={t('profile.refreshGarments.subtitle')}
@@ -802,7 +818,7 @@ const StatItem: React.FC<StatItemProps> = ({ icon, value, label, color }) => {
     <View style={styles.statItem}>
       <LabelMedium style={styles.statItemIcon}>{icon}</LabelMedium>
       <View style={styles.statItemText}>
-        <LabelMedium style={{ color, fontSize: 20, fontWeight: '600', lineHeight: 24 }}>{value}</LabelMedium>
+        <LabelMedium style={{ color }}>{value}</LabelMedium>
         <LabelSmall color="tertiary" style={styles.statItemLabel}>{label}</LabelSmall>
       </View>
     </View>
@@ -810,7 +826,8 @@ const StatItem: React.FC<StatItemProps> = ({ icon, value, label, color }) => {
 };
 
 type ActionItemProps = {
-  icon: any;
+  icon?: any;
+  iconName?: string;
   title: string;
   subtitle?: string;
   onPress: () => void;
@@ -818,29 +835,43 @@ type ActionItemProps = {
 
 const ActionItem: React.FC<ActionItemProps> = ({
   icon,
+  iconName,
   title,
   subtitle,
   onPress,
-}) => (
-  <TouchableOpacity
-    style={styles.actionItem}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <Image
-      source={icon}
-      style={styles.actionIcon}
-      resizeMode="contain"
-    />
-    <View style={styles.actionText}>
-      <LabelMedium>{title}</LabelMedium>
-      {subtitle && <LabelSmall color="secondary">{subtitle}</LabelSmall>}
-    </View>
-    <View style={styles.actionArrow}>
-      <BodySmall color="secondary">›</BodySmall>
-    </View>
-  </TouchableOpacity>
-);
+}) => {
+  const use3DIcons = useSessionStore((s) => s.use3DIcons);
+  
+  return (
+    <TouchableOpacity
+      style={styles.actionItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      {iconName && !use3DIcons ? (
+        <AppIcon
+          name={iconName}
+          size={24}
+          color={Colors.accent.primary}
+          style={styles.actionIcon}
+        />
+      ) : (
+        <Image
+          source={icon}
+          style={styles.actionIcon}
+          resizeMode="contain"
+        />
+      )}
+      <View style={styles.actionText}>
+        <LabelMedium>{title}</LabelMedium>
+        {subtitle && <LabelSmall color="secondary">{subtitle}</LabelSmall>}
+      </View>
+      <View style={styles.actionArrow}>
+        <BodySmall color="secondary">›</BodySmall>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

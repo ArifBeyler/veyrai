@@ -33,6 +33,7 @@ import {
   LabelMedium,
   LabelLarge,
   LabelSmall,
+  EditorialText,
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { GlassCard } from '../src/ui/GlassCard';
@@ -72,6 +73,7 @@ const PaywallScreen = () => {
     getPackage,
     refreshOfferings,
     restore,
+    offerings,
   } = useRevenueCat();
 
   useEffect(() => {
@@ -82,6 +84,35 @@ const PaywallScreen = () => {
   useEffect(() => {
     refreshOfferings();
   }, [refreshOfferings]);
+
+  // Debug: Check RevenueCat connection
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        console.log('=== RevenueCat Connection Check ===');
+        console.log('Offerings:', offerings);
+        console.log('Weekly package:', getPackage('weekly'));
+        console.log('Monthly package:', getPackage('monthly'));
+        console.log('Yearly package:', getPackage('yearly'));
+        
+        if (!offerings) {
+          console.warn('⚠️ No offerings found - RevenueCat may not be connected');
+        } else {
+          console.log('✅ RevenueCat connected, offerings available');
+          console.log('Available packages:', offerings.availablePackages.map(pkg => ({
+            identifier: pkg.identifier,
+            packageType: pkg.packageType,
+            productId: pkg.product.identifier,
+            price: pkg.product.price,
+          })));
+        }
+      } catch (error) {
+        console.error('RevenueCat connection check error:', error);
+      }
+    };
+    
+    checkConnection();
+  }, [offerings, getPackage]);
 
   const closeOpacity = useSharedValue(0);
 
@@ -101,15 +132,19 @@ const PaywallScreen = () => {
     const monthlyPkg = getPackage('monthly');
     const yearlyPkg = getPackage('yearly');
     
-    // Default fallback prices (based on docs/pricesrules.md)
-    const WEEKLY_PRICE = weeklyPkg?.product?.price ?? 2.99;
-    const MONTHLY_PRICE = monthlyPkg?.product?.price ?? 9.99;
-    const YEARLY_PRICE = yearlyPkg?.product?.price ?? 69.99;
+    // Default fallback prices (based on $99.99/year pricing)
+    // Cost per generation: ~$0.15
+    // Yearly: $99.99/year = ~$8.33/month = ~55 credits/month = 660 credits/year
+    // Monthly: $14.99/month = ~100 credits/month (better value than yearly per month)
+    // Weekly: $4.99/week = ~33 credits/week
+    const WEEKLY_PRICE = weeklyPkg?.product?.price ?? 4.99;
+    const MONTHLY_PRICE = monthlyPkg?.product?.price ?? 14.99;
+    const YEARLY_PRICE = yearlyPkg?.product?.price ?? 99.99;
     
     // Use StoreKit localized price strings when available
-    const weeklyPriceString = weeklyPkg?.product?.priceString ?? '$2.99';
-    const monthlyPriceString = monthlyPkg?.product?.priceString ?? '$9.99';
-    const yearlyPriceString = yearlyPkg?.product?.priceString ?? '$69.99';
+    const weeklyPriceString = weeklyPkg?.product?.priceString ?? '$4.99';
+    const monthlyPriceString = monthlyPkg?.product?.priceString ?? '$14.99';
+    const yearlyPriceString = yearlyPkg?.product?.priceString ?? '$99.99';
     
     // Calculate monthly equivalent for yearly plan: yearly / 12
     const yearlyMonthlyEquivalent = (YEARLY_PRICE / 12).toFixed(2);
@@ -125,21 +160,21 @@ const PaywallScreen = () => {
       weekly: {
         price: WEEKLY_PRICE,
         priceString: weeklyPriceString,
-        credits: 7,
+        credits: 33, // ~33 credits/week (4.99/0.15 ≈ 33.27)
         label: t('paywall.plans.weekly'),
       },
       monthly: {
         price: MONTHLY_PRICE,
         priceString: monthlyPriceString,
-        credits: 40,
+        credits: 100, // ~100 credits/month (14.99/0.15 ≈ 99.93)
         label: t('paywall.plans.monthly'),
       },
       yearly: {
         price: YEARLY_PRICE,
         priceString: yearlyPriceString,
         monthlyEquivalent: `~$${yearlyMonthlyEquivalent}`,
-        credits: 480,
-        creditsPerMonth: 40,
+        credits: 660, // ~660 credits/year (99.99/0.15 ≈ 666.6, rounded to 660)
+        creditsPerMonth: 55, // ~55 credits/month (99.99/12/0.15 ≈ 55.55)
         label: t('paywall.plans.yearly'),
         discountPercent: showDiscount ? discountPercent : null,
       },
@@ -283,10 +318,18 @@ const PaywallScreen = () => {
           </Animated.View>
         )}
 
-        {/* Title on Video */}
+        {/* Title on Video - Canela for hero headline */}
         <View style={styles.videoOverlayContent}>
           <Animated.View entering={FadeIn.delay(200)}>
-            <HeadlineLarge style={styles.title}>Wearify Pro</HeadlineLarge>
+            <EditorialText
+              size={32}
+              weight="regular"
+              letterSpacing={-1.5}
+              color="primary"
+              style={styles.title}
+            >
+              Wearify Pro
+            </EditorialText>
           </Animated.View>
         </View>
       </View>
@@ -308,9 +351,6 @@ const PaywallScreen = () => {
           <View style={styles.benefitRow}>
             <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit3')}</BodySmall>
           </View>
-          <View style={styles.benefitRow}>
-            <BodySmall style={styles.benefitText}>✓ {t('paywall.benefit4')}</BodySmall>
-          </View>
         </Animated.View>
 
         {/* Plan Cards */}
@@ -323,6 +363,9 @@ const PaywallScreen = () => {
             accessibilityRole="radio"
             accessibilityState={{ selected: selectedPlan === 'weekly' }}
           >
+            <View style={styles.trialBadge}>
+              <LabelSmall style={styles.trialBadgeText}>{t('paywall.trialBadge')}</LabelSmall>
+            </View>
             <View style={[
               styles.planCard,
               selectedPlan === 'weekly' && styles.planCardSelected,
@@ -339,9 +382,6 @@ const PaywallScreen = () => {
               
               <View style={styles.planInfo}>
                 <HeadlineMedium style={styles.planName}>{planData.weekly.label}</HeadlineMedium>
-                <BodySmall style={styles.planSubtext}>
-                  {planData.weekly.credits} {t('paywall.creditsPerWeek')}
-                </BodySmall>
               </View>
               
               <View style={styles.planPriceContainer}>
@@ -388,11 +428,8 @@ const PaywallScreen = () => {
               <View style={styles.planInfo}>
                 <HeadlineMedium style={styles.planName}>{planData.yearly.label}</HeadlineMedium>
                 <BodySmall style={styles.planSubtext}>
-                  {planData.yearly.monthlyEquivalent}/{t('paywall.month')} · {planData.yearly.creditsPerMonth} {t('paywall.creditsPerMonth')}
+                  {planData.yearly.monthlyEquivalent}/{t('paywall.month')}
                 </BodySmall>
-                <LabelSmall style={styles.planCredits}>
-                  {t('paywall.totalCreditsPerYear', { count: planData.yearly.credits })}
-                </LabelSmall>
               </View>
               
               <View style={styles.planPriceContainer}>
@@ -430,9 +467,6 @@ const PaywallScreen = () => {
               
               <View style={styles.planInfo}>
                 <HeadlineMedium style={styles.planName}>{planData.monthly.label}</HeadlineMedium>
-                <BodySmall style={styles.planSubtext}>
-                  {planData.monthly.credits} {t('paywall.creditsPerMonth')}
-                </BodySmall>
               </View>
               
               <View style={styles.planPriceContainer}>
@@ -448,15 +482,8 @@ const PaywallScreen = () => {
           </Pressable>
         </Animated.View>
 
-        {/* Credit System Info */}
-        <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.creditInfoSection}>
-          <BodySmall style={styles.creditInfoText}>
-            {t('paywall.creditSystemInfo')}
-          </BodySmall>
-        </Animated.View>
-
         {/* Main CTA */}
-        <Animated.View entering={FadeInDown.delay(350).springify()}>
+        <Animated.View entering={FadeInDown.delay(300).springify()}>
           <PrimaryButton
             title={t('paywall.startTrial')}
             onPress={handleSubscribe}
@@ -642,16 +669,12 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   
-  // Title
+  // Title - Canela (EditorialText handles font)
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
     textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
-    lineHeight: 42,
   },
   
   // Content
@@ -683,6 +706,7 @@ const styles = StyleSheet.create({
   },
   planCardWrapper: {
     position: 'relative',
+    marginBottom: 4,
   },
   discountBadge: {
     position: 'absolute',
@@ -696,13 +720,12 @@ const styles = StyleSheet.create({
   },
   discountText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 11,
+    // LabelSmall already has proper weight
   },
   planCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 12,
     borderRadius: BorderRadius.lg,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.15)',
@@ -743,44 +766,45 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   planName: {
-    fontSize: 18,
-    fontWeight: '600',
     color: '#FFFFFF',
+    // HeadlineMedium already has fontWeight 600
   },
   planSubtext: {
     color: 'rgba(255,255,255,0.7)',
-    fontSize: 13,
+    fontSize: 12,
   },
   planCredits: {
     color: Colors.accent.primary,
-    fontWeight: '600',
     marginTop: 4,
+    // Using Typography component weight
   },
   planPriceContainer: {
     alignItems: 'flex-end',
   },
   planPrice: {
-    fontSize: 22,
-    fontWeight: 'bold',
     color: 'rgba(255,255,255,0.9)',
+    // HeadlineMedium already has proper weight
   },
   planPriceSelected: {
     color: Colors.accent.primary,
   },
   planPeriod: {
     color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
+    fontSize: 11,
   },
-  
-  // Credit Info
-  creditInfoSection: {
-    paddingVertical: 8,
+  trialBadge: {
+    position: 'absolute',
+    top: -8,
+    left: 16,
+    backgroundColor: Colors.accent.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.pill,
+    zIndex: 1,
   },
-  creditInfoText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 13,
-    textAlign: 'center',
-    lineHeight: 18,
+  trialBadgeText: {
+    color: Colors.dark.background,
+    // LabelSmall already has proper weight
   },
   
   // CTA

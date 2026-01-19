@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
-import { HeadlineLarge, BodyLarge, BodyMedium, LabelMedium } from '../src/ui/Typography';
+import { HeadlineLarge, BodyLarge, BodyMedium, LabelMedium, EditorialText } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { useTranslation } from '../src/hooks/useTranslation';
 
@@ -47,11 +47,17 @@ const WelcomeScreen = () => {
           <LabelMedium color="tertiary" style={styles.brandLabel}>VIRTUAL TRY-ON</LabelMedium>
         </View>
 
-        {/* Main Title */}
+        {/* Main Title - Canela for hero headline */}
         <View style={styles.titleSection}>
-          <HeadlineLarge style={styles.title}>
+          <EditorialText
+            size={32}
+            weight="regular"
+            letterSpacing={-1.5}
+            color="primary"
+            style={styles.title}
+          >
             {t('welcome.title')}
-          </HeadlineLarge>
+          </EditorialText>
           <BodyLarge color="secondary" style={styles.subtitle}>
             {t('welcome.subtitle')}
           </BodyLarge>

@@ -28,6 +28,8 @@ const queryClient = new QueryClient({
 const RootLayout = () => {
   const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Canela-Regular': require('../assets/fonts/Canela-Regular-Trial.otf'),
+    'Canela-Medium': require('../assets/fonts/Canela-Medium-Trial.otf'),
   });
 
   // Get sample garments loader from store

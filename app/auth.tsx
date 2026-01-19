@@ -599,11 +599,11 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 15,
-    fontWeight: '500',
+    // Using Typography component weight
   },
   tabTextActive: {
-    fontWeight: '700',
     color: '#000',
+    // Using Typography component weight
   },
   // Form
   formContainer: {

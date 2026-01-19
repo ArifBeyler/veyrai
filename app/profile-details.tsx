@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   },
   genderLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   checkMark: {
     position: 'absolute',
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   checkIcon: {
     color: Colors.dark.background,
     fontSize: 14,
-    fontWeight: 'bold',
+    // Using Typography component weight
   },
   bottomActions: {
     paddingHorizontal: Spacing.page,

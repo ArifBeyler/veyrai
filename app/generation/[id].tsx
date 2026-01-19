@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
   stepCheck: {
     color: Colors.dark.background,
     fontSize: 12,
-    fontWeight: 'bold',
+    // Using Typography component weight
   },
   stepLabel: {
     fontSize: 11,
@@ -890,8 +890,8 @@ const styles = StyleSheet.create({
   },
   beforeAfterText: {
     color: '#FFFFFF',
-    fontWeight: '700',
     fontSize: 14,
+    // Using Typography component weight
   },
   bottomSection: {
     paddingTop: 16,
@@ -914,8 +914,8 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 18,
-    fontWeight: '600',
     textAlign: 'center',
+    // Using Typography component weight
   },
   actionButtons: {
     flexDirection: 'row',

@@ -290,9 +290,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.text.primary,
-    fontSize: 36,
-    fontWeight: '700',
+    fontSize: 36, // DisplayLarge variant override for splash screen
     letterSpacing: 2,
+    // DisplayLarge already has fontWeight 700
   },
   subtitle: {
     marginTop: 8,

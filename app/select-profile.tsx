@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   checkIcon: {
     color: Colors.dark.background,
     fontSize: 16,
-    fontWeight: 'bold',
+    // Using Typography component weight
   },
   emptyCard: {
     alignItems: 'center',

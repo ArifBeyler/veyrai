@@ -68,81 +68,86 @@ export const BorderRadius = {
   full: 9999,
 } as const;
 
+/**
+ * SF Pro Text Typography System
+ * All styles use SF Pro Text (system font on iOS)
+ * Line heights optimized for 1.3-1.45 range (body text)
+ */
 export const Typography = {
-  // Display - Headlines
+  // Display - Large headlines (Semibold, sparingly used)
   displayLarge: {
     fontSize: 34,
     fontWeight: '700' as const,
-    lineHeight: 41,
+    lineHeight: 46, // 1.35 ratio
     letterSpacing: 0.25,
   },
   displayMedium: {
     fontSize: 28,
     fontWeight: '600' as const,
-    lineHeight: 34,
+    lineHeight: 38, // 1.35 ratio
     letterSpacing: 0,
   },
   displaySmall: {
     fontSize: 24,
     fontWeight: '600' as const,
-    lineHeight: 30,
+    lineHeight: 32, // 1.33 ratio
     letterSpacing: 0,
   },
-  // Headlines
+  // Headlines - Section titles (Semibold)
   headlineLarge: {
     fontSize: 22,
     fontWeight: '600' as const,
-    lineHeight: 28,
+    lineHeight: 30, // 1.36 ratio
     letterSpacing: 0,
   },
   headlineMedium: {
     fontSize: 20,
     fontWeight: '600' as const,
-    lineHeight: 26,
+    lineHeight: 26, // 1.3 ratio
     letterSpacing: 0,
   },
   headlineSmall: {
     fontSize: 17,
     fontWeight: '600' as const,
-    lineHeight: 22,
+    lineHeight: 23, // 1.35 ratio
     letterSpacing: -0.41,
   },
-  // Body
+  // Body - Main content text (Regular)
   bodyLarge: {
     fontSize: 17,
     fontWeight: '400' as const,
-    lineHeight: 24,
+    lineHeight: 24, // 1.41 ratio
     letterSpacing: -0.41,
   },
   bodyMedium: {
     fontSize: 15,
     fontWeight: '400' as const,
-    lineHeight: 22,
+    lineHeight: 21, // 1.4 ratio
     letterSpacing: -0.24,
   },
   bodySmall: {
     fontSize: 13,
     fontWeight: '400' as const,
-    lineHeight: 18,
+    lineHeight: 18, // 1.38 ratio
     letterSpacing: -0.08,
   },
-  // Labels
+  // Labels - Buttons, CTAs, metadata (Medium)
   labelLarge: {
     fontSize: 15,
     fontWeight: '500' as const,
-    lineHeight: 20,
+    lineHeight: 20, // 1.33 ratio
     letterSpacing: -0.24,
   },
   labelMedium: {
     fontSize: 13,
     fontWeight: '500' as const,
-    lineHeight: 18,
+    lineHeight: 18, // 1.38 ratio
     letterSpacing: -0.08,
   },
   labelSmall: {
     fontSize: 11,
     fontWeight: '500' as const,
-    lineHeight: 16,
+    lineHeight: 16, // 1.45 ratio
     letterSpacing: 0.06,
   },
 } as const;

@@ -5,35 +5,39 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomNav } from '../../src/ui/BottomNav';
 import { Colors } from '../../src/ui/theme';
 
-// Icons from full3dicons
-const NAV_ITEMS = [
-  {
-    key: 'home',
-    icon: require('../../full3dicons/images/home.png'),
-    accessibilityLabel: 'Ana Sayfa',
-  },
-  {
-    key: 'wardrobe',
-    icon: require('../../full3dicons/images/wardrobe.png'),
-    accessibilityLabel: 'Gardrop',
-  },
-  {
-    key: 'gallery',
-    icon: require('../../full3dicons/images/photo.png'),
-    accessibilityLabel: 'Galeri',
-  },
-  {
-    key: 'profile',
-    icon: require('../../full3dicons/images/profile.png'),
-    accessibilityLabel: 'Profil',
-  },
-];
-
-const CREATE_ICON = require('../../full3dicons/images/plus-sign.png');
-
 const TabsLayout = () => {
   const [activeTab, setActiveTab] = useState('home');
   const insets = useSafeAreaInsets();
+
+  // Icon names - BottomNav will handle 3D/normal icon switching
+  const NAV_ITEMS = [
+    {
+      key: 'home',
+      icon: require('../../full3dicons/images/home.png'),
+      iconName: 'home',
+      accessibilityLabel: 'Ana Sayfa',
+    },
+    {
+      key: 'wardrobe',
+      icon: require('../../full3dicons/images/wardrobe.png'),
+      iconName: 'wardrobe',
+      accessibilityLabel: 'Gardrop',
+    },
+    {
+      key: 'gallery',
+      icon: require('../../full3dicons/images/photo.png'),
+      iconName: 'gallery',
+      accessibilityLabel: 'Galeri',
+    },
+    {
+      key: 'profile',
+      icon: require('../../full3dicons/images/profile.png'),
+      iconName: 'profile',
+      accessibilityLabel: 'Profil',
+    },
+  ];
+
+  const CREATE_ICON = require('../../full3dicons/images/plus-sign.png');
 
   const handleTabSelect = (key: string) => {
     setActiveTab(key);

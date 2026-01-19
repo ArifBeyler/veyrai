@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   tryOnText: {
     color: '#0B0B0C',
-    fontWeight: '700',
+    // Using Typography component weight
   },
   emptyCard: {
     alignItems: 'center',

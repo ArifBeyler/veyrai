@@ -115,15 +115,17 @@ export const useRevenueCat = () => {
       setIsPremium(entitled);
       
       // Add credits based on package type
+      // Based on $99.99/year pricing: $0.15 per generation
+      // Yearly: $99.99 = 660 credits, Monthly: $14.99 = 100 credits, Weekly: $4.99 = 33 credits
       const packageId = packageToPurchase.identifier?.toLowerCase() || '';
       let creditsToAdd = 0;
       
       if (packageId.includes('yearly') || packageId.includes('annual')) {
-        creditsToAdd = 480; // Yıllık: 480 kredi
+        creditsToAdd = 660; // Yearly: 660 credits ($99.99/year)
       } else if (packageId.includes('monthly')) {
-        creditsToAdd = 40; // Aylık: 40 kredi
+        creditsToAdd = 100; // Monthly: 100 credits ($14.99/month)
       } else if (packageId.includes('weekly')) {
-        creditsToAdd = 7; // Haftalık: 7 kredi (7 günlük deneme)
+        creditsToAdd = 33; // Weekly: 33 credits ($4.99/week)
       }
       
       if (creditsToAdd > 0) {

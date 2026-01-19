@@ -524,8 +524,8 @@ const styles = StyleSheet.create({
   },
   balanceValue: {
     fontSize: 36,
-    fontWeight: '700',
     lineHeight: 42,
+    // Using Typography component weight
   },
   // Section
   sectionTitle: {
@@ -562,8 +562,8 @@ const styles = StyleSheet.create({
   },
   popularText: {
     color: '#000',
-    fontWeight: '700',
     fontSize: 10,
+    // Using Typography component weight
   },
   bonusBadge: {
     position: 'absolute',
@@ -577,8 +577,8 @@ const styles = StyleSheet.create({
   },
   bonusText: {
     color: '#fff',
-    fontWeight: '600',
     fontSize: 9,
+    // Using Typography component weight
   },
   packageIcon: {
     fontSize: 32,
@@ -587,8 +587,8 @@ const styles = StyleSheet.create({
   },
   packageTokens: {
     fontSize: 28,
-    fontWeight: '700',
     color: '#fff',
+    // Using Typography component weight
   },
   packagePriceContainer: {
     alignItems: 'center',
@@ -597,8 +597,8 @@ const styles = StyleSheet.create({
   },
   packagePrice: {
     fontSize: 18,
-    fontWeight: '600',
     color: '#fff',
+    // Using Typography component weight
   },
   perToken: {
     fontSize: 10,
@@ -615,8 +615,8 @@ const styles = StyleSheet.create({
   },
   selectedCheckText: {
     color: '#000',
-    fontWeight: '700',
     fontSize: 12,
+    // Using Typography component weight
   },
   // Info
   infoSection: {

@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   Pressable,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  withSpring,
+  withDelay,
+  Easing,
+  interpolate,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, BorderRadius } from '../../src/ui/theme';
+import { Colors, Spacing, BorderRadius, Shadows } from '../../src/ui/theme';
 import {
   DisplaySmall,
   HeadlineSmall,
   BodyMedium,
   BodySmall,
+  LabelLarge,
   LabelMedium,
   LabelSmall,
+  EditorialText,
 } from '../../src/ui/Typography';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
@@ -97,7 +111,7 @@ const GalleryScreen = () => {
           </BodyMedium>
         </Animated.View>
 
-        {/* Time filter */}
+        {/* Time filter - Muted when empty */}
         <Animated.View
           entering={FadeInDown.delay(200).springify()}
           style={styles.filterContainer}
@@ -106,15 +120,18 @@ const GalleryScreen = () => {
             <Pressable
               key={filter}
               onPress={() => handleFilterSelect(filter)}
+              disabled={completedJobs.length === 0}
               style={[
                 styles.filterChip,
                 timeFilter === filter && styles.filterChipActive,
+                completedJobs.length === 0 && styles.filterChipMuted,
               ]}
               accessibilityRole="tab"
               accessibilityState={{ selected: timeFilter === filter }}
             >
               <LabelMedium
                 color={timeFilter === filter ? 'accent' : 'secondary'}
+                style={completedJobs.length === 0 ? styles.filterTextMuted : undefined}
               >
                 {filter === 'all' && t('gallery.all')}
                 {filter === 'today' && t('gallery.today')}
@@ -186,33 +203,133 @@ const GalleryScreen = () => {
             </View>
           </Animated.View>
         ) : (
-          /* Empty State */
-          <Animated.View
-            entering={FadeInDown.delay(300).springify()}
-            style={styles.emptyState}
-          >
-            <GlassCard style={styles.emptyCard}>
-              <Image
-                source={require('../../full3dicons/images/photo.png')}
-                style={styles.emptyIcon}
-                resizeMode="contain"
-              />
-              <HeadlineSmall style={styles.emptyTitle}>
-                {t('gallery.emptyTitle')}
-              </HeadlineSmall>
-              <BodyMedium color="secondary" style={styles.emptyText}>
-                {t('gallery.emptySubtitle')}
-              </BodyMedium>
-              <PrimaryButton
-                title={t('gallery.startFirstTry')}
-                onPress={handleNewTryOn}
-                size="md"
-              />
-            </GlassCard>
-          </Animated.View>
+          /* Empty State - Premium Editorial Design */
+          <EmptyStateView onPress={handleNewTryOn} t={t} />
         )}
       </ScrollView>
     </View>
+  );
+};
+
+// Empty State Component with Editorial Design
+const EmptyStateView: React.FC<{ onPress: () => void; t: (key: string) => string }> = ({
+  onPress,
+  t,
+}) => {
+  // Subtle float animation for icon
+  const floatY = useSharedValue(0);
+  const iconScale = useSharedValue(1);
+  const cardOpacity = useSharedValue(0);
+  const cardScale = useSharedValue(0.95);
+  const ctaOpacity = useSharedValue(0);
+  const ctaTranslateY = useSharedValue(10);
+
+  useEffect(() => {
+    // Entry animation
+    cardOpacity.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    cardScale.value = withSpring(1, { damping: 15, stiffness: 90 });
+    
+    // CTA appears last
+    ctaOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    ctaTranslateY.value = withDelay(300, withSpring(0, { damping: 15, stiffness: 90 }));
+
+    // Idle float animation (very slow, subtle)
+    floatY.value = withRepeat(
+      withTiming(-8, {
+        duration: 5000,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
+      true
+    );
+
+    // Subtle pulse for icon
+    iconScale.value = withRepeat(
+      withTiming(1.05, {
+        duration: 6000,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
+      true
+    );
+  }, []);
+
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: floatY.value },
+      { scale: iconScale.value },
+    ],
+  }));
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
+
+  const ctaAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: ctaOpacity.value,
+    transform: [{ translateY: ctaTranslateY.value }],
+  }));
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onPress();
+  };
+
+  return (
+    <Animated.View style={[styles.emptyState, cardAnimatedStyle]}>
+      <View style={styles.emptyCard}>
+        {/* Icon with subtle animation */}
+        <Animated.View style={iconAnimatedStyle}>
+          <Image
+            source={require('../../full3dicons/images/photo.png')}
+            style={styles.emptyIcon}
+            resizeMode="contain"
+          />
+        </Animated.View>
+
+        {/* Title - Canela (Editorial) */}
+        <EditorialText
+          size={28}
+          weight="regular"
+          letterSpacing={-1.5}
+          color="primary"
+          style={styles.emptyTitle}
+        >
+          {t('gallery.emptyTitle') || 'Your gallery starts here'}
+        </EditorialText>
+
+        {/* Subtitle - SF Pro Text */}
+        <BodyMedium color="secondary" style={styles.emptySubtitle}>
+          {t('gallery.emptySubtitle') || 'Every try-on you create will be saved here.'}
+        </BodyMedium>
+
+        {/* CTA Button - Same style as onboarding */}
+        <Animated.View style={[styles.ctaContainer, ctaAnimatedStyle]}>
+          <TouchableOpacity
+            onPress={handlePress}
+            activeOpacity={0.8}
+            style={styles.ctaButton}
+          >
+            <LinearGradient
+              colors={[Colors.accent.primary, '#8BE04F']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.ctaGradient}
+            >
+              <LabelLarge color="inverse" style={styles.ctaText}>
+                {t('gallery.startFirstTry') || 'Create your first look'}
+              </LabelLarge>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Optional helper text */}
+          <BodySmall color="tertiary" style={styles.helperText}>
+            {t('gallery.emptyHelper') || 'It only takes a few seconds'}
+          </BodySmall>
+        </Animated.View>
+      </View>
+    </Animated.View>
   );
 };
 
@@ -246,6 +363,12 @@ const styles = StyleSheet.create({
   filterChipActive: {
     backgroundColor: Colors.accent.primaryDim,
     borderColor: Colors.accent.primary,
+  },
+  filterChipMuted: {
+    opacity: 0.45,
+  },
+  filterTextMuted: {
+    opacity: 0.6,
   },
   gallerySection: {
     gap: 12,
@@ -321,23 +444,61 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     marginTop: 40,
+    alignItems: 'center',
   },
   emptyCard: {
+    width: '100%',
     alignItems: 'center',
-    padding: 32,
-    gap: 16,
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+    gap: 20,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: 30, // 28-32 range, using 30
+    borderWidth: 1,
+    borderColor: Colors.dark.strokeLight,
+    ...Shadows.md,
   },
   emptyIcon: {
-    width: 80,
-    height: 80,
-    opacity: 0.4,
+    width: 96,
+    height: 96,
+    opacity: 0.5,
+    marginBottom: 8,
   },
   emptyTitle: {
     textAlign: 'center',
+    paddingHorizontal: Spacing.md,
+    marginBottom: 4,
   },
-  emptyText: {
+  emptySubtitle: {
     textAlign: 'center',
-    marginBottom: 8,
+    paddingHorizontal: Spacing.lg,
+    maxWidth: 280,
+    lineHeight: 22,
+  },
+  ctaContainer: {
+    width: '100%',
+    marginTop: 8,
+    alignItems: 'center',
+    gap: 12,
+  },
+  ctaButton: {
+    width: '100%',
+    borderRadius: BorderRadius.pill,
+    overflow: 'hidden',
+    ...Shadows.glow(Colors.accent.primary),
+  },
+  ctaGradient: {
+    paddingVertical: Spacing.lg + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaText: {
+    // Using LabelLarge from Typography system
+    fontWeight: '600' as const,
+  },
+  helperText: {
+    textAlign: 'center',
+    paddingHorizontal: Spacing.md,
   },
 });
 

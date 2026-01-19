@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   emailButtonText: {
     color: '#000',
-    fontWeight: '600',
+    // Using Typography component weight
   },
   // FAQ
   sectionTitle: {
@@ -256,8 +256,8 @@ const styles = StyleSheet.create({
   },
   faqBulletText: {
     color: '#000',
-    fontWeight: '700',
     fontSize: 12,
+    // Using Typography component weight
   },
   faqQuestionText: {
     flex: 1,

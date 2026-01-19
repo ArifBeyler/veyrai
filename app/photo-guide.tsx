@@ -31,6 +31,7 @@ import {
   BodySmall,
   LabelMedium,
   LabelSmall,
+  EditorialText,
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { GlassCard } from '../src/ui/GlassCard';
@@ -353,8 +354,7 @@ const styles = StyleSheet.create({
   },
   comparisonTitle: {
     textAlign: 'center',
-    fontWeight: '600',
-    fontSize: 16,
+    // BodyMedium already has proper weight
   },
   imageContainer: {
     width: width,
@@ -389,8 +389,7 @@ const styles = StyleSheet.create({
   },
   badgeOverlayText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 13,
+    // LabelMedium already has proper weight
   },
   exampleHeader: {
     flexDirection: 'row',
@@ -407,8 +406,7 @@ const styles = StyleSheet.create({
   },
   goodBadgeText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 13,
+    // LabelMedium already has proper weight
   },
   badBadge: {
     backgroundColor: '#ef4444',
@@ -419,13 +417,11 @@ const styles = StyleSheet.create({
   },
   badBadgeText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 13,
+    // LabelMedium already has proper weight
   },
   exampleTitle: {
     flex: 1,
-    fontWeight: '600',
-    fontSize: 15,
+    // Using Typography component weight
   },
   imageCard: {
     borderRadius: BorderRadius.lg,
@@ -458,9 +454,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     lineHeight: 26,
-    fontSize: 16,
-    fontWeight: '700',
     marginTop: 2,
+    // LabelSmall already has proper weight
   },
   badBullet: {
     backgroundColor: '#ef4444',

@@ -13,7 +13,6 @@ import {
   Image as RNImage,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
 } from 'react-native';
 import Animated, {
@@ -30,6 +29,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { translateGarmentTitle } from '../../src/utils/garmentTitle';
 import {
@@ -96,7 +96,6 @@ const CreateScreen = () => {
   const [selectedGender, setSelectedGender] = useState<GarmentGender | 'all'>('all');
   const [selectedCategories, setSelectedCategories] = useState<(GarmentCategory | 'all')[]>(['all']);
   const [showOnlyMine, setShowOnlyMine] = useState(false);
-  const [styleNoteInput, setStyleNoteInput] = useState('');
 
   const profiles = useSessionStore((s) => s.profiles);
   const garments = useSessionStore((s) => s.garments);
@@ -123,7 +122,6 @@ const CreateScreen = () => {
   const selectedGarmentIds = useSessionStore((s) => s.selectedGarmentIds);
   const toggleSelectedGarment = useSessionStore((s) => s.toggleSelectedGarment);
   const clearSelectedGarments = useSessionStore((s) => s.clearSelectedGarments);
-  const setStyleNote = useSessionStore((s) => s.setStyleNote);
   
   // Store'dan gelen seçili profil ID'sini local state'e senkronize et
   useEffect(() => {
@@ -173,7 +171,15 @@ const CreateScreen = () => {
       filtered = filtered.filter((g) => selectedCategories.includes(g.category));
     }
     
-    return filtered;
+    // Female outfitler her zaman en üstte
+    return filtered.sort((a, b) => {
+      const aIsFemale = a.gender === 'female';
+      const bIsFemale = b.gender === 'female';
+      
+      if (aIsFemale && !bIsFemale) return -1;
+      if (!aIsFemale && bIsFemale) return 1;
+      return 0; // Aynı cinsiyetteyse sıralama değişmez
+    });
   }, [garments, selectedGender, selectedCategories, showOnlyMine]);
   
   // Kullanıcının eklediği kıyafet sayısı
@@ -483,10 +489,9 @@ const CreateScreen = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } else if (step === 'garment' && selectedGarmentIds.length > 0) {
       setStep('confirm');
-      setStyleNote(styleNoteInput);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  }, [step, selectedProfileId, selectedGarmentIds.length, styleNoteInput]);
+  }, [step, selectedProfileId, selectedGarmentIds.length]);
 
   const handlePrevStep = () => {
     if (step === 'garment') {
@@ -738,10 +743,10 @@ const CreateScreen = () => {
                   !showOnlyMine && styles.mainTabActive,
                 ]}
               >
-                <Image
-                  source={require('../../full3dicons/images/wardrobe.png')}
-                  style={styles.mainTabIcon}
-                  resizeMode="contain"
+                <Ionicons 
+                  name="shirt-outline" 
+                  size={20} 
+                  color={!showOnlyMine ? Colors.accent.primary : Colors.text.secondary} 
                 />
                 <LabelMedium color={!showOnlyMine ? 'accent' : 'secondary'}>
                   {t('create.exampleGarments')}
@@ -758,10 +763,10 @@ const CreateScreen = () => {
                   showOnlyMine && styles.mainTabActive,
                 ]}
               >
-                <Image
-                  source={require('../../full3dicons/images/profile.png')}
-                  style={styles.mainTabIcon}
-                  resizeMode="contain"
+                <Ionicons 
+                  name="person-outline" 
+                  size={20} 
+                  color={showOnlyMine ? Colors.accent.primary : Colors.text.secondary} 
                 />
                 <LabelMedium color={showOnlyMine ? 'accent' : 'secondary'}>
                   {t('create.myGarments')}
@@ -782,75 +787,32 @@ const CreateScreen = () => {
             {/* Gender & Category Filters - Sadece Örnek Kıyafetler sekmesinde */}
             {!showOnlyMine && (
               <>
-                {/* Gender Tabs */}
-                <View style={styles.filterSection}>
-                  <LabelSmall color="secondary" style={styles.filterLabel}>{t('create.genderLabel')}</LabelSmall>
-                  <View style={styles.genderTabs}>
-                    {genderFilters.map((gender) => (
-                      <Pressable
-                        key={gender.key}
-                        onPress={() => handleSelectGender(gender.key)}
-                        style={[
-                          styles.genderTab,
-                          selectedGender === gender.key && styles.genderTabActive,
-                        ]}
-                      >
-                        <LabelSmall color={selectedGender === gender.key ? 'accent' : 'secondary'}>
-                          {gender.label}
-                        </LabelSmall>
-                        {genderCounts[gender.key] > 0 && (
-                          <View style={[
-                            styles.genderCount,
-                            selectedGender === gender.key && styles.genderCountActive
-                          ]}>
-                            <LabelSmall style={styles.categoryCountText}>
-                              {genderCounts[gender.key]}
-                            </LabelSmall>
-                          </View>
-                        )}
-                      </Pressable>
-                    ))}
+                {/* Gender Filter - Text-based selector */}
+                <Animated.View entering={FadeIn.delay(100).duration(250)} style={styles.filterSection}>
+                  <View style={styles.genderFilterRow}>
+                    {genderFilters.map((gender) => {
+                      const isSelected = selectedGender === gender.key;
+                      return (
+                        <Pressable
+                          key={gender.key}
+                          onPress={() => handleSelectGender(gender.key)}
+                          style={styles.genderFilterItem}
+                        >
+                          <LabelMedium 
+                            color={isSelected ? 'primary' : 'secondary'}
+                            style={[
+                              styles.genderFilterText,
+                              isSelected && styles.genderFilterTextSelected,
+                            ]}
+                          >
+                            {gender.label}
+                          </LabelMedium>
+                          {isSelected && <View style={styles.genderFilterUnderline} />}
+                        </Pressable>
+                      );
+                    })}
                   </View>
-                </View>
-
-                {/* Category Tabs (Çoklu Seçim) */}
-                <View style={styles.filterSection}>
-                  <LabelSmall color="secondary" style={styles.filterLabel}>{t('create.categoryLabel')}</LabelSmall>
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.categoryTabs}
-              >
-                {categories.map((cat) => {
-                  const isSelected = selectedCategories.includes(cat.key);
-                  return (
-                    <Pressable
-                      key={cat.key}
-                      onPress={() => handleToggleCategory(cat.key)}
-                      style={[
-                        styles.categoryTab,
-                        isSelected && styles.categoryTabActive,
-                      ]}
-                    >
-                      <Image source={cat.icon} style={styles.categoryTabIcon} resizeMode="contain" />
-                      <LabelSmall color={isSelected ? 'accent' : 'secondary'}>
-                        {cat.label}
-                      </LabelSmall>
-                      {categoryCounts[cat.key] > 0 && (
-                        <View style={[
-                          styles.categoryCount,
-                          isSelected && styles.categoryCountActive
-                        ]}>
-                          <LabelSmall style={styles.categoryCountText}>
-                            {categoryCounts[cat.key]}
-                          </LabelSmall>
-                        </View>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                </Animated.View>
               </>
             )}
 
@@ -956,25 +918,6 @@ const CreateScreen = () => {
                 </GlassCard>
               </Animated.View>
             )}
-
-            {/* Style Note Input */}
-            <View style={styles.styleNoteSection}>
-              <LabelMedium style={styles.styleNoteLabel}>{t('create.styleNote')}</LabelMedium>
-              <GlassCard style={styles.styleNoteCard}>
-                <TextInput
-                  style={styles.styleNoteInput}
-                  placeholder="örn: minimal, siyah ağırlıklı, smart casual..."
-                  placeholderTextColor={Colors.text.tertiary}
-                  value={styleNoteInput}
-                  onChangeText={setStyleNoteInput}
-                  multiline
-                  maxLength={150}
-                />
-              </GlassCard>
-              <LabelSmall color="tertiary" style={styles.styleNoteHint}>
-                AI'a stil ipuçları vererek daha iyi sonuçlar alabilirsin
-              </LabelSmall>
-            </View>
           </Animated.View>
         )}
 
@@ -1064,16 +1007,6 @@ const CreateScreen = () => {
               </ScrollView>
             </Animated.View>
 
-            {/* Style Note (if exists) */}
-            {styleNoteInput ? (
-              <Animated.View entering={FadeIn.delay(400)}>
-                <View style={styles.confirmStyleNoteCard}>
-                  <LabelSmall color="secondary">💬 {t('create.styleNoteLabel')}</LabelSmall>
-                  <BodySmall style={styles.confirmStyleNoteText}>"{styleNoteInput}"</BodySmall>
-                </View>
-              </Animated.View>
-            ) : null}
-
             {/* AI Generation Box - Modern */}
             <Animated.View entering={FadeInDown.delay(500)} style={styles.confirmAISection}>
               <LinearGradient
@@ -1147,7 +1080,7 @@ const CreateScreen = () => {
         ) : step !== 'confirm' ? (
           <>
             <PrimaryButton
-              title="Geri"
+              title={t('create.back')}
               variant="ghost"
               onPress={handlePrevStep}
               size="md"
@@ -1473,7 +1406,7 @@ const styles = StyleSheet.create({
   selectedChipCategoryText: {
     color: '#fff',
     fontSize: 9,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   selectedChipRemove: {
     position: 'absolute',
@@ -1489,83 +1422,84 @@ const styles = StyleSheet.create({
   removeText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
     lineHeight: 16,
+    // Using Typography component weight
   },
   // Filter Section
   filterSection: {
-    gap: 8,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   filterLabel: {
     marginLeft: 4,
+    marginBottom: 8,
   },
-  // Gender Tabs
-  genderTabs: {
+  // Gender Filter - Text-based
+  genderFilterRow: {
     flexDirection: 'row',
-    gap: 8,
-  },
-  genderTab: {
-    flexDirection: 'row',
+    gap: 24,
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: BorderRadius.pill,
-    borderWidth: 2,
-    borderColor: Colors.dark.strokeLight,
   },
-  genderTabActive: {
-    backgroundColor: Colors.accent.primaryDim,
-    borderColor: Colors.accent.primary,
-  },
-  genderCount: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    backgroundColor: Colors.dark.surfaceElevated,
-    borderRadius: BorderRadius.sm,
-  },
-  genderCountActive: {
-    backgroundColor: Colors.accent.primary,
-  },
-  // Category Tabs
-  categoryTabs: {
-    gap: 8,
-    paddingVertical: 4,
-  },
-  categoryTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
+  genderFilterItem: {
+    position: 'relative',
     paddingVertical: 8,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: BorderRadius.pill,
-    borderWidth: 1,
-    borderColor: Colors.dark.strokeLight,
+    paddingHorizontal: 2,
   },
-  categoryTabActive: {
-    backgroundColor: Colors.accent.primaryDim,
-    borderColor: Colors.accent.primary,
+  genderFilterText: {
+    fontSize: 15,
+    opacity: 0.6,
+    transition: 'opacity 200ms ease-out',
+    // Using Typography component weight
   },
-  categoryTabIcon: {
-    width: 16,
-    height: 16,
-    opacity: 0.7,
+  genderFilterTextSelected: {
+    opacity: 1,
+    // Using Typography component weight
   },
-  categoryCount: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    backgroundColor: Colors.dark.surfaceElevated,
-    borderRadius: BorderRadius.sm,
-  },
-  categoryCountActive: {
+  genderFilterUnderline: {
+    position: 'absolute',
+    bottom: 4,
+    left: 0,
+    right: 0,
+    height: 2,
     backgroundColor: Colors.accent.primary,
+    borderRadius: 1,
   },
-  categoryCountText: {
-    color: '#fff',
-    fontSize: 10,
+  // Category Filter - Text-based horizontal scroll
+  categoryFilterRow: {
+    flexDirection: 'row',
+    gap: 20,
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+  categoryFilterItem: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+  },
+  categoryFilterIcon: {
+    width: 14,
+    height: 14,
+  },
+  categoryFilterText: {
+    fontSize: 14,
+    opacity: 0.55,
+    transition: 'opacity 200ms ease-out',
+    // Using Typography component weight
+  },
+  categoryFilterTextSelected: {
+    opacity: 1,
+    // Using Typography component weight
+  },
+  categoryFilterUnderline: {
+    position: 'absolute',
+    bottom: 4,
+    left: 0,
+    right: 0,
+    height: 1.5,
+    backgroundColor: Colors.accent.primary,
+    borderRadius: 1,
   },
   // Garment Grid
   garmentGrid: {
@@ -1600,7 +1534,7 @@ const styles = StyleSheet.create({
   garmentCategoryText: {
     color: '#fff',
     fontSize: 10,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   garmentInfo: {
     gap: 2,
@@ -1669,7 +1603,7 @@ const styles = StyleSheet.create({
   heroProfileName: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   heroChangeButton: {
     backgroundColor: 'rgba(181, 255, 31, 0.2)',
@@ -1702,7 +1636,7 @@ const styles = StyleSheet.create({
   selectedCountText: {
     color: '#000',
     fontSize: 11,
-    fontWeight: '700',
+    // Using Typography component weight
   },
   editGarmentsButton: {
     backgroundColor: 'rgba(181, 255, 31, 0.1)',
@@ -1738,7 +1672,7 @@ const styles = StyleSheet.create({
   confirmGarmentBadgeText: {
     color: '#fff',
     fontSize: 10,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   // Style Note
   confirmStyleNoteCard: {
@@ -1785,7 +1719,7 @@ const styles = StyleSheet.create({
   },
   confirmAITitle: {
     color: '#fff',
-    fontWeight: '600',
+    // Using Typography component weight
   },
   confirmCreditRow: {
     flexDirection: 'row',
@@ -1874,7 +1808,7 @@ const styles = StyleSheet.create({
   },
   swipeLabel: {
     color: Colors.accent.primary,
-    fontWeight: '600',
+    // Using Typography component weight
   },
   swipeArrows: {
     color: Colors.accent.primary,
@@ -1898,7 +1832,7 @@ const styles = StyleSheet.create({
   swipeButtonIcon: {
     color: '#000',
     fontSize: 20,
-    fontWeight: '700',
+    // Using Typography component weight
   },
   // Main Tabs - Örnek Kıyafetler / Benim Kıyafetlerim
   mainTabsContainer: {
@@ -1939,7 +1873,7 @@ const styles = StyleSheet.create({
   mainTabBadgeText: {
     color: '#fff',
     fontSize: 11,
-    fontWeight: '600',
+    // Using Typography component weight
   },
 });
 

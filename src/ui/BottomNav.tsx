@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Image,
   ImageSourcePropType,
@@ -12,14 +12,66 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  withRepeat,
+  withSequence,
+  Easing,
+  interpolateColor,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Animation, BorderRadius, Colors, Shadows, Spacing } from './theme';
-import { Image as ExpoImage } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors } from './theme';
+import { AppIcon } from '../utils/iconHelper';
+import { useSessionStore } from '../state/useSessionStore';
+
+// Design tokens
+const TOKENS = {
+  dock: {
+    borderRadius: 28,
+    blur: 40,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    bottomOffset: 12,
+    shadow: {
+      color: '#000000',
+      offset: { width: 0, height: 10 },
+      opacity: 0.26,
+      radius: 20,
+    },
+    border: {
+      width: 1,
+      color: 'rgba(255, 255, 255, 0.08)',
+    },
+    background: 'rgba(20, 20, 22, 0.85)',
+  },
+  icon: {
+    size: 28,
+    containerSize: 50,
+    activeColor: Colors.accent.primary,
+    inactiveOpacity: 0.55,
+  },
+  glowDot: {
+    size: 6,
+    blur: 8,
+    color: Colors.accent.primary,
+  },
+  createButton: {
+    size: 60,
+    iconSize: 28,
+    elevation: 14,
+    gradientColors: ['#C4FF70', '#8FD93A', '#6BC41B'] as const,
+  },
+  animation: {
+    press: { damping: 15, stiffness: 400 },
+    color: { duration: 180 },
+    dot: { duration: 200 },
+  },
+};
 
 type NavItem = {
   key: string;
   icon: ImageSourcePropType;
+  iconName?: string;
   accessibilityLabel: string;
 };
 
@@ -32,25 +84,50 @@ type BottomNavProps = {
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedView = Animated.View;
 
+// NavButton with glow dot
 const NavButton: React.FC<{
   item: NavItem;
   isActive: boolean;
   onPress: () => void;
 }> = ({ item, isActive, onPress }) => {
   const scale = useSharedValue(1);
+  const dotOpacity = useSharedValue(isActive ? 1 : 0);
+  const dotScale = useSharedValue(isActive ? 1 : 0.5);
+  const iconOpacity = useSharedValue(isActive ? 1 : TOKENS.icon.inactiveOpacity);
+  const use3DIcons = useSessionStore((s) => s.use3DIcons);
+
+  // Update animations when active state changes
+  useEffect(() => {
+    dotOpacity.value = withTiming(isActive ? 1 : 0, { duration: TOKENS.animation.dot.duration });
+    dotScale.value = withSpring(isActive ? 1 : 0.5, TOKENS.animation.press);
+    iconOpacity.value = withTiming(
+      isActive ? 1 : TOKENS.icon.inactiveOpacity, 
+      { duration: TOKENS.animation.color.duration }
+    );
+  }, [isActive]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: iconOpacity.value,
+  }));
+
+  const dotAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: dotOpacity.value,
+    transform: [{ scale: dotScale.value }],
+  }));
+
   const handlePressIn = () => {
-    scale.value = withSpring(0.92, Animation.spring);
+    scale.value = withSpring(0.92, TOKENS.animation.press);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, Animation.spring);
+    scale.value = withSpring(1, TOKENS.animation.press);
   };
 
   return (
@@ -63,15 +140,102 @@ const NavButton: React.FC<{
       accessibilityLabel={item.accessibilityLabel}
       accessibilityState={{ selected: isActive }}
     >
-      <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
-        <Image
-          source={item.icon}
-          style={[
-            styles.navIcon,
-            !isActive && styles.inactiveIcon,
-          ]}
-          resizeMode="contain"
+      <AnimatedView style={[styles.iconWrapper, iconAnimatedStyle]}>
+        {item.iconName && !use3DIcons ? (
+          <AppIcon
+            name={item.iconName}
+            size={TOKENS.icon.size}
+            color={TOKENS.icon.activeColor}
+          />
+        ) : (
+          <Image
+            source={item.icon}
+            style={[styles.navIcon, { tintColor: TOKENS.icon.activeColor }]}
+            resizeMode="contain"
+          />
+        )}
+      </AnimatedView>
+      
+      {/* Glow Dot */}
+      <AnimatedView style={[styles.glowDot, dotAnimatedStyle]}>
+        <View style={styles.glowDotInner} />
+        <View style={styles.glowDotGlow} />
+      </AnimatedView>
+    </AnimatedPressable>
+  );
+};
+
+// Hero Create Button
+const CreateButton: React.FC<{
+  onPress: () => void;
+  createIcon: ImageSourcePropType;
+}> = ({ onPress, createIcon }) => {
+  const scale = useSharedValue(1);
+  const glowOpacity = useSharedValue(0.6);
+  const use3DIcons = useSessionStore((s) => s.use3DIcons);
+
+  // Subtle breathing glow animation
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.5, { duration: 2000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.92, TOKENS.animation.press);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, TOKENS.animation.press);
+  };
+
+  return (
+    <AnimatedPressable
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+      style={[styles.createButton, animatedStyle]}
+      accessibilityRole="button"
+      accessibilityLabel="Create new"
+    >
+      {/* Outer glow */}
+      <AnimatedView style={[styles.createButtonGlow, glowStyle]} />
+      
+      {/* Button with gradient */}
+      <View style={styles.createButtonInner}>
+        <LinearGradient
+          colors={TOKENS.createButton.gradientColors}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
         />
+        {!use3DIcons ? (
+          <AppIcon
+            name="plus-sign"
+            size={TOKENS.createButton.iconSize}
+            color="#000000"
+          />
+        ) : (
+          <Image
+            source={createIcon}
+            style={styles.createIcon}
+            resizeMode="contain"
+          />
+        )}
       </View>
     </AnimatedPressable>
   );
@@ -85,61 +249,33 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   createIcon,
 }) => {
   const insets = useSafeAreaInsets();
-  const createScale = useSharedValue(1);
-
-  const createAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: createScale.value }],
-  }));
-
-  const handleCreatePressIn = () => {
-    createScale.value = withSpring(0.9, Animation.spring);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
-
-  const handleCreatePressOut = () => {
-    createScale.value = withSpring(1, Animation.spring);
-  };
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 12) + -10 }]}>
+    <View style={[
+      styles.container, 
+      { paddingBottom: Math.max(insets.bottom, 8) + TOKENS.dock.bottomOffset }
+    ]}>
       <View style={styles.navWrapper}>
-        {/* Glass3D Container */}
-        <View style={styles.glass3dContainer}>
-          {/* Outer shadows layer - multiple shadow simulation */}
-          <View style={styles.glass3dShadowOuter} />
-          <View style={styles.glass3dShadowOuter2} />
+        {/* Floating Glass Dock */}
+        <View style={styles.dockContainer}>
+          {/* Shadow layer */}
+          <View style={styles.dockShadow} />
           
-          {/* Main blur and background layer */}
+          {/* Glass background */}
           <BlurView
-            intensity={80}
+            intensity={TOKENS.dock.blur}
             tint="dark"
-            style={styles.glass3dBlur}
-          >
-            {/* Background color overlay */}
-            <View style={styles.glass3dBackground} />
-            
-            {/* Noise texture overlay - with fallback */}
-            <View style={styles.glass3dNoiseContainer}>
-              <ExpoImage
-                source={{ uri: 'https://www.transparenttextures.com/patterns/egg-shell.png' }}
-                style={styles.glass3dNoise}
-                contentFit="repeat"
-                cachePolicy="memory-disk"
-                onError={() => {
-                  // Fallback handled by container background
-                }}
-              />
-            </View>
-          </BlurView>
+            style={styles.dockBlur}
+          />
           
-          {/* Inner highlight overlay (top-left) */}
-          <View style={styles.glass3dInnerHighlight} />
+          {/* Dark overlay for better contrast */}
+          <View style={styles.dockBackground} />
           
-          {/* Inner shadow overlay (bottom-right) */}
-          <View style={styles.glass3dInnerShadow} />
+          {/* Top highlight border */}
+          <View style={styles.dockHighlight} />
           
-          {/* Content */}
-          <View style={styles.glass3dContent}>
+          {/* Navigation items */}
+          <View style={styles.dockContent}>
             {items.map((item) => (
               <NavButton
                 key={item.key}
@@ -151,22 +287,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </View>
         </View>
 
-        <AnimatedPressable
-          onPressIn={handleCreatePressIn}
-          onPressOut={handleCreatePressOut}
-          onPress={onCreatePress}
-          style={[styles.createButton, createAnimatedStyle]}
-          accessibilityRole="button"
-          accessibilityLabel="Yeni oluştur"
-        >
-          <View style={styles.createButtonInner}>
-            <Image
-              source={createIcon}
-              style={styles.createIcon}
-              resizeMode="contain"
-            />
-          </View>
-        </AnimatedPressable>
+        {/* Hero Create Button */}
+        <CreateButton onPress={onCreatePress} createIcon={createIcon} />
       </View>
     </View>
   );
@@ -179,150 +301,121 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: 16,
   },
   navWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
-  // Glass3D Styles
-  glass3dContainer: {
-    borderRadius: BorderRadius.pill,
+  // Dock styles
+  dockContainer: {
+    borderRadius: TOKENS.dock.borderRadius,
     overflow: 'hidden',
     position: 'relative',
   },
-  glass3dShadowOuter: {
+  dockShadow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: TOKENS.dock.borderRadius,
+    shadowColor: TOKENS.dock.shadow.color,
+    shadowOffset: TOKENS.dock.shadow.offset,
+    shadowOpacity: TOKENS.dock.shadow.opacity,
+    shadowRadius: TOKENS.dock.shadow.radius,
+    elevation: 12,
+    backgroundColor: 'transparent',
+  },
+  dockBlur: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  dockBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: TOKENS.dock.background,
+  },
+  dockHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-    shadowColor: 'hsl(205, 20%, 10%)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 0.75,
-    elevation: 2,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
-  glass3dShadowOuter2: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-    shadowColor: 'hsl(205, 20%, 10%)',
-    shadowOffset: { width: 0.7, height: 0.8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.2,
-    elevation: 3,
-  },
-  glass3dBlur: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-  },
-  glass3dBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'hsla(189, 80%, 10%, 0.2)', // hsl(189 80% 10% / 0.2)
-    borderRadius: BorderRadius.pill,
-  },
-  glass3dNoiseContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-    overflow: 'hidden',
-  },
-  glass3dNoise: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.15,
-  },
-  glass3dInnerHighlight: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-    borderColor: 'hsla(205, 20%, 90%, 0.8)',
-    opacity: 0.6,
-  },
-  glass3dInnerShadow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.pill,
-    borderTopWidth: 0,
-    borderLeftWidth: 0,
-    borderRightWidth: 0.25,
-    borderBottomWidth: 0.25,
-    borderColor: 'hsla(205, 20%, 10%, 0.3)',
-    opacity: 0.4,
-  },
-  glass3dContent: {
+  dockContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.sm + 2,
-    paddingVertical: Spacing.sm + 2,
-    position: 'relative',
-    zIndex: 6,
+    paddingHorizontal: TOKENS.dock.paddingHorizontal,
+    paddingVertical: TOKENS.dock.paddingVertical,
+    gap: 4,
   },
+  // Nav button styles
   navButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    width: TOKENS.icon.containerSize,
+    height: TOKENS.icon.containerSize + 8,
     position: 'relative',
   },
-  iconContainer: {
-    width: 52,
-    height: 52,
+  iconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BorderRadius.md,
-  },
-  activeIconContainer: {
-    backgroundColor: Colors.accent.primaryDim,
   },
   navIcon: {
-    width: 40,
-    height: 40,
+    width: TOKENS.icon.size,
+    height: TOKENS.icon.size,
   },
-  inactiveIcon: {
-    opacity: 0.5,
-  },
-  createButton: {
-    ...Shadows.glow(Colors.accent.primary),
-  },
-  createButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: Colors.accent.primary,
+  // Glow dot
+  glowDot: {
+    position: 'absolute',
+    bottom: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  glowDotInner: {
+    width: TOKENS.glowDot.size,
+    height: TOKENS.glowDot.size,
+    borderRadius: TOKENS.glowDot.size / 2,
+    backgroundColor: TOKENS.glowDot.color,
+  },
+  glowDotGlow: {
+    position: 'absolute',
+    width: TOKENS.glowDot.size + TOKENS.glowDot.blur,
+    height: TOKENS.glowDot.size + TOKENS.glowDot.blur,
+    borderRadius: (TOKENS.glowDot.size + TOKENS.glowDot.blur) / 2,
+    backgroundColor: TOKENS.glowDot.color,
+    opacity: 0.4,
+  },
+  // Create button styles
+  createButton: {
+    position: 'relative',
+    marginTop: -8, // Float slightly higher
+  },
+  createButtonGlow: {
+    position: 'absolute',
+    top: -6,
+    left: -6,
+    right: -6,
+    bottom: -6,
+    borderRadius: (TOKENS.createButton.size + 12) / 2,
+    backgroundColor: Colors.accent.primary,
+    opacity: 0.3,
+  },
+  createButtonInner: {
+    width: TOKENS.createButton.size,
+    height: TOKENS.createButton.size,
+    borderRadius: TOKENS.createButton.size / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    // Shadow
+    shadowColor: Colors.accent.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: TOKENS.createButton.elevation,
+  },
   createIcon: {
-    width: 34,
-    height: 34,
+    width: TOKENS.createButton.iconSize,
+    height: TOKENS.createButton.iconSize,
+    tintColor: '#000000',
   },
 });
 
