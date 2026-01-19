@@ -1,7 +1,7 @@
-# App Store Metadata - Wearify
+# App Store Metadata - Veyra
 
 ## App Name
-**Wearify**
+**Veyra**
 
 ## Subtitle (Alt Başlık - 30 karakter)
 **AI ile Sanal Deneme Odası**
@@ -16,9 +16,9 @@
 
 ## App Store Açıklaması (4000 karakter)
 
-**Wearify - AI Destekli Görsel Deneme**
+**Veyra - AI Destekli Görsel Deneme**
 
-Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Wearify, AI teknolojisiyle size özel görsel sonuçlar üretir ve stil denemelerinize ilham verir.
+Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Veyra, AI teknolojisiyle size özel görsel sonuçlar üretir ve stil denemelerinize ilham verir.
 
 **Özellikler:**
 
@@ -40,7 +40,7 @@ Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Wearify, AI teknoloji
 
 **Önemli Notlar:**
 
-• Wearify bir AI destekli görselleştirme aracıdır.
+• Veyra bir AI destekli görselleştirme aracıdır.
 • Sonuçlar değişkenlik gösterebilir ve gerçekçilik garantisi vermez.
 • Üretilen görseller ilham ve görselleştirme amaçlıdır.
 • Sonuçlar mükemmel veya %100 doğru olmayabilir.
@@ -57,7 +57,7 @@ Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Wearify, AI teknoloji
 
 Kullanıcı gizliliği bizim için çok önemlidir. Fotoğraflarınız yalnızca görsel sonuç üretmek için işlenir ve güvenli bir şekilde saklanır.
 
-Wearify ile stil denemelerinizi keşfedin ve kendi tarzınızı bulun.
+Veyra ile stil denemelerinizi keşfedin ve kendi tarzınızı bulun.
 
 ---
 
@@ -139,7 +139,7 @@ App Store Connect'te eklenmesi gereken Privacy Policy URL'sinde şunlar bulunmal
 
 ## In-App Purchase Kontrol Listesi
 
-App Store Connect > Wearify > In-App Purchases bölümünde kontrol edilmesi gerekenler:
+App Store Connect > Veyra > In-App Purchases bölümünde kontrol edilmesi gerekenler:
 
 ### Subscription Ürünleri:
 - [ ] Monthly Subscription ($9.99/ay) - 40 kredi/ay

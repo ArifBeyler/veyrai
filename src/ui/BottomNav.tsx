@@ -2,8 +2,6 @@ import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect } from 'react';
 import {
-  Image,
-  ImageSourcePropType,
   Pressable,
   StyleSheet,
   View,
@@ -22,7 +20,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from './theme';
 import { AppIcon } from '../utils/iconHelper';
-import { useSessionStore } from '../state/useSessionStore';
 
 // Design tokens
 const TOKENS = {
@@ -70,8 +67,7 @@ const TOKENS = {
 
 type NavItem = {
   key: string;
-  icon: ImageSourcePropType;
-  iconName?: string;
+  iconName: string;
   accessibilityLabel: string;
 };
 
@@ -80,7 +76,6 @@ type BottomNavProps = {
   activeKey: string;
   onSelect: (key: string) => void;
   onCreatePress: () => void;
-  createIcon: ImageSourcePropType;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -96,7 +91,6 @@ const NavButton: React.FC<{
   const dotOpacity = useSharedValue(isActive ? 1 : 0);
   const dotScale = useSharedValue(isActive ? 1 : 0.5);
   const iconOpacity = useSharedValue(isActive ? 1 : TOKENS.icon.inactiveOpacity);
-  const use3DIcons = useSessionStore((s) => s.use3DIcons);
 
   // Update animations when active state changes
   useEffect(() => {
@@ -141,19 +135,11 @@ const NavButton: React.FC<{
       accessibilityState={{ selected: isActive }}
     >
       <AnimatedView style={[styles.iconWrapper, iconAnimatedStyle]}>
-        {item.iconName && !use3DIcons ? (
-          <AppIcon
-            name={item.iconName}
-            size={TOKENS.icon.size}
-            color={TOKENS.icon.activeColor}
-          />
-        ) : (
-          <Image
-            source={item.icon}
-            style={[styles.navIcon, { tintColor: TOKENS.icon.activeColor }]}
-            resizeMode="contain"
-          />
-        )}
+        <AppIcon
+          name={item.iconName}
+          size={TOKENS.icon.size}
+          color={TOKENS.icon.activeColor}
+        />
       </AnimatedView>
       
       {/* Glow Dot */}
@@ -168,11 +154,9 @@ const NavButton: React.FC<{
 // Hero Create Button
 const CreateButton: React.FC<{
   onPress: () => void;
-  createIcon: ImageSourcePropType;
-}> = ({ onPress, createIcon }) => {
+}> = ({ onPress }) => {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.6);
-  const use3DIcons = useSessionStore((s) => s.use3DIcons);
 
   // Subtle breathing glow animation
   useEffect(() => {
@@ -223,19 +207,11 @@ const CreateButton: React.FC<{
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         />
-        {!use3DIcons ? (
-          <AppIcon
-            name="plus-sign"
-            size={TOKENS.createButton.iconSize}
-            color="#000000"
-          />
-        ) : (
-          <Image
-            source={createIcon}
-            style={styles.createIcon}
-            resizeMode="contain"
-          />
-        )}
+        <AppIcon
+          name="plus-sign"
+          size={TOKENS.createButton.iconSize}
+          color="#000000"
+        />
       </View>
     </AnimatedPressable>
   );
@@ -246,7 +222,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeKey,
   onSelect,
   onCreatePress,
-  createIcon,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -288,7 +263,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         </View>
 
         {/* Hero Create Button */}
-        <CreateButton onPress={onCreatePress} createIcon={createIcon} />
+        <CreateButton onPress={onCreatePress} />
       </View>
     </View>
   );
@@ -411,11 +386,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: TOKENS.createButton.elevation,
-  },
-  createIcon: {
-    width: TOKENS.createButton.iconSize,
-    height: TOKENS.createButton.iconSize,
-    tintColor: '#000000',
   },
 });
 

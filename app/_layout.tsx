@@ -72,14 +72,34 @@ const RootLayout = () => {
               screenOptions={{
                 headerShown: false,
                 contentStyle: { backgroundColor: Colors.dark.background },
-                animation: 'fade',
+                animation: 'slide_from_right',
               }}
             >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="welcome" />
+            <Stack.Screen 
+              name="index" 
+              options={{
+                animation: 'fade',
+              }}
+            />
+            <Stack.Screen 
+              name="welcome" 
+              options={{
+                animation: 'fade',
+              }}
+            />
             {/* Auth screen removed - app runs in anonymous mode */}
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen 
+              name="onboarding" 
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen 
+              name="(tabs)" 
+              options={{
+                animation: 'fade',
+              }}
+            />
             <Stack.Screen
               name="create"
               options={{

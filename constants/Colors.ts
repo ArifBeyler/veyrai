@@ -1,5 +1,5 @@
 /**
- * Wearify Color Constants
+ * Veyra Color Constants
  * Re-exported from design system theme
  */
 

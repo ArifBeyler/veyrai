@@ -29,7 +29,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { TShirt } from 'phosphor-react-native';
+import { AppIcon } from '../../src/utils/iconHelper';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { translateGarmentTitle } from '../../src/utils/garmentTitle';
 import {
@@ -58,22 +59,22 @@ const { width } = Dimensions.get('window');
 type Step = 'profile' | 'garment' | 'confirm';
 
 // Cinsiyet filtreleri - dinamik olarak t() ile doldurulacak
-const getGenderFilters = (t: (key: string) => string): { key: GarmentGender | 'all'; label: string; icon: any }[] => [
-  { key: 'all', label: t('create.gender.all'), icon: require('../../full3dicons/images/wardrobe.png') },
-  { key: 'male', label: t('create.gender.male'), icon: require('../../full3dicons/images/profile.png') },
-  { key: 'female', label: t('create.gender.female'), icon: require('../../full3dicons/images/profile.png') },
+const getGenderFilters = (t: (key: string) => string): { key: GarmentGender | 'all'; label: string; iconName: string }[] => [
+  { key: 'all', label: t('create.gender.all'), iconName: 'wardrobe' },
+  { key: 'male', label: t('create.gender.male'), iconName: 'man' },
+  { key: 'female', label: t('create.gender.female'), iconName: 'woman' },
 ];
 
 // Kategori tanımları - dinamik olarak t() ile doldurulacak
-const getCategories = (t: (key: string) => string): { key: GarmentCategory | 'all'; label: string; icon: any }[] => [
-  { key: 'all', label: t('create.category.all'), icon: require('../../full3dicons/images/wardrobe.png') },
-  { key: 'tops', label: t('create.category.tops'), icon: require('../../full3dicons/images/t-shirt.png') },
-  { key: 'bottoms', label: t('create.category.bottoms'), icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'onepiece', label: t('create.category.onepiece'), icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'outerwear', label: t('create.category.outerwear'), icon: require('../../full3dicons/images/flannel-shirt.png') },
-  { key: 'footwear', label: t('create.category.footwear'), icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'bags', label: t('create.category.bags'), icon: require('../../full3dicons/images/clothes-hanger.png') },
-  { key: 'accessories', label: t('create.category.accessories'), icon: require('../../full3dicons/images/clothes-hanger.png') },
+const getCategories = (t: (key: string) => string): { key: GarmentCategory | 'all'; label: string; iconName: string }[] => [
+  { key: 'all', label: t('create.category.all'), iconName: 'wardrobe' },
+  { key: 'tops', label: t('create.category.tops'), iconName: 't-shirt' },
+  { key: 'bottoms', label: t('create.category.bottoms'), iconName: 'clothes-hanger' },
+  { key: 'onepiece', label: t('create.category.onepiece'), iconName: 'clothes-hanger' },
+  { key: 'outerwear', label: t('create.category.outerwear'), iconName: 'flannel-shirt' },
+  { key: 'footwear', label: t('create.category.footwear'), iconName: 'clothes-hanger' },
+  { key: 'bags', label: t('create.category.bags'), iconName: 'clothes-hanger' },
+  { key: 'accessories', label: t('create.category.accessories'), iconName: 'clothes-hanger' },
 ];
 
 // Kategori renkleri
@@ -566,7 +567,7 @@ const CreateScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
-          icon={require('../../full3dicons/images/home.png')}
+          icon="home"
           onPress={handleClose}
           accessibilityLabel="Kapat"
           variant="glass"
@@ -579,10 +580,11 @@ const CreateScreen = () => {
         </View>
         {!shouldShowPaywall && (
           <View style={styles.creditBadge}>
-            <Image
-              source={require('../../full3dicons/images/sparkle.png')}
-              style={styles.creditBadgeIcon}
-              resizeMode="contain"
+            <AppIcon
+              name="sparkle"
+              size={16}
+              color={Colors.accent.primary}
+              weight="fill"
             />
             <LabelSmall color="accent">
               {isPremium ? '∞' : credits > 0 ? credits : freeCreditsUsed ? '0' : '1'}
@@ -609,10 +611,10 @@ const CreateScreen = () => {
             {/* Add Profile */}
             <Animated.View entering={FadeInDown.delay(200).springify()}>
               <GlassCard style={styles.addCard} onPress={handleAddProfile}>
-                <Image
-                  source={require('../../full3dicons/images/plus-sign.png')}
-                  style={styles.addIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="plus-sign"
+                  size={24}
+                  color={Colors.accent.primary}
                 />
                 <LabelMedium>{t('create.addNewProfile')}</LabelMedium>
               </GlassCard>
@@ -643,10 +645,10 @@ const CreateScreen = () => {
                               resizeMode="cover"
                             />
                           ) : (
-                            <Image
-                              source={require('../../full3dicons/images/profile.png')}
-                              style={styles.placeholderImage}
-                              resizeMode="contain"
+                            <AppIcon
+                              name="profile"
+                              size={48}
+                              color={Colors.text.tertiary}
                             />
                           )}
                         </View>
@@ -664,10 +666,10 @@ const CreateScreen = () => {
             ) : (
               <Animated.View entering={FadeInDown.delay(300).springify()}>
                 <GlassCard style={styles.emptyCard}>
-                  <Image
-                    source={require('../../full3dicons/images/profile.png')}
-                    style={styles.emptyIcon}
-                    resizeMode="contain"
+                  <AppIcon
+                    name="profile"
+                    size={64}
+                    color={Colors.text.tertiary}
                   />
                   <BodyMedium color="secondary" style={styles.emptyText}>
                     {t('create.noProfilesYet')}
@@ -743,10 +745,10 @@ const CreateScreen = () => {
                   !showOnlyMine && styles.mainTabActive,
                 ]}
               >
-                <Ionicons 
-                  name="shirt-outline" 
+                <TShirt 
                   size={20} 
-                  color={!showOnlyMine ? Colors.accent.primary : Colors.text.secondary} 
+                  color={!showOnlyMine ? Colors.accent.primary : Colors.text.secondary}
+                  weight={!showOnlyMine ? 'regular' : 'light'}
                 />
                 <LabelMedium color={!showOnlyMine ? 'accent' : 'secondary'}>
                   {t('create.exampleGarments')}
@@ -819,10 +821,10 @@ const CreateScreen = () => {
             {/* Add Garment */}
             <Animated.View entering={FadeInDown.delay(200).springify()}>
               <GlassCard style={styles.addCard} onPress={handleAddGarment}>
-                <Image
-                  source={require('../../full3dicons/images/plus-sign.png')}
-                  style={styles.addIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="plus-sign"
+                  size={24}
+                  color={Colors.accent.primary}
                 />
                 <LabelMedium>{t('create.addGarment')}</LabelMedium>
               </GlassCard>
@@ -866,10 +868,10 @@ const CreateScreen = () => {
                                 cachePolicy="memory-disk"
                               />
                             ) : (
-                              <Image
-                                source={require('../../full3dicons/images/t-shirt.png')}
-                                style={styles.placeholderImage}
-                                resizeMode="contain"
+                              <AppIcon
+                                name="t-shirt"
+                                size={48}
+                                color={Colors.text.tertiary}
                               />
                             )}
                             
@@ -905,10 +907,10 @@ const CreateScreen = () => {
             ) : (
               <Animated.View entering={FadeInDown.delay(300).springify()}>
                 <GlassCard style={styles.emptyCard}>
-                  <Image
-                    source={require('../../full3dicons/images/wardrobe.png')}
-                    style={styles.emptyIcon}
-                    resizeMode="contain"
+                  <AppIcon
+                    name="wardrobe"
+                    size={64}
+                    color={Colors.text.tertiary}
                   />
                   <BodyMedium color="secondary" style={styles.emptyText}>
                     {selectedCategories.includes('all') && selectedGender === 'all'
@@ -940,10 +942,10 @@ const CreateScreen = () => {
                   style={styles.heroTopGradient}
                 >
                   <View style={styles.heroProfileBadge}>
-                    <Image
-                      source={require('../../full3dicons/images/profile.png')}
-                      style={styles.heroProfileBadgeIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="profile"
+                      size={20}
+                      color={Colors.text.primary}
                     />
                     <LabelMedium style={styles.heroProfileName}>
                       {selectedProfile?.name}
@@ -1016,10 +1018,11 @@ const CreateScreen = () => {
                 style={styles.confirmAIBox}
               >
                 <View style={styles.confirmAIIconContainer}>
-                  <Image
-                    source={require('../../full3dicons/images/ai-sparkle.png')}
-                    style={styles.confirmAIIcon}
-                    resizeMode="contain"
+                  <AppIcon
+                    name="ai-sparkle"
+                    size={32}
+                    color={Colors.accent.primary}
+                    weight="fill"
                   />
                 </View>
                 <View style={styles.confirmAIText}>
@@ -1032,10 +1035,11 @@ const CreateScreen = () => {
               
               {/* Credit Info - Centered */}
               <View style={styles.confirmCreditRow}>
-                <Image
-                  source={require('../../full3dicons/images/sparkle.png')}
-                  style={styles.confirmCreditIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="sparkle"
+                  size={16}
+                  color={Colors.accent.primary}
+                  weight="fill"
                 />
                 <LabelSmall color={(isPremium || credits > 0) ? 'accent' : 'tertiary'}>
                   {isPremium 

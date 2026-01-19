@@ -15,7 +15,7 @@ import * as crypto from 'crypto';
 
 const TEAM_ID = '73ANVUDATZ'; // Apple Team ID
 const KEY_ID = '948DL5U9PS'; // Apple Key ID (.p8 oluştururken aldığın)
-const CLIENT_ID = 'com.wearify.app'; // Bundle ID
+const CLIENT_ID = 'com.veyra.app'; // Bundle ID
 
 // .p8 dosyasının içeriğini buraya yapıştır (-----BEGIN PRIVATE KEY----- dahil)
 const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----

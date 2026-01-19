@@ -37,7 +37,7 @@ import { useSessionStore } from '../../src/state/useSessionStore';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { useTheme } from '../../src/theme';
 import { AppIcon } from '../../src/utils/iconHelper';
-import { Ionicons } from '@expo/vector-icons';
+import { Sparkle, Star, Plus, CaretRight } from 'phosphor-react-native';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.55;
@@ -161,7 +161,7 @@ const HomeScreen = () => {
         {/* Header - Minimal */}
         <Animated.View entering={FadeIn.delay(100)} style={styles.header}>
           <View style={styles.headerLeft}>
-            <DisplaySmall style={styles.brandName}>{t('common.appName')}</DisplaySmall>
+            <DisplaySmall style={styles.brandName}>{t('home.welcome')}</DisplaySmall>
           </View>
           <View style={styles.headerRight}>
             {/* Credits Display */}
@@ -171,7 +171,7 @@ const HomeScreen = () => {
                 onPress={() => router.push('/paywall')}
               >
                 <View style={styles.creditsBadge}>
-                  <Ionicons name="sparkles" size={16} color={Colors.accent.primary} />
+                  <Sparkle size={16} color={Colors.accent.primary} weight="regular" />
                   <LabelMedium color="primary" style={styles.creditsText}>
                     {!freeCreditsUsed ? 1 : credits}
                   </LabelMedium>
@@ -181,7 +181,7 @@ const HomeScreen = () => {
             {isPremium && (
               <View style={styles.creditsContainer}>
                 <View style={[styles.creditsBadge, styles.premiumBadge]}>
-                  <Ionicons name="star" size={16} color={Colors.accent.primary} />
+                  <Star size={16} color={Colors.accent.primary} weight="fill" />
                   <LabelMedium color="primary" style={styles.creditsText}>
                     Premium
                   </LabelMedium>
@@ -193,14 +193,14 @@ const HomeScreen = () => {
 
         {/* Styles Section - Card Stack */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <View style={styles.sectionHeader}>
-            <HeadlineSmall style={styles.sectionTitle}>{t('home.styles')}</HeadlineSmall>
-            {hasCompletedResults && (
+          {hasCompletedResults && (
+            <View style={styles.sectionHeader}>
+              <View style={styles.headerLeft} />
               <Pressable onPress={() => router.push('/(tabs)/gallery')}>
                 <LabelMedium color="accent">{t('home.seeAll')}</LabelMedium>
               </Pressable>
-            )}
-          </View>
+            </View>
+          )}
 
           {hasCompletedResults ? (
             <View style={styles.cardStackContainer}>
@@ -322,7 +322,7 @@ const HomeScreen = () => {
                 <BlurView intensity={60} tint="dark" style={styles.fanCardBlur}>
                   <View style={styles.fanCardCTA}>
                     <View style={styles.emptyIconContainer}>
-                      <Ionicons name="sparkles" size={36} color={Colors.accent.primary} />
+                      <Sparkle size={36} color={Colors.accent.primary} weight="regular" />
                     </View>
                     <HeadlineMedium style={styles.emptyTitle}>
                       {!freeCreditsUsed 
@@ -397,13 +397,13 @@ const HomeScreen = () => {
             <GlassCard style={styles.quickStartCard}>
               <View style={styles.quickStartContent}>
                 <View style={styles.quickStartIcon}>
-                  <Ionicons name="add" size={28} color={Colors.accent.primary} />
+                  <Plus size={28} color={Colors.accent.primary} weight="regular" />
                 </View>
                 <View style={styles.quickStartText}>
                   <LabelMedium>{t('home.quickStart')}</LabelMedium>
                   <BodySmall color="secondary">{t('home.quickStartDesc')}</BodySmall>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={Colors.text.secondary} />
+                <CaretRight size={20} color={Colors.text.secondary} weight="regular" />
               </View>
             </GlassCard>
           </Pressable>

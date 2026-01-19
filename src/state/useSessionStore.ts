@@ -188,9 +188,6 @@ type SessionState = {
   };
   setPreferences: (prefs: Partial<SessionState['preferences']>) => void;
 
-  // Icon style preference
-  use3DIcons: boolean;
-  setUse3DIcons: (value: boolean) => void;
 
   // Premium
   isPremium: boolean;
@@ -402,9 +399,6 @@ export const useSessionStore = create<SessionState>()(
           preferences: { ...state.preferences, ...prefs },
         })),
 
-      // Icon style preference
-      use3DIcons: true,
-      setUse3DIcons: (value) => set({ use3DIcons: value }),
 
       // Premium
       isPremium: false,
@@ -478,7 +472,7 @@ export const useSessionStore = create<SessionState>()(
       },
     }),
     {
-      name: 'wearify-session',
+      name: 'veyra-session',
       version: 3, // Cache temizlemek için versiyon değiştirildi
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
@@ -495,7 +489,6 @@ export const useSessionStore = create<SessionState>()(
         credits: state.credits,
         deviceHash: state.deviceHash,
         pushToken: state.pushToken,
-        use3DIcons: state.use3DIcons,
         sampleGarmentsLoaded: false, // Yeniden yüklensin
       }),
       migrate: (persistedState: any, version: number) => {

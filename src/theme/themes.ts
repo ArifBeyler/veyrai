@@ -1,5 +1,5 @@
 /**
- * Wearify Theme System
+ * Veyra Theme System
  * Farklı renk temalarını tanımlar
  */
 

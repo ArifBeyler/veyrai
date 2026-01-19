@@ -34,7 +34,7 @@ import { Colors, Spacing, BorderRadius, Shadows } from '../src/ui/theme';
 import { useTranslation } from '../src/hooks/useTranslation';
 import { useAppLanguage } from '../src/hooks/useAppLanguage';
 import { useSessionStore } from '../src/state/useSessionStore';
-import { Ionicons } from '@expo/vector-icons';
+import * as PhosphorIcons from 'phosphor-react-native';
 import { EditorialText } from '../src/ui/Typography';
 import { Typography } from '../src/ui/theme';
 import { Video, ResizeMode } from 'expo-av';
@@ -85,7 +85,7 @@ const LANGUAGE_CONFIG: Record<string, { name: string; flag: string; short: strin
 // Onboarding data
 type OnboardingStep = {
   id: number;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof PhosphorIcons;
   image?: any;
   titleKey: string;
   descriptionKey: string;
@@ -99,7 +99,7 @@ type OnboardingStep = {
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 0,
-    icon: 'layers-outline',
+    icon: 'Stack', // layers-outline -> Stack
     titleKey: 'onboarding.step2.title',
     descriptionKey: 'onboarding.step2.description',
     accentColor: '#7DD3FC', // Soft blue
@@ -108,7 +108,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 1,
-    icon: 'color-wand-outline',
+    icon: 'MagicWand', // color-wand-outline -> MagicWand
     titleKey: 'onboarding.step3.title',
     descriptionKey: 'onboarding.step3.description',
     accentColor: Colors.accent.primary,
@@ -208,7 +208,7 @@ const FloatingIcon = ({
   image,
   isActive,
 }: { 
-  icon: keyof typeof Ionicons.glyphMap; 
+  icon: keyof typeof PhosphorIcons; 
   color: string;
   size?: number;
   image?: any;
@@ -254,9 +254,18 @@ const FloatingIcon = ({
           contentFit="contain"
         />
       ) : (
-        // İkon için minimal container
+        // İkon için minimal container - Phosphor Icons
         <View style={styles.iconContainerMinimal}>
-          <Ionicons name={icon} size={size} color={color} />
+          {(() => {
+            const IconComponent = PhosphorIcons[icon] as React.ComponentType<{
+              size?: number;
+              color?: string;
+              weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+            }>;
+            return IconComponent ? (
+              <IconComponent size={size} color={color} weight="regular" />
+            ) : null;
+          })()}
         </View>
       )}
     </Animated.View>

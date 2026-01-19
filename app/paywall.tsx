@@ -37,6 +37,7 @@ import {
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { GlassCard } from '../src/ui/GlassCard';
+import { AppIcon } from '../src/utils/iconHelper';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
 import { useTranslation } from '../src/hooks/useTranslation';
 
@@ -275,11 +276,11 @@ const PaywallScreen = () => {
   };
 
   const handleOpenPrivacy = () => {
-    Linking.openURL('https://wearify.app/privacy');
+    Linking.openURL('https://veyra.app/privacy');
   };
 
   const handleOpenTerms = () => {
-    Linking.openURL('https://wearify.app/terms');
+    Linking.openURL('https://veyra.app/terms');
   };
 
   const isPackageAvailable = (plan: Plan): boolean => {
@@ -328,7 +329,7 @@ const PaywallScreen = () => {
               color="primary"
               style={styles.title}
             >
-              Wearify Pro
+              Veyra Pro
             </EditorialText>
           </Animated.View>
         </View>
@@ -544,14 +545,11 @@ const PaywallScreen = () => {
                   : styles.modalIconError,
               ]}
             >
-              <Image
-                source={
-                  paymentModal.type === 'success'
-                    ? require('../full3dicons/images/checkmark.png')
-                    : require('../full3dicons/images/cross.png')
-                }
-                style={styles.modalIcon}
-                resizeMode="contain"
+              <AppIcon
+                name={paymentModal.type === 'success' ? 'checkmark' : 'cross'}
+                size={48}
+                color={paymentModal.type === 'success' ? Colors.accent.primary : Colors.error}
+                weight="fill"
               />
             </Animated.View>
 

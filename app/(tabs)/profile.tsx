@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
-  Modal,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -16,8 +15,6 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeOut,
-  SlideInDown,
-  SlideOutDown,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -42,7 +39,7 @@ import {
   LabelMedium,
   LabelSmall
 } from '../../src/ui/Typography';
-import { useTheme, getAllThemes, Theme, ThemeId } from '../../src/theme';
+import { useTheme } from '../../src/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -121,199 +118,16 @@ const LanguageTransitionOverlay = ({
   );
 };
 
-// Theme Selector Modal Component
-const ThemeSelectorModal = ({
-  visible,
-  onClose,
-  currentThemeId,
-  onSelectTheme,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  currentThemeId: ThemeId;
-  onSelectTheme: (id: ThemeId) => void;
-}) => {
-  const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
-  const themes = getAllThemes();
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onRequestClose={onClose}
-    >
-      <View style={themeModalStyles.overlay}>
-        <TouchableOpacity 
-          style={StyleSheet.absoluteFill} 
-          onPress={onClose}
-          activeOpacity={1}
-        />
-        <Animated.View 
-          entering={SlideInDown.duration(300)}
-          exiting={SlideOutDown.duration(200)}
-          style={[themeModalStyles.container, { paddingBottom: insets.bottom + 20 }]}
-        >
-          <LinearGradient
-            colors={['#1a1a2e', '#16213e', '#1a1a2e']}
-            style={StyleSheet.absoluteFill}
-          />
-          
-          {/* Header */}
-          <View style={themeModalStyles.header}>
-            <HeadlineSmall>{t('profile.selectTheme')}</HeadlineSmall>
-            <TouchableOpacity onPress={onClose} style={themeModalStyles.closeButton}>
-              <BodyLarge color="secondary">✕</BodyLarge>
-            </TouchableOpacity>
-          </View>
-
-          {/* Theme Grid */}
-          <ScrollView 
-            style={themeModalStyles.scrollView}
-            contentContainerStyle={themeModalStyles.grid}
-            showsVerticalScrollIndicator={false}
-          >
-            {themes.map((theme) => (
-              <TouchableOpacity
-                key={theme.id}
-                style={[
-                  themeModalStyles.themeItem,
-                  currentThemeId === theme.id && themeModalStyles.themeItemSelected,
-                ]}
-                onPress={() => onSelectTheme(theme.id)}
-                activeOpacity={0.7}
-              >
-                {/* Theme Preview Gradient */}
-                <LinearGradient
-                  colors={[theme.preview[0], theme.preview[1]]}
-                  style={themeModalStyles.themePreview}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  {/* Accent Color Dot */}
-                  <View style={[themeModalStyles.accentDot, { backgroundColor: theme.colors.accent }]} />
-                </LinearGradient>
-                
-                {/* Theme Info */}
-                <View style={themeModalStyles.themeInfo}>
-                  <LabelMedium style={themeModalStyles.themeEmoji}>{theme.emoji}</LabelMedium>
-                  <LabelSmall color={currentThemeId === theme.id ? 'accent' : 'primary'}>
-                    {theme.name}
-                  </LabelSmall>
-                </View>
-
-                {/* Selected Indicator */}
-                {currentThemeId === theme.id && (
-                  <View style={[themeModalStyles.selectedBadge, { backgroundColor: theme.colors.accent }]}>
-                    <LabelSmall style={{ color: '#000', fontSize: 10 }}>✓</LabelSmall>
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-};
-
-const themeModalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
-  },
-  container: {
-    backgroundColor: '#1a1a2e',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
-  },
-  themeItem: {
-    width: (Dimensions.get('window').width - 56) / 2,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  themeItemSelected: {
-    borderColor: Colors.accent.primary,
-  },
-  themePreview: {
-    height: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  accentDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  themeInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  themeEmoji: {
-    fontSize: 18,
-  },
-  selectedBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setLang, resolvedLang, supportedLanguages } = useAppLanguage();
   const { restore: restorePurchases } = useRevenueCat();
-  const { theme, themeId, setTheme } = useTheme();
+  const { theme } = useTheme();
   const [showLanguageChangeToast, setShowLanguageChangeToast] = useState(false);
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
   const [transitionLang, setTransitionLang] = useState<string | null>(null);
-  const [showThemeModal, setShowThemeModal] = useState(false);
   
   // Auto-hide toast after 1.5 seconds
   useEffect(() => {
@@ -337,8 +151,6 @@ const ProfileScreen = () => {
   const clearUserData = useSessionStore((s) => s.clearUserData);
   const setHasCompletedOnboarding = useSessionStore((s) => s.setHasCompletedOnboarding);
   const loadSampleGarments = useSessionStore((s) => s.loadSampleGarments);
-  const use3DIcons = useSessionStore((s) => s.use3DIcons);
-  const setUse3DIcons = useSessionStore((s) => s.setUse3DIcons);
 
   const hasCredits = !freeCreditsUsed || isPremium;
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
@@ -474,26 +286,7 @@ const ProfileScreen = () => {
     setTransitionLang(null);
   };
 
-  const handleOpenThemeSelector = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setShowThemeModal(true);
-  };
 
-  const handleSelectTheme = async (id: ThemeId) => {
-    if (id === themeId) {
-      setShowThemeModal(false);
-      return;
-    }
-    
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    await setTheme(id);
-    setShowThemeModal(false);
-  };
-
-  const handleToggleIconStyle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setUse3DIcons(!use3DIcons);
-  };
 
   return (
     <View style={styles.container}>
@@ -547,19 +340,20 @@ const ProfileScreen = () => {
                   />
                 ) : (
                   <View style={styles.profilePhotoPlaceholder}>
-                    <Image
-                      source={require('../../full3dicons/images/profile-icon.png')}
-                      style={styles.profilePhotoIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="profile-icon"
+                      size={40}
+                      color={Colors.text.tertiary}
                     />
                   </View>
                 )}
                 {(isPremium || credits > 0) && (
                   <View style={[styles.premiumBadge, { backgroundColor: theme.colors.accent }]}>
-                    <Image
-                      source={require('../../full3dicons/images/sparkle.png')}
-                      style={styles.premiumIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="sparkle"
+                      size={16}
+                      color="#000000"
+                      weight="fill"
                     />
                   </View>
                 )}
@@ -595,10 +389,10 @@ const ProfileScreen = () => {
 
               {/* Edit Icon */}
               <View style={styles.editIconContainer}>
-                <Image
-                  source={require('../../full3dicons/images/profile-icon.png')}
-                  style={styles.editIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="profile-icon"
+                  size={20}
+                  color={Colors.text.primary}
                 />
               </View>
             </TouchableOpacity>
@@ -611,10 +405,11 @@ const ProfileScreen = () => {
             <GlassCard style={[styles.subscriptionCardPremium, { borderColor: theme.colors.accent }]}>
               <View style={styles.subscriptionHeader}>
                 <View style={[styles.premiumIconContainer, { backgroundColor: theme.colors.accentDim }]}>
-                  <Image
-                    source={require('../../full3dicons/images/sparkle.png')}
-                    style={[styles.subscriptionIcon, { tintColor: theme.colors.accent }]}
-                    resizeMode="contain"
+                  <AppIcon
+                    name="sparkle"
+                    size={20}
+                    color={theme.colors.accent}
+                    weight="fill"
                   />
                 </View>
                 <View style={styles.subscriptionText}>
@@ -628,10 +423,11 @@ const ProfileScreen = () => {
               <View style={styles.freePlanContent}>
                 <View style={styles.freePlanLeft}>
                   <View style={styles.freePlanIconContainer}>
-                    <Image
-                      source={require('../../full3dicons/images/sparkle.png')}
-                      style={styles.freePlanIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="sparkle"
+                      size={20}
+                      color={Colors.text.secondary}
+                      weight="regular"
                     />
                   </View>
                   <View style={styles.freePlanText}>
@@ -682,14 +478,14 @@ const ProfileScreen = () => {
           
           <GlassCard style={styles.actionsCard}>
             <ActionItem
-              icon={require('../../full3dicons/images/profile-icon.png')}
+              iconName="profile-icon"
               title={t('profile.manageProfiles')}
               subtitle={t('profile.profilesCount', { count: profiles.length })}
               onPress={() => router.push('/select-profile')}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/photo.png')}
+              iconName="gallery"
               title={t('profile.goToGallery')}
               subtitle={t('profile.imagesCount', { count: galleryImagesCount })}
               onPress={() => router.push('/(tabs)/gallery')}
@@ -703,62 +499,47 @@ const ProfileScreen = () => {
 
           <GlassCard style={styles.settingsCard}>
             <ActionItem
-              icon={require('../../full3dicons/images/sparkle.png')}
+              iconName="sparkle"
               title={t('profile.helpAndSupport')}
               onPress={handleSupport}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/sparkle.png')}
+              iconName="sparkle"
               title={t('profile.buyTokens')}
               subtitle={t('profile.buyTokensSubtitle')}
               onPress={handleBuyTokens}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/profile-icon.png')}
+              iconName="profile-icon"
               title={t('profile.privacyPolicy')}
               onPress={handlePrivacy}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/ai-sparkle.png')}
+              iconName="ai-sparkle"
               title={t('profile.changeLanguage')}
               subtitle={resolvedLang === 'tr' ? 'Türkçe' : resolvedLang === 'en' ? 'English' : 'Français'}
               onPress={handleChangeLanguage}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/sparkle.png')}
-              title={t('profile.changeTheme')}
-              subtitle={`${theme.emoji} ${theme.name}`}
-              onPress={handleOpenThemeSelector}
-            />
-            <View style={styles.divider} />
-            <ActionItem
-              iconName={use3DIcons ? "sparkle" : "sparkle"}
-              icon={require('../../full3dicons/images/sparkle.png')}
-              title={use3DIcons ? t('profile.useNormalIcons') : t('profile.use3DIcons')}
-              subtitle={use3DIcons ? t('profile.normalIconsSubtitle') : t('profile.3DIconsSubtitle')}
-              onPress={handleToggleIconStyle}
-            />
-            <View style={styles.divider} />
-            <ActionItem
-              icon={require('../../full3dicons/images/wardrobe.png')}
+              iconName="wardrobe"
               title={t('profile.refreshGarments.title')}
               subtitle={t('profile.refreshGarments.subtitle')}
               onPress={handleRefreshGarments}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/checkmark.png')}
+              iconName="checkmark"
               title={t('profile.restorePurchases.title')}
               subtitle={t('profile.restorePurchases.subtitle')}
               onPress={handleRestorePurchases}
             />
             <View style={styles.divider} />
             <ActionItem
-              icon={require('../../full3dicons/images/home.png')}
+              iconName="home"
               title={t('profile.replayOnboarding.title')}
               subtitle={t('profile.replayOnboarding.subtitle')}
               onPress={handleReplayOnboarding}
@@ -771,7 +552,7 @@ const ProfileScreen = () => {
           entering={FadeInDown.delay(800).springify()}
           style={styles.versionContainer}
         >
-          <BodySmall color="tertiary">Wearify v1.0.0</BodySmall>
+          <BodySmall color="tertiary">Veyra v1.0.0</BodySmall>
         </Animated.View>
       </ScrollView>
 
@@ -784,10 +565,11 @@ const ProfileScreen = () => {
         >
           <GlassCard style={styles.toastCard}>
             <View style={styles.toastContent}>
-              <Image
-                source={require('../../full3dicons/images/sparkle.png')}
-                style={styles.toastIcon}
-                resizeMode="contain"
+              <AppIcon
+                name="sparkle"
+                size={20}
+                color={Colors.accent.primary}
+                weight="fill"
               />
               <LabelMedium>{t('profile.changingLanguage')}</LabelMedium>
             </View>
@@ -795,13 +577,6 @@ const ProfileScreen = () => {
         </Animated.View>
       )}
 
-      {/* Theme Selector Modal */}
-      <ThemeSelectorModal
-        visible={showThemeModal}
-        onClose={() => setShowThemeModal(false)}
-        currentThemeId={themeId}
-        onSelectTheme={handleSelectTheme}
-      />
     </View>
   );
 };
@@ -840,28 +615,26 @@ const ActionItem: React.FC<ActionItemProps> = ({
   subtitle,
   onPress,
 }) => {
-  const use3DIcons = useSessionStore((s) => s.use3DIcons);
-  
   return (
     <TouchableOpacity
       style={styles.actionItem}
       onPress={onPress}
       activeOpacity={0.7}
     >
-      {iconName && !use3DIcons ? (
+      {iconName ? (
         <AppIcon
           name={iconName}
           size={24}
           color={Colors.accent.primary}
           style={styles.actionIcon}
         />
-      ) : (
+      ) : icon ? (
         <Image
           source={icon}
           style={styles.actionIcon}
           resizeMode="contain"
         />
-      )}
+      ) : null}
       <View style={styles.actionText}>
         <LabelMedium>{title}</LabelMedium>
         {subtitle && <LabelSmall color="secondary">{subtitle}</LabelSmall>}

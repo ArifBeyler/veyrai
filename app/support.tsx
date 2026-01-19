@@ -16,6 +16,7 @@ import { useTranslation } from '../src/hooks/useTranslation';
 import { useTheme } from '../src/theme';
 import { GlassCard } from '../src/ui/GlassCard';
 import { IconButton } from '../src/ui/IconButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { BorderRadius, Colors, Spacing } from '../src/ui/theme';
 import {
   BodyMedium,
@@ -26,7 +27,7 @@ import {
   LabelSmall,
 } from '../src/ui/Typography';
 
-const SUPPORT_EMAIL = 'support@wearify.app';
+const SUPPORT_EMAIL = 'support@veyra.app';
 const FAQ_ITEMS = [
   {
     question: 'support.faq.howToUse.question',
@@ -69,7 +70,7 @@ const SupportScreen = () => {
         style={[styles.header, { paddingTop: insets.top + 8 }]}
       >
         <IconButton
-          icon={require('../full3dicons/images/home.png')}
+          icon="home"
           onPress={() => router.back()}
           accessibilityLabel="Geri"
           variant="glass"
@@ -97,10 +98,11 @@ const SupportScreen = () => {
               style={StyleSheet.absoluteFill}
             />
             <View style={styles.contactIcon}>
-              <Image
-                source={require('../full3dicons/images/sparkle.png')}
-                style={styles.iconImage}
-                resizeMode="contain"
+              <AppIcon
+                name="sparkle"
+                size={32}
+                color={theme.colors.accent}
+                weight="fill"
               />
             </View>
             <HeadlineSmall style={styles.contactTitle}>
@@ -160,7 +162,7 @@ const SupportScreen = () => {
               style={styles.appLogo}
               resizeMode="contain"
             />
-            <LabelSmall color="tertiary">Wearify v1.0.0</LabelSmall>
+            <LabelSmall color="tertiary">Veyra v1.0.0</LabelSmall>
             <BodySmall color="tertiary" style={styles.appTagline}>
               {t('support.madeWithLove')}
             </BodySmall>

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Wearify",
+    "appName": "Veyra",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -165,7 +165,7 @@
     }
   },
   "paywall": {
-    "title": "Wearify Pro",
+    "title": "Veyra Pro",
     "subtitle": "Generate AI-assisted visualizations with your credits",
     "subscribe": "Subscribe",
     "startTrial": "Try 7 Days Free",
@@ -336,7 +336,7 @@
       "almostReady": "Almost ready..."
     },
     "success": "Combination ready!",
-    "shareMessage": "I tried on clothes with Wearify! 👕✨",
+    "shareMessage": "I tried on clothes with Veyra! 👕✨",
     "deleteImage": "Delete Image",
     "deleteConfirm": "Are you sure you want to delete this image?",
     "saveImage": "Save Image",
@@ -381,12 +381,30 @@
     "title": "Select Profile",
     "info": "Select your profile for try-on or create a new profile",
     "addNewProfile": "Add New Profile",
+    "addProfileSubtitle": "Enter name and add photo",
     "takePhoto": "Take Photo",
     "selectFromGallery": "Select from Gallery",
     "myProfiles": "My Profiles",
     "noProfilesYet": "No profiles yet",
     "createFirstProfile": "Create your first profile by adding a photo",
     "continue": "Continue"
+  },
+  "addProfile": {
+    "title": "New Profile",
+    "profileName": "Profile Name",
+    "profileNamePlaceholder": "e.g. Sarah, John",
+    "nameHint": "This name will be used to identify your profile",
+    "addPhoto": "Add Photo",
+    "takePhoto": "Take Photo",
+    "selectFromGallery": "Select from Gallery",
+    "changePhoto": "Change Photo",
+    "createProfile": "Create Profile",
+    "nameRequiredTitle": "Name Required",
+    "nameRequiredMessage": "Please enter a profile name",
+    "photoRequiredTitle": "Photo Required",
+    "photoRequiredMessage": "Please add a photo",
+    "cameraPermissionTitle": "Camera Permission",
+    "cameraPermissionMessage": "We need camera permission to take photos"
   },
   "profileDetails": {
     "title": "Profile",
@@ -441,12 +459,12 @@
     "needHelp": "Need help?",
     "contactDescription": "Contact us with your questions, we'll respond as soon as possible.",
     "emailUs": "Send Email",
-    "emailSubject": "Wearify Support Request",
+    "emailSubject": "Veyra Support Request",
     "faqTitle": "Frequently Asked Questions",
     "madeWithLove": "Made with ❤️ in Turkey",
     "faq": {
       "howToUse": {
-        "question": "How do I use Wearify?",
+        "question": "How do I use Veyra?",
         "answer": "Add your profile photo, select clothes from wardrobe and create your outfit with AI."
       },
       "credits": {
@@ -486,7 +504,7 @@
   },
   "privacy": {
     "title": "Privacy Policy",
-    "intro": "At Wearify, we care about your privacy. This policy explains how we collect, use and protect your data.",
+    "intro": "At Veyra, we care about your privacy. This policy explains how we collect, use and protect your data.",
     "dataCollection": {
       "title": "Data Collection",
       "item1": "Profile photos (stored on your device)",

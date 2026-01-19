@@ -3,9 +3,8 @@ import {
   StyleSheet,
   Pressable,
   ViewStyle,
-  Image,
-  ImageSourcePropType,
 } from 'react-native';
+import { AppIcon } from '../utils/iconHelper';
 import { BlurView } from 'expo-blur';
 import Animated, {
   useAnimatedStyle,
@@ -16,7 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { Colors, BorderRadius, Shadows, Animation } from './theme';
 
 type IconButtonProps = {
-  icon: ImageSourcePropType;
+  icon: string; // Icon name for AppIcon
   onPress: () => void;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'default' | 'filled' | 'glass' | 'accent';
@@ -24,6 +23,7 @@ type IconButtonProps = {
   accessibilityLabel: string;
   style?: ViewStyle;
   active?: boolean;
+  iconColor?: string;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -37,6 +37,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   accessibilityLabel,
   style,
   active = false,
+  iconColor,
 }) => {
   const scale = useSharedValue(1);
 
@@ -97,18 +98,14 @@ export const IconButton: React.FC<IconButtonProps> = ({
     }
   };
 
+  const iconColorValue = iconColor || (active ? Colors.accent.primary : Colors.text.primary);
+  
   const content = (
-    <Image
-      source={icon}
-      style={[
-        styles.icon,
-        {
-          width: sizeValue.icon,
-          height: sizeValue.icon,
-        },
-        active && styles.iconActive,
-      ]}
-      resizeMode="contain"
+    <AppIcon
+      name={icon}
+      size={sizeValue.icon}
+      color={iconColorValue}
+      weight={active ? 'fill' : 'regular'}
     />
   );
 
@@ -173,12 +170,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.strokeLight,
     overflow: 'hidden',
-  },
-  icon: {
-    tintColor: Colors.text.primary,
-  },
-  iconActive: {
-    tintColor: Colors.accent.primary,
   },
   activeContainer: {
     backgroundColor: Colors.accent.primaryDim,

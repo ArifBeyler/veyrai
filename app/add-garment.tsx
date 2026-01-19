@@ -27,6 +27,7 @@ import {
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { IconButton } from '../src/ui/IconButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { useSessionStore, GarmentCategory } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
 
@@ -35,16 +36,16 @@ const { width } = Dimensions.get('window');
 type CategoryOption = {
   key: GarmentCategory;
   label: string;
-  icon: any;
+  iconName: string;
 };
 
 const CATEGORIES: CategoryOption[] = [
-  { key: 'tops', label: 'Üst Giyim', icon: require('../full3dicons/images/t-shirt.png') },
-  { key: 'pants', label: 'Alt Giyim', icon: require('../full3dicons/images/clothes-hanger.png') },
-  { key: 'dresses', label: 'Elbise', icon: require('../full3dicons/images/clothes-hanger.png') },
-  { key: 'outerwear', label: 'Dış Giyim', icon: require('../full3dicons/images/flannel-shirt.png') },
-  { key: 'shoes', label: 'Ayakkabı', icon: require('../full3dicons/images/clothes-hanger.png') },
-  { key: 'accessories', label: 'Aksesuar', icon: require('../full3dicons/images/clothes-hanger.png') },
+  { key: 'tops', label: 'Üst Giyim', iconName: 't-shirt' },
+  { key: 'pants', label: 'Alt Giyim', iconName: 'clothes-hanger' },
+  { key: 'dresses', label: 'Elbise', iconName: 'clothes-hanger' },
+  { key: 'outerwear', label: 'Dış Giyim', iconName: 'flannel-shirt' },
+  { key: 'shoes', label: 'Ayakkabı', iconName: 'clothes-hanger' },
+  { key: 'accessories', label: 'Aksesuar', iconName: 'clothes-hanger' },
 ];
 
 const AddGarmentScreen = () => {
@@ -139,7 +140,7 @@ const AddGarmentScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
-          icon={require('../full3dicons/images/home.png')}
+          icon="home"
           onPress={handleClose}
           accessibilityLabel="Kapat"
           variant="glass"
@@ -173,19 +174,19 @@ const AddGarmentScreen = () => {
           ) : (
             <View style={styles.imagePickerOptions}>
               <GlassCard style={styles.imagePickerCard} onPress={handlePickImage}>
-                <Image
-                  source={require('../full3dicons/images/photo.png')}
-                  style={styles.imagePickerIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="gallery"
+                  size={32}
+                  color={Colors.accent.primary}
                 />
                 <LabelMedium>{t('addGarment.selectFromGallery')}</LabelMedium>
               </GlassCard>
               
               <GlassCard style={styles.imagePickerCard} onPress={handleTakePhoto}>
-                <Image
-                  source={require('../full3dicons/images/camera.png')}
-                  style={styles.imagePickerIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="camera"
+                  size={32}
+                  color={Colors.accent.primary}
                 />
                 <LabelMedium>{t('addGarment.takePhoto')}</LabelMedium>
               </GlassCard>
@@ -207,13 +208,11 @@ const AddGarmentScreen = () => {
                 ]}
                 onPress={() => handleCategorySelect(cat.key)}
               >
-                <Image
-                  source={cat.icon}
-                  style={[
-                    styles.categoryIcon,
-                    category === cat.key && styles.categoryIconActive,
-                  ]}
-                  resizeMode="contain"
+                <AppIcon
+                  name={cat.iconName}
+                  size={24}
+                  color={category === cat.key ? Colors.accent.primary : Colors.text.secondary}
+                  weight={category === cat.key ? 'fill' : 'regular'}
                 />
                 <LabelSmall
                   color={category === cat.key ? 'accent' : 'secondary'}
@@ -260,10 +259,11 @@ const AddGarmentScreen = () => {
         {/* Info */}
         <Animated.View entering={FadeIn.delay(500)}>
           <GlassCard style={styles.infoCard}>
-            <Image
-              source={require('../full3dicons/images/sparkle.png')}
-              style={styles.infoIcon}
-              resizeMode="contain"
+            <AppIcon
+              name="sparkle"
+              size={20}
+              color={Colors.accent.primary}
+              weight="fill"
             />
             <BodySmall color="secondary" style={styles.infoText}>
               {t('addGarment.info')}

@@ -14,7 +14,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import { Colors } from '../src/ui/theme';
-import { DisplayLarge, BodyMedium } from '../src/ui/Typography';
+import { BodyMedium, EditorialText } from '../src/ui/Typography';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
 import { generateDeviceHash } from '../src/utils/deviceHash';
@@ -79,7 +79,7 @@ const SplashScreen = () => {
       try {
         // Zustand persist automatically hydrates, but we need to wait a bit
         // Check AsyncStorage directly to ensure it's loaded
-        await AsyncStorage.getItem('wearify-session');
+        await AsyncStorage.getItem('veyra-session');
         // Small delay to ensure Zustand has finished hydrating
         await new Promise(resolve => setTimeout(resolve, 150));
         setIsStoreHydrated(true);
@@ -212,7 +212,7 @@ const SplashScreen = () => {
         {/* Logo */}
         <Animated.View style={[styles.logoWrapper, logoStyle]}>
           <Image
-            source={require('../assets/images/logo.png')}
+            source={require('../assets/images/logoveyra.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -221,7 +221,15 @@ const SplashScreen = () => {
 
       {/* Text */}
       <Animated.View style={[styles.textContainer, textStyle]}>
-        <DisplayLarge style={styles.title}>Wearify</DisplayLarge>
+        <EditorialText 
+          weight="regular" 
+          size={42} 
+          lineHeight={52}
+          letterSpacing={-1.5}
+          style={styles.title}
+        >
+          Veyra
+        </EditorialText>
         <BodyMedium color="secondary" style={styles.subtitle}>
           {t('splash.subtitle')}
         </BodyMedium>
@@ -290,9 +298,6 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.text.primary,
-    fontSize: 36, // DisplayLarge variant override for splash screen
-    letterSpacing: 2,
-    // DisplayLarge already has fontWeight 700
   },
   subtitle: {
     marginTop: 8,

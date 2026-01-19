@@ -1,5 +1,5 @@
 /**
- * Wearify Design System - Theme Constants
+ * Veyra Design System - Theme Constants
  * iOS premium "liquid glass" aesthetic
  */
 

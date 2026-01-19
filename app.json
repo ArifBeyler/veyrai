@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Wearify",
-    "slug": "wearify",
+    "name": "Veyra",
+    "slug": "veyra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wearify",
+    "scheme": "veyra",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.wearify.app",
+      "bundleIdentifier": "com.veyra.app",
       "buildNumber": "1",
       "infoPlist": {
         "UIBackgroundModes": [
@@ -35,7 +35,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0B0B0C"
       },
-      "package": "com.wearify.app",
+      "package": "com.veyra.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [

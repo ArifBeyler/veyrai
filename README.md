@@ -1,4 +1,4 @@
-# Wearify 👕✨
+# Veyra 👕✨
 
 AI destekli sanal kıyafet deneme uygulaması. Kendi fotoğrafınızı yükleyin, istediğiniz kıyafeti seçin ve AI ile üzerinizde nasıl durduğunu görün.
 

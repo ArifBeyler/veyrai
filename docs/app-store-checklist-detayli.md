@@ -2,13 +2,13 @@
 
 ## 🔍 EKSİK KALANLAR - Kontrol Edilecekler
 
-### 1️⃣ App Store Connect > My Apps > Wearify
+### 1️⃣ App Store Connect > My Apps > Veyra
 
 #### App Information (Genel Bilgiler)
-- [ ] **Name**: Wearify
+- [ ] **Name**: Veyra
 - [ ] **Primary Language**: Turkish (Türkçe) veya English
-- [ ] **Bundle ID**: `com.wearify.app` (zaten var, kontrol et)
-- [ ] **SKU**: Wearify-001 (veya başka bir SKU)
+- [ ] **Bundle ID**: `com.veyra.app` (zaten var, kontrol et)
+- [ ] **SKU**: Veyra-001 (veya başka bir SKU)
 - [ ] **User Access**: Full Access veya App Manager
 
 #### Pricing and Availability
@@ -93,14 +93,14 @@
 #### Subscription Ürünleri Kontrolü:
 - [ ] **Monthly Subscription** (`monthly` veya benzeri Product ID)
   - Price: $9.99/ay (veya TRY eşdeğeri)
-  - Display Name: "Wearify Pro - Monthly"
+  - Display Name: "Veyra Pro - Monthly"
   - Description: "Aylık 40 kredi ile sınırsız AI görsel üretimi"
   - Duration: 1 Month
   - Status: Ready to Submit
 
 - [ ] **Yearly Subscription** (Opsiyonel)
   - Price: $59.99-$79.99/yıl
-  - Display Name: "Wearify Pro - Yearly"
+  - Display Name: "Veyra Pro - Yearly"
   - Description: "Yıllık abonelik ile tasarruf edin"
   - Duration: 1 Year
   - Status: Ready to Submit
@@ -139,7 +139,7 @@
 #### What's New in This Version
 - [ ] 1.0.0 için "What's New" metni:
   ```
-  İlk sürüm! Wearify ile AI destekli sanal deneme deneyimini keşfedin.
+  İlk sürüm! Veyra ile AI destekli sanal deneme deneyimini keşfedin.
   - 1 ücretsiz deneme hakkı
   - Kolay kullanım
   - Kişisel galeri
@@ -158,7 +158,7 @@
 #### Notes
 - [ ] Review Notes metni:
   ```
-  Wearify, AI destekli bir görselleştirme aracıdır.
+  Veyra, AI destekli bir görselleştirme aracıdır.
   Kullanıcılar fotoğraflarını yükleyip kıyafetleri sanal olarak deneyebilir.
   Sonuçlar değişkenlik gösterebilir ve ilham amaçlıdır.
   Ücretsiz deneme 1 kere kullanılabilir.
@@ -228,7 +228,7 @@
 ## ✅ Submit for Review Öncesi Final Kontrol
 
 ### Teknik Kontroller:
-- [x] Bundle ID doğru: `com.wearify.app`
+- [x] Bundle ID doğru: `com.veyra.app`
 - [x] Version: `1.0.0`
 - [ ] Build seçilmiş ve hazır
 - [ ] Screenshots yüklenmiş (6.5" ve 5.5")
@@ -251,7 +251,7 @@
 ### RevenueCat Kontrolleri:
 - [ ] Production API Key güncellendi
 - [ ] Product ID'ler App Store Connect ile eşleşiyor
-- [ ] Entitlement ID doğru: `wearify Pro`
+- [ ] Entitlement ID doğru: `veyra Pro`
 
 ---
 
@@ -281,22 +281,22 @@
 1. Uygulamayı çalıştır
 2. Ekran görüntüleri al (iPhone 6.5" ve 5.5" boyutlarında)
 3. Gerekirse düzenleme yap (overlay text ekleme)
-4. App Store Connect > My Apps > Wearify > Version 1.0.0 > Screenshots
+4. App Store Connect > My Apps > Veyra > Version 1.0.0 > Screenshots
 5. Yükle
 
 ### Adım 2: Metadata Ekle
-1. App Store Connect > My Apps > Wearify > Version 1.0.0
+1. App Store Connect > My Apps > Veyra > Version 1.0.0
 2. Description: `docs/app-store-metadata.md` dosyasından kopyala
 3. Keywords: `AI,fashion,outfit,virtual try-on,clothing,style,photo,visualization,generate,wardrobe`
 4. Promotional Text: "1 ücretsiz deneme ile başla! AI teknolojisiyle kıyafetleri üzerinde nasıl görüneceğini keşfet."
 
 ### Adım 3: Privacy Policy URL Ekle
-1. App Store Connect > My Apps > Wearify > App Privacy
+1. App Store Connect > My Apps > Veyra > App Privacy
 2. Privacy Policy URL ekle (ör: `https://yourdomain.com/privacy`)
 3. Privacy Policy sayfasını hazırla (gerekirse)
 
 ### Adım 4: In-App Purchase Kontrolü
-1. App Store Connect > My Apps > Wearify > In-App Purchases
+1. App Store Connect > My Apps > Veyra > In-App Purchases
 2. RevenueCat Dashboard'daki Product ID'lerle karşılaştır
 3. Eksik varsa oluştur, varsa kontrol et
 4. Tüm ürünlerin "Ready to Submit" olduğundan emin ol
@@ -304,7 +304,7 @@
 ### Adım 5: Build Al ve Yükle
 1. Terminal'de: `eas build --profile production --platform ios`
 2. Build tamamlandığında: `eas submit --platform ios --latest`
-3. App Store Connect > My Apps > Wearify > TestFlight
+3. App Store Connect > My Apps > Veyra > TestFlight
 4. Build'in işlenmesini bekle
 5. Version 1.0.0 > Build bölümünden build'i seç
 

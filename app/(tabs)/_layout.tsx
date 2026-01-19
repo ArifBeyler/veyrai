@@ -9,35 +9,29 @@ const TabsLayout = () => {
   const [activeTab, setActiveTab] = useState('home');
   const insets = useSafeAreaInsets();
 
-  // Icon names - BottomNav will handle 3D/normal icon switching
+  // Navigation items - using Phosphor Icons
   const NAV_ITEMS = [
     {
       key: 'home',
-      icon: require('../../full3dicons/images/home.png'),
       iconName: 'home',
       accessibilityLabel: 'Ana Sayfa',
     },
     {
       key: 'wardrobe',
-      icon: require('../../full3dicons/images/wardrobe.png'),
       iconName: 'wardrobe',
       accessibilityLabel: 'Gardrop',
     },
     {
       key: 'gallery',
-      icon: require('../../full3dicons/images/photo.png'),
       iconName: 'gallery',
       accessibilityLabel: 'Galeri',
     },
     {
       key: 'profile',
-      icon: require('../../full3dicons/images/profile.png'),
       iconName: 'profile',
       accessibilityLabel: 'Profil',
     },
   ];
-
-  const CREATE_ICON = require('../../full3dicons/images/plus-sign.png');
 
   const handleTabSelect = (key: string) => {
     setActiveTab(key);
@@ -54,6 +48,7 @@ const TabsLayout = () => {
         screenOptions={{
           headerShown: false,
           tabBarStyle: { display: 'none' },
+          animation: 'shift',
         }}
         screenListeners={{
           state: (e) => {
@@ -66,10 +61,30 @@ const TabsLayout = () => {
           },
         }}
       >
-        <Tabs.Screen name="home" />
-        <Tabs.Screen name="wardrobe" />
-        <Tabs.Screen name="gallery" />
-        <Tabs.Screen name="profile" />
+        <Tabs.Screen 
+          name="home" 
+          options={{
+            animation: 'shift',
+          }}
+        />
+        <Tabs.Screen 
+          name="wardrobe" 
+          options={{
+            animation: 'shift',
+          }}
+        />
+        <Tabs.Screen 
+          name="gallery" 
+          options={{
+            animation: 'shift',
+          }}
+        />
+        <Tabs.Screen 
+          name="profile" 
+          options={{
+            animation: 'shift',
+          }}
+        />
       </Tabs>
 
       <BottomNav
@@ -77,7 +92,6 @@ const TabsLayout = () => {
         activeKey={activeTab}
         onSelect={handleTabSelect}
         onCreatePress={handleCreatePress}
-        createIcon={CREATE_ICON}
       />
     </View>
   );

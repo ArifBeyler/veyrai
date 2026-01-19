@@ -12,7 +12,7 @@
 
 ### 1. App Store Connect'e Giriş Yap
 1. https://appstoreconnect.apple.com adresine git
-2. "My Apps" > "Wearify" seç
+2. "My Apps" > "Veyra" seç
 3. Sol menüden "In-App Purchases" seç
 
 ### 2. Mevcut Ürünleri Bul ve Güncelle
@@ -22,7 +22,7 @@
 - **Type**: Auto-Renewable Subscription
 - **Price**: **$4.99** (Weekly)
 - **Duration**: 1 Week
-- **Display Name**: "Wearify Pro - Weekly"
+- **Display Name**: "Veyra Pro - Weekly"
 - **Description**: "Weekly subscription with 33 credits per week"
 
 #### Monthly Subscription
@@ -30,7 +30,7 @@
 - **Type**: Auto-Renewable Subscription
 - **Price**: **$14.99** (Monthly)
 - **Duration**: 1 Month
-- **Display Name**: "Wearify Pro - Monthly"
+- **Display Name**: "Veyra Pro - Monthly"
 - **Description**: "Monthly subscription with 100 credits per month"
 
 #### Yearly Subscription
@@ -38,7 +38,7 @@
 - **Type**: Auto-Renewable Subscription
 - **Price**: **$99.99** (Yearly)
 - **Duration**: 1 Year
-- **Display Name**: "Wearify Pro - Yearly"
+- **Display Name**: "Veyra Pro - Yearly"
 - **Description**: "Yearly subscription with 660 credits per year. Save 44% compared to monthly plan."
 
 ### 3. Ürün Durumunu Kontrol Et
@@ -51,7 +51,7 @@
 
 ### 1. RevenueCat Dashboard'a Giriş
 1. https://app.revenuecat.com adresine git
-2. "Wearify" projesini seç
+2. "Veyra" projesini seç
 
 ### 2. Products Sekmesini Kontrol Et
 1. Sol menüden **"Products"** seç
@@ -87,7 +87,7 @@
 
 ### 4. Entitlement Kontrolü
 1. Sol menüden **"Entitlements"** seç
-2. **"wearify Pro"** entitlement'ını kontrol et
+2. **"veyra Pro"** entitlement'ını kontrol et
 3. Tüm paketlerin (weekly, monthly, yearly) bu entitlement'a bağlı olduğundan emin ol
 
 ---

@@ -1,16 +1,16 @@
-# Wearify iOS Release Checklist
+# Veyra iOS Release Checklist
 
 ## 📋 Pre-Release Checklist
 
 ### 1. App Store Connect Setup
 - [ ] Apple Developer hesabı aktif
-- [ ] App Store Connect'te "Wearify" app oluşturuldu
-- [ ] Bundle ID: `com.wearify.app` Identifiers'da kayıtlı
+- [ ] App Store Connect'te "Veyra" app oluşturuldu
+- [ ] Bundle ID: `com.veyra.app` Identifiers'da kayıtlı
 - [ ] Push Notifications capability aktif
 - [ ] In-App Purchase capability aktif (RevenueCat için)
 
 ### 2. Proje Konfigürasyonu
-- [x] Bundle ID: `com.wearify.app`
+- [x] Bundle ID: `com.veyra.app`
 - [x] Version: `1.0.0`
 - [x] iOS minimum version: default (iOS 15+)
 - [x] Push Notifications configured

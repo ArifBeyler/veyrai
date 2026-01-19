@@ -41,9 +41,11 @@ import {
   BodySmall,
   LabelMedium,
   LabelSmall,
+  EditorialText,
 } from '../src/ui/Typography';
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { supabase } from '../src/services/supabase';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
@@ -335,7 +337,15 @@ const AuthScreen = () => {
               resizeMode="contain"
             />
           </View>
-          <DisplaySmall style={styles.appName}>Wearify</DisplaySmall>
+          <EditorialText 
+            weight="regular" 
+            size={28} 
+            lineHeight={36}
+            letterSpacing={-1}
+            style={styles.appName}
+          >
+            Veyra
+          </EditorialText>
         </Animated.View>
 
         {/* Tab Switcher */}
@@ -394,10 +404,10 @@ const AuthScreen = () => {
               <Animated.View entering={FadeInUp.delay(100)} exiting={FadeOut}>
                 <View style={styles.inputWrapper}>
                   <View style={styles.inputIconContainer}>
-                    <Image
-                      source={require('../full3dicons/images/profile-icon.png')}
-                      style={styles.inputIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="profile-icon"
+                      size={20}
+                      color={Colors.text.secondary}
                     />
                   </View>
                   <TextInput

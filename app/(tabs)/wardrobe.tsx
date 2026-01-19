@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -16,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { Garment, GarmentCategory, useSessionStore } from '../../src/state/useSessionStore';
 import { translateGarmentTitle } from '../../src/utils/garmentTitle';
+import { AppIcon } from '../../src/utils/iconHelper';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
@@ -33,16 +35,16 @@ const { width } = Dimensions.get('window');
 type GenderFilter = 'all' | 'male' | 'female';
 
 // Filtre ikonları
-const getFilterIcon = (filter: GenderFilter) => {
+const getFilterIconName = (filter: GenderFilter): string => {
   switch (filter) {
     case 'all':
-      return require('../../full3dicons/images/wardrobe.png');
+      return 'wardrobe';
     case 'male':
-      return require('../../full3dicons/images/man.png');
+      return 'man';
     case 'female':
-      return require('../../full3dicons/images/woman.png');
+      return 'woman';
     default:
-      return require('../../full3dicons/images/wardrobe.png');
+      return 'wardrobe';
   }
 };
 
@@ -58,10 +60,21 @@ const WardrobeScreen = () => {
   const setSelectedGarmentId = useSessionStore((s) => s.setSelectedGarmentId);
   const removeGarment = useSessionStore((s) => s.removeGarment);
 
-  // Filtrelenmiş kıyafetler (gender'a göre)
+  // Filtrelenmiş kıyafetler (gender'a göre) - Kadın kombinleri önce
   const filteredGarments = useMemo(() => {
-    if (selectedFilter === 'all') return garments;
-    return garments.filter((g) => g.gender === selectedFilter);
+    let filtered = garments;
+    
+    // Gender filtresi
+    if (selectedFilter !== 'all') {
+      filtered = filtered.filter((g) => g.gender === selectedFilter);
+    }
+    
+    // Sıralama: Kadın kombinleri önce, sonra erkek
+    return filtered.sort((a, b) => {
+      if (a.gender === 'female' && b.gender !== 'female') return -1;
+      if (a.gender !== 'female' && b.gender === 'female') return 1;
+      return 0;
+    });
   }, [garments, selectedFilter]);
 
   // Filtre sayıları
@@ -161,13 +174,11 @@ const WardrobeScreen = () => {
                   accessibilityLabel={label}
                   accessibilityState={{ selected: selectedFilter === filter }}
                 >
-                  <Image
-                    source={getFilterIcon(filter)}
-                    style={[
-                      styles.categoryIcon,
-                      selectedFilter === filter && styles.categoryIconActive,
-                    ]}
-                    resizeMode="contain"
+                  <AppIcon
+                    name={getFilterIconName(filter)}
+                    size={20}
+                    color={selectedFilter === filter ? Colors.accent.primary : Colors.text.secondary}
+                    weight={selectedFilter === filter ? 'fill' : 'regular'}
                   />
                   <LabelMedium
                     color={selectedFilter === filter ? 'accent' : 'secondary'}
@@ -189,21 +200,48 @@ const WardrobeScreen = () => {
 
         {/* Add garment button */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <GlassCard style={styles.addCard} onPress={handleAddGarment}>
-            <View style={styles.addCardContent}>
-              <View style={styles.addIconContainer}>
-                <Image
-                  source={require('../../full3dicons/images/plus-sign.png')}
-                  style={styles.addIcon}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.addCardText}>
-                <LabelMedium>{t('wardrobe.addGarment')}</LabelMedium>
-                <BodySmall color="secondary">{t('wardrobe.addGarmentSubtitle')}</BodySmall>
-              </View>
-            </View>
-          </GlassCard>
+          <Pressable onPress={handleAddGarment} style={styles.addCardWrapper}>
+            <LinearGradient
+              colors={[Colors.accent.primaryDim + '40', Colors.accent.primaryDim + '20']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.addCardGradient}
+            >
+              <BlurView intensity={40} tint="dark" style={styles.addCardBlur}>
+                <View style={styles.addCardContent}>
+                  <View style={styles.addIconContainer}>
+                    <LinearGradient
+                      colors={[Colors.accent.primary, Colors.accent.primaryDim]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.addIconGradient}
+                    >
+                      <AppIcon
+                        name="plus-sign"
+                        size={28}
+                        color={Colors.dark.background}
+                        weight="bold"
+                      />
+                    </LinearGradient>
+                  </View>
+                  <View style={styles.addCardText}>
+                    <LabelMedium style={styles.addCardTitle}>{t('wardrobe.addGarment')}</LabelMedium>
+                    <BodySmall color="secondary" style={styles.addCardSubtitle}>
+                      {t('wardrobe.addGarmentSubtitle')}
+                    </BodySmall>
+                  </View>
+                  <View style={styles.addCardArrow}>
+                    <AppIcon
+                      name="chevron-forward"
+                      size={20}
+                      color={Colors.accent.primary}
+                      weight="bold"
+                    />
+                  </View>
+                </View>
+              </BlurView>
+            </LinearGradient>
+          </Pressable>
         </Animated.View>
 
         {/* Garments Section */}
@@ -236,10 +274,10 @@ const WardrobeScreen = () => {
             /* Empty State */
             <Animated.View entering={FadeInDown.delay(500).springify()}>
               <GlassCard style={styles.emptyCard}>
-                <Image
-                  source={require('../../full3dicons/images/wardrobe.png')}
-                  style={styles.emptyIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="wardrobe"
+                  size={64}
+                  color={Colors.text.tertiary}
                 />
                 <HeadlineSmall style={styles.emptyTitle}>
                   {selectedFilter === 'all'
@@ -293,18 +331,19 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
               cachePolicy="memory-disk"
             />
           ) : (
-            <Image
-              source={require('../../full3dicons/images/t-shirt.png')}
-              style={styles.garmentImagePlaceholder}
-              resizeMode="contain"
+            <AppIcon
+              name="t-shirt"
+              size={48}
+              color={Colors.text.tertiary}
             />
           )}
           {/* Dene butonu - görsel içinde */}
           <View style={styles.tryOnBadge}>
-            <Image
-              source={require('../../full3dicons/images/ai-sparkle.png')}
-              style={styles.tryOnIcon}
-              resizeMode="contain"
+            <AppIcon
+              name="ai-sparkle"
+              size={20}
+              color={Colors.accent.primary}
+              weight="fill"
             />
             <LabelSmall style={styles.tryOnText}>{t('wardrobe.try')}</LabelSmall>
           </View>
@@ -366,19 +405,45 @@ const styles = StyleSheet.create({
   categoryCount: {
     marginLeft: 2,
   },
-  addCard: {
-    padding: 16,
+  addCardWrapper: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: Colors.accent.primaryDim,
+    shadowColor: Colors.accent.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  addCardGradient: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+  },
+  addCardBlur: {
+    borderRadius: BorderRadius.xl,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   addCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    padding: 20,
   },
   addIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.accent.primaryDim,
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    shadowColor: Colors.accent.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  addIconGradient: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -388,7 +453,22 @@ const styles = StyleSheet.create({
   },
   addCardText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
+  },
+  addCardTitle: {
+    color: Colors.text.primary,
+    fontWeight: '600' as const,
+  },
+  addCardSubtitle: {
+    opacity: 0.8,
+  },
+  addCardArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.accent.primaryDim + '30',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   garmentSection: {
     gap: 12,

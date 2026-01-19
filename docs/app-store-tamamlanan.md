@@ -15,7 +15,7 @@
 
 3. ✅ **Description** (App Store Açıklaması - 4000 karakter limiti)
    - Karakter sayısı: 2.438/4.000
-   - İçerik: Wearify - AI Destekli Görsel Deneme açıklaması
+   - İçerik: Veyra - AI Destekli Görsel Deneme açıklaması
    - Apple kurallarına uygun (yasak kelimeler yok)
    - Durum: Dolduruldu
 

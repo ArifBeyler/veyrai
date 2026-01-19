@@ -1,8 +1,8 @@
 # App Store Description - Temiz Versiyon (Markdown'suz)
 
-## Wearify - AI Destekli Görsel Deneme
+## Veyra - AI Destekli Görsel Deneme
 
-Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Wearify, AI teknolojisiyle size özel görsel sonuçlar üretir ve stil denemelerinize ilham verir.
+Kendi fotoğrafınızla kıyafetleri sanal olarak deneyin. Veyra, AI teknolojisiyle size özel görsel sonuçlar üretir ve stil denemelerinize ilham verir.
 
 ÖZELLİKLER
 
@@ -24,7 +24,7 @@ Esnek Fiyatlandırma
 
 ÖNEMLİ NOTLAR
 
-Wearify bir AI destekli görselleştirme aracıdır. Sonuçlar değişkenlik gösterebilir ve gerçekçilik garantisi vermez. Üretilen görseller ilham ve görselleştirme amaçlıdır. Sonuçlar mükemmel veya yüzde 100 doğru olmayabilir. Fotoğraflarınız yalnızca görsel sonuç üretmek için kullanılır.
+Veyra bir AI destekli görselleştirme aracıdır. Sonuçlar değişkenlik gösterebilir ve gerçekçilik garantisi vermez. Üretilen görseller ilham ve görselleştirme amaçlıdır. Sonuçlar mükemmel veya yüzde 100 doğru olmayabilir. Fotoğraflarınız yalnızca görsel sonuç üretmek için kullanılır.
 
 NASIL ÇALIŞIR
 
@@ -37,5 +37,5 @@ GİZLİLİK
 
 Kullanıcı gizliliği bizim için çok önemlidir. Fotoğraflarınız yalnızca görsel sonuç üretmek için işlenir ve güvenli bir şekilde saklanır.
 
-Wearify ile stil denemelerinizi keşfedin ve kendi tarzınızı bulun.
+Veyra ile stil denemelerinizi keşfedin ve kendi tarzınızı bulun.
 

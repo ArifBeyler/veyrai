@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Wearify",
+    "appName": "Veyra",
     "loading": "Yükleniyor...",
     "error": "Hata",
     "success": "Başarılı",
@@ -155,7 +155,7 @@
     }
   },
   "paywall": {
-    "title": "Wearify Pro",
+    "title": "Veyra Pro",
     "subtitle": "Kredin kadar AI destekli görselleştirme yap",
     "subscribe": "Abone Ol",
     "startTrial": "7 Gün Ücretsiz Dene",
@@ -347,7 +347,7 @@
       "almostReady": "Birazdan hazır..."
     },
     "success": "Kombin hazır!",
-    "shareMessage": "Wearify ile kıyafet denedim! 👕✨",
+    "shareMessage": "Veyra ile kıyafet denedim! 👕✨",
     "deleteImage": "Görseli Sil",
     "deleteConfirm": "Bu görseli silmek istediğinize emin misiniz?",
     "saveImage": "Görseli Kaydet",
@@ -372,12 +372,30 @@
     "title": "Profil Seç",
     "info": "Try-on için profilini seç veya yeni profil oluştur",
     "addNewProfile": "Yeni Profil Ekle",
+    "addProfileSubtitle": "Adını yaz ve fotoğraf ekle",
     "takePhoto": "Fotoğraf Çek",
     "selectFromGallery": "Galeriden Seç",
     "myProfiles": "Profillerim",
     "noProfilesYet": "Henüz profil yok",
     "createFirstProfile": "Fotoğrafını ekleyerek ilk profilini oluştur",
     "continue": "Devam"
+  },
+  "addProfile": {
+    "title": "Yeni Profil",
+    "profileName": "Profil Adı",
+    "profileNamePlaceholder": "Örn: Ayşe, Mehmet",
+    "nameHint": "Bu isim profilini tanımlamak için kullanılacak",
+    "addPhoto": "Fotoğraf Ekle",
+    "takePhoto": "Fotoğraf Çek",
+    "selectFromGallery": "Galeriden Seç",
+    "changePhoto": "Fotoğrafı Değiştir",
+    "createProfile": "Profil Oluştur",
+    "nameRequiredTitle": "İsim Gerekli",
+    "nameRequiredMessage": "Lütfen bir profil adı girin",
+    "photoRequiredTitle": "Fotoğraf Gerekli",
+    "photoRequiredMessage": "Lütfen bir fotoğraf ekleyin",
+    "cameraPermissionTitle": "Kamera İzni",
+    "cameraPermissionMessage": "Fotoğraf çekmek için kamera iznine ihtiyacımız var"
   },
   "profileDetails": {
     "title": "Profil",
@@ -432,12 +450,12 @@
     "needHelp": "Yardıma mı ihtiyacın var?",
     "contactDescription": "Sorularınız için bize ulaşın, en kısa sürede yanıtlayalım.",
     "emailUs": "E-posta Gönder",
-    "emailSubject": "Wearify Destek Talebi",
+    "emailSubject": "Veyra Destek Talebi",
     "faqTitle": "Sık Sorulan Sorular",
     "madeWithLove": "Türkiye'de ❤️ ile yapıldı",
     "faq": {
       "howToUse": {
-        "question": "Wearify nasıl kullanılır?",
+        "question": "Veyra nasıl kullanılır?",
         "answer": "Profil fotoğrafınızı ekleyin, gardroptan kıyafet seçin ve AI ile kombininizi oluşturun."
       },
       "credits": {
@@ -477,7 +495,7 @@
   },
   "privacy": {
     "title": "Gizlilik Politikası",
-    "intro": "Wearify olarak gizliliğinizi önemsiyoruz. Bu politika, verilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.",
+    "intro": "Veyra olarak gizliliğinizi önemsiyoruz. Bu politika, verilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.",
     "dataCollection": {
       "title": "Toplanan Veriler",
       "item1": "Profil fotoğrafları (cihazınızda saklanır)",

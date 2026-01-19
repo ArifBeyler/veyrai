@@ -26,6 +26,7 @@ import {
 } from '../src/ui/Typography';
 import { GlassCard } from '../src/ui/GlassCard';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { useSessionStore } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
 
@@ -134,10 +135,10 @@ const ProfileDetailsScreen = () => {
                 cachePolicy="memory-disk"
               />
             ) : (
-              <Image
-                source={require('../full3dicons/images/profile.png')}
-                style={styles.placeholderImage}
-                resizeMode="contain"
+              <AppIcon
+                name="profile"
+                size={80}
+                color={Colors.text.tertiary}
               />
             )}
             {/* Glow effect when selected */}

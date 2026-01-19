@@ -206,7 +206,7 @@ const PhotoGuideScreen = () => {
         style={[styles.header, { paddingTop: insets.top + 16 }]}
       >
         <IconButton
-          icon="✕"
+          icon="close"
           onPress={() => router.back()}
           style={styles.closeButton}
         />

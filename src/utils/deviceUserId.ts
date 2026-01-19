@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 
-const DEVICE_USER_ID_KEY = 'com.wearify.deviceUserId';
+const DEVICE_USER_ID_KEY = 'com.veyra.deviceUserId';
 
 /**
  * Gets or creates a unique device user ID stored in Keychain

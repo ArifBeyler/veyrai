@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Wearify",
+    "appName": "Veyra",
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
@@ -164,7 +164,7 @@
     }
   },
   "paywall": {
-    "title": "Wearify Pro",
+    "title": "Veyra Pro",
     "subtitle": "Générez avec vos crédits",
     "subscribe": "S'abonner",
     "startTrial": "Essai gratuit 7 jours",
@@ -340,7 +340,7 @@
       "almostReady": "Presque prêt..."
     },
     "success": "Combinaison prête !",
-    "shareMessage": "J'ai essayé des vêtements avec Wearify ! 👕✨"
+    "shareMessage": "J'ai essayé des vêtements avec Veyra ! 👕✨"
   },
   "splash": {
     "subtitle": "Essayez les vêtements sur vous",
@@ -350,12 +350,30 @@
     "title": "Sélectionner un profil",
     "info": "Sélectionnez votre profil pour l'essai ou créez un nouveau profil",
     "addNewProfile": "Ajouter un nouveau profil",
+    "addProfileSubtitle": "Entrez le nom et ajoutez une photo",
     "takePhoto": "Prendre une photo",
     "selectFromGallery": "Sélectionner dans la galerie",
     "myProfiles": "Mes profils",
     "noProfilesYet": "Pas encore de profils",
     "createFirstProfile": "Créez votre premier profil en ajoutant une photo",
     "continue": "Continuer"
+  },
+  "addProfile": {
+    "title": "Nouveau profil",
+    "profileName": "Nom du profil",
+    "profileNamePlaceholder": "ex. Marie, Pierre",
+    "nameHint": "Ce nom sera utilisé pour identifier votre profil",
+    "addPhoto": "Ajouter une photo",
+    "takePhoto": "Prendre une photo",
+    "selectFromGallery": "Sélectionner dans la galerie",
+    "changePhoto": "Changer la photo",
+    "createProfile": "Créer le profil",
+    "nameRequiredTitle": "Nom requis",
+    "nameRequiredMessage": "Veuillez entrer un nom de profil",
+    "photoRequiredTitle": "Photo requise",
+    "photoRequiredMessage": "Veuillez ajouter une photo",
+    "cameraPermissionTitle": "Autorisation de la caméra",
+    "cameraPermissionMessage": "Nous avons besoin de l'autorisation de la caméra pour prendre des photos"
   },
   "profileDetails": {
     "title": "Profil",
@@ -410,12 +428,12 @@
     "needHelp": "Besoin d'aide ?",
     "contactDescription": "Contactez-nous avec vos questions, nous vous répondrons dès que possible.",
     "emailUs": "Envoyer un e-mail",
-    "emailSubject": "Demande de support Wearify",
+    "emailSubject": "Demande de support Veyra",
     "faqTitle": "Questions Fréquemment Posées",
     "madeWithLove": "Fait avec ❤️ en Turquie",
     "faq": {
       "howToUse": {
-        "question": "Comment utiliser Wearify ?",
+        "question": "Comment utiliser Veyra ?",
         "answer": "Ajoutez votre photo de profil, sélectionnez des vêtements dans la garde-robe et créez votre tenue avec l'IA."
       },
       "credits": {
@@ -455,7 +473,7 @@
   },
   "privacy": {
     "title": "Politique de Confidentialité",
-    "intro": "Chez Wearify, nous nous soucions de votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos données.",
+    "intro": "Chez Veyra, nous nous soucions de votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos données.",
     "dataCollection": {
       "title": "Collecte de Données",
       "item1": "Photos de profil (stockées sur votre appareil)",

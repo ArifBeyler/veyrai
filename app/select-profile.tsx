@@ -1,5 +1,4 @@
 import * as Haptics from 'expo-haptics';
-import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -28,6 +27,7 @@ import { UserProfile, useSessionStore } from '../src/state/useSessionStore';
 import { useTranslation } from '../src/hooks/useTranslation';
 import { GlassCard } from '../src/ui/GlassCard';
 import { IconButton } from '../src/ui/IconButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
 import { BorderRadius, Colors, Spacing } from '../src/ui/theme';
 import {
@@ -96,61 +96,6 @@ const SelectProfileScreen = () => {
     );
   };
 
-  const createProfileAndNavigate = (imageUri: string) => {
-    const newProfileId = Date.now().toString();
-    const newProfile: UserProfile = {
-      id: newProfileId,
-      name: `Profil ${profiles.length + 1}`,
-      photos: [
-        {
-          id: Date.now().toString(),
-          uri: imageUri,
-          kind: 'front',
-          createdAt: new Date(),
-        },
-      ],
-      isDefault: profiles.length === 0,
-      createdAt: new Date(),
-    };
-
-    addProfile(newProfile);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
-    // Auto-select the new profile
-    setSelectedId(newProfileId);
-    
-    // Navigate to profile details for gender
-    router.push({
-      pathname: '/profile-details',
-      params: { profileId: newProfileId },
-    });
-  };
-
-  const handleCreateProfile = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      createProfileAndNavigate(result.assets[0].uri);
-    }
-  };
-
-  const handleTakePhoto = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) return;
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false,
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      createProfileAndNavigate(result.assets[0].uri);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -162,7 +107,7 @@ const SelectProfileScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
-          icon={require('../full3dicons/images/home.png')}
+          icon="home"
           onPress={handleClose}
           accessibilityLabel="Geri"
           variant="glass"
@@ -194,18 +139,29 @@ const SelectProfileScreen = () => {
         >
           <LabelMedium style={styles.sectionLabel}>{t('selectProfile.addNewProfile')}</LabelMedium>
           
-          <View style={styles.createOptions}>
-            <CreateCard
-              icon={require('../full3dicons/images/camera.png')}
-              label={t('selectProfile.takePhoto')}
-              onPress={handleTakePhoto}
-            />
-            <CreateCard
-              icon={require('../full3dicons/images/photo.png')}
-              label={t('selectProfile.selectFromGallery')}
-              onPress={handleCreateProfile}
-            />
-          </View>
+          <Pressable onPress={() => router.push('/add-profile')}>
+            <GlassCard style={styles.addProfileCard}>
+              <View style={styles.addProfileContent}>
+                <View style={styles.addProfileIconContainer}>
+                  <AppIcon
+                    name="plus-sign"
+                    size={28}
+                    color={Colors.accent.primary}
+                    weight="bold"
+                  />
+                </View>
+                <View style={styles.addProfileText}>
+                  <LabelMedium>{t('selectProfile.addNewProfile')}</LabelMedium>
+                  <LabelSmall color="secondary">{t('selectProfile.addProfileSubtitle')}</LabelSmall>
+                </View>
+                <AppIcon
+                  name="chevron-forward"
+                  size={20}
+                  color={Colors.text.secondary}
+                />
+              </View>
+            </GlassCard>
+          </Pressable>
         </Animated.View>
 
         {/* Existing Profiles */}
@@ -237,10 +193,10 @@ const SelectProfileScreen = () => {
         {profiles.length === 0 && (
           <Animated.View entering={FadeInDown.delay(300).springify()}>
             <GlassCard style={styles.emptyCard}>
-              <Image
-                source={require('../full3dicons/images/profile.png')}
-                style={styles.emptyIcon}
-                resizeMode="contain"
+              <AppIcon
+                name="profile"
+                size={64}
+                color={Colors.text.tertiary}
               />
               <HeadlineSmall style={styles.emptyTitle}>
                 {t('selectProfile.noProfilesYet')}
@@ -270,40 +226,6 @@ const SelectProfileScreen = () => {
         </Animated.View>
       )}
     </View>
-  );
-};
-
-// Create Card Component
-type CreateCardProps = {
-  icon: any;
-  label: string;
-  onPress: () => void;
-};
-
-const CreateCard: React.FC<CreateCardProps> = ({ icon, label, onPress }) => {
-  const scale = useSharedValue(1);
-  
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePress = () => {
-    scale.value = withSequence(
-      withSpring(0.95),
-      withSpring(1)
-    );
-    onPress();
-  };
-
-  return (
-    <Pressable onPress={handlePress} style={styles.createCardWrapper}>
-      <Animated.View style={animatedStyle}>
-        <GlassCard style={styles.createCard}>
-          <Image source={icon} style={styles.createIcon} resizeMode="contain" />
-          <LabelMedium>{label}</LabelMedium>
-        </GlassCard>
-      </Animated.View>
-    </Pressable>
   );
 };
 
@@ -393,10 +315,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                   cachePolicy="memory-disk"
                 />
               ) : (
-                <Image
-                  source={require('../full3dicons/images/profile.png')}
-                  style={styles.profilePlaceholder}
-                  resizeMode="contain"
+                <AppIcon
+                  name="profile"
+                  size={48}
+                  color={Colors.text.tertiary}
                 />
               )}
             </View>
@@ -452,22 +374,26 @@ const styles = StyleSheet.create({
   sectionLabel: {
     marginBottom: 4,
   },
-  createOptions: {
+  addProfileCard: {
+    padding: 0,
+  },
+  addProfileContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  createCardWrapper: {
-    flex: 1,
-  },
-  createCard: {
     alignItems: 'center',
-    padding: 24,
-    gap: 12,
+    padding: 20,
+    gap: 16,
   },
-  createIcon: {
-    width: 48,
-    height: 48,
+  addProfileIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.accent.primaryDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addProfileText: {
+    flex: 1,
+    gap: 4,
   },
   profilesSection: {
     gap: 12,

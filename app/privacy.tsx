@@ -78,7 +78,7 @@ const PrivacyScreen = () => {
         style={[styles.header, { paddingTop: insets.top + 8 }]}
       >
         <IconButton
-          icon={require('../full3dicons/images/home.png')}
+          icon="home"
           onPress={() => router.back()}
           accessibilityLabel="Geri"
           variant="glass"
@@ -149,7 +149,7 @@ const PrivacyScreen = () => {
             <BodySmall color="tertiary" style={styles.contactText}>
               {t('privacy.contact')}
             </BodySmall>
-            <LabelMedium color="accent">support@wearify.app</LabelMedium>
+            <LabelMedium color="accent">support@veyra.app</LabelMedium>
           </View>
         </Animated.View>
 

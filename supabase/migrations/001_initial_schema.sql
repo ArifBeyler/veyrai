@@ -1,4 +1,4 @@
--- Wearify - Initial Database Schema
+-- Veyra - Initial Database Schema
 -- =============================================
 
 -- Enable UUID extension

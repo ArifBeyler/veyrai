@@ -37,6 +37,7 @@ import {
 } from '../../src/ui/Typography';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
+import { AppIcon } from '../../src/utils/iconHelper';
 import { useSessionStore } from '../../src/state/useSessionStore';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { useTheme } from '../../src/theme';
@@ -281,10 +282,11 @@ const EmptyStateView: React.FC<{ onPress: () => void; t: (key: string) => string
       <View style={styles.emptyCard}>
         {/* Icon with subtle animation */}
         <Animated.View style={iconAnimatedStyle}>
-          <Image
-            source={require('../../full3dicons/images/photo.png')}
-            style={styles.emptyIcon}
-            resizeMode="contain"
+          <AppIcon
+            name="photo"
+            size={96}
+            color={Colors.text.tertiary}
+            weight="regular"
           />
         </Animated.View>
 

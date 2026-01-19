@@ -1,4 +1,4 @@
-Help me integrate RevenueCat SDK into my Wearify app. I need to:
+Help me integrate RevenueCat SDK into my Veyra app. I need to:
 
 1. Install the RevenueCat SDK using npm
    - npm: npm install --save react-native-purchases react-native-purchases-ui
@@ -8,7 +8,7 @@ Help me integrate RevenueCat SDK into my Wearify app. I need to:
 
 3. Set up basic subscription functionality in React Native
 
-4. Set up entitlement checking for: wearify Pro
+4. Set up entitlement checking for: veyra Pro
 
 5. Handle customer info and purchases
 
@@ -22,7 +22,7 @@ Please provide step-by-step instructions for React Native implementation with np
 - Error handling
 - Best practices for subscription management
 - Customer info retrieval
-- Entitlement checking for wearify Pro
+- Entitlement checking for veyra Pro
 - Present a RevenueCat Paywall (https://www.revenuecat.com/docs/tools/paywalls)
 - When it makes sense: Add support for Customer Center (https://www.revenuecat.com/docs/tools/customer-center)
 - Product configuration and offering setup

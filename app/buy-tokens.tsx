@@ -33,6 +33,7 @@ import {
   LabelSmall,
 } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
+import { AppIcon } from '../src/utils/iconHelper';
 import { useRevenueCat } from '../src/hooks/useRevenueCat';
 import { supabase } from '../src/services/supabase';
 import { useTranslation } from '../src/hooks/useTranslation';
@@ -44,7 +45,7 @@ const { width } = Dimensions.get('window');
 // Token paketleri - Product ID'ler App Store Connect ile eşleşmeli
 const TOKEN_PACKAGES = [
   {
-    id: 'com.wearify.tokens10',
+    id: 'com.veyra.tokens10',
     tokens: 10,
     price: 2.99,
     priceString: '$2.99',
@@ -52,7 +53,7 @@ const TOKEN_PACKAGES = [
     popular: false,
   },
   {
-    id: 'com.wearify.tokens50',
+    id: 'com.veyra.tokens50',
     tokens: 50,
     price: 9.99,
     priceString: '$9.99',
@@ -61,7 +62,7 @@ const TOKEN_PACKAGES = [
     bonus: 10, // +10 bonus token
   },
   {
-    id: 'com.wearify.tokens100',
+    id: 'com.veyra.tokens100',
     tokens: 100,
     price: 14.99,
     priceString: '$14.99',
@@ -70,7 +71,7 @@ const TOKEN_PACKAGES = [
     bonus: 30, // +30 bonus token
   },
   {
-    id: 'com.wearify.tokens250',
+    id: 'com.veyra.tokens250',
     tokens: 250,
     price: 29.99,
     priceString: '$29.99',
@@ -84,7 +85,7 @@ const BuyTokensScreen = () => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const [selectedPackage, setSelectedPackage] = useState<string>('com.wearify.tokens50');
+  const [selectedPackage, setSelectedPackage] = useState<string>('com.veyra.tokens50');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentModal, setPaymentModal] = useState<{
     visible: boolean;
@@ -252,10 +253,11 @@ const BuyTokensScreen = () => {
             />
             <View style={styles.balanceContent}>
               <Animated.View style={[styles.balanceIconContainer, sparkleStyle]}>
-                <Image
-                  source={require('../full3dicons/images/sparkle.png')}
-                  style={styles.balanceIcon}
-                  resizeMode="contain"
+                <AppIcon
+                  name="sparkle"
+                  size={32}
+                  color={theme.colors.accent}
+                  weight="fill"
                 />
               </Animated.View>
               <View style={styles.balanceText}>

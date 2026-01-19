@@ -6,7 +6,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme, ThemeId, THEMES, DEFAULT_THEME, getTheme } from './themes';
 
-const THEME_STORAGE_KEY = 'wearify-theme';
+const THEME_STORAGE_KEY = 'veyra-theme';
 
 type ThemeContextType = {
   theme: Theme;

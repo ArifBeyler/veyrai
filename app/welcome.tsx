@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '../src/ui/theme';
 import { HeadlineLarge, BodyLarge, BodyMedium, LabelMedium, EditorialText } from '../src/ui/Typography';
 import { PrimaryButton } from '../src/ui/PrimaryButton';
@@ -39,12 +40,20 @@ const WelcomeScreen = () => {
         <View style={styles.brandSection}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../full3dicons/images/t-shirts.png')}
+              source={require('../assets/images/logoveyra.png')}
               style={styles.logo}
-              resizeMode="contain"
+              contentFit="contain"
             />
           </View>
-          <LabelMedium color="tertiary" style={styles.brandLabel}>VIRTUAL TRY-ON</LabelMedium>
+          <EditorialText 
+            weight="regular" 
+            size={32} 
+            lineHeight={40}
+            letterSpacing={-1.5}
+            style={styles.brandLabel}
+          >
+            Veyra
+          </EditorialText>
         </View>
 
         {/* Main Title - Canela for hero headline */}
@@ -135,11 +144,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.06)',
   },
   logo: {
-    width: 64,
-    height: 64,
+    width: 80,
+    height: 80,
   },
   brandLabel: {
-    letterSpacing: 3,
+    color: Colors.text.primary,
+    marginTop: 12,
   },
   titleSection: {
     alignItems: 'center',

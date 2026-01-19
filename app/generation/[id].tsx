@@ -31,6 +31,7 @@ import { useSessionStore } from '../../src/state/useSessionStore';
 import { useTranslation } from '../../src/hooks/useTranslation';
 import { GlassCard } from '../../src/ui/GlassCard';
 import { IconButton } from '../../src/ui/IconButton';
+import { AppIcon } from '../../src/utils/iconHelper';
 import { PrimaryButton } from '../../src/ui/PrimaryButton';
 import { BorderRadius, Colors, Spacing } from '../../src/ui/theme';
 import {
@@ -418,7 +419,7 @@ const GenerationScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
-          icon={require('../../full3dicons/images/home.png')}
+          icon="home"
           onPress={handleClose}
           accessibilityLabel={t('generation.home')}
           variant="glass"
@@ -516,10 +517,11 @@ const GenerationScreen = () => {
                     colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
                     style={styles.actionButtonGradient}
                   >
-                    <Image
-                      source={require('../../full3dicons/images/photo.png')}
-                      style={styles.actionIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="gallery"
+                      size={20}
+                      color={Colors.text.primary}
+                      weight="regular"
                     />
                     <LabelMedium style={styles.actionButtonText}>{t('common.save')}</LabelMedium>
                   </LinearGradient>
@@ -530,10 +532,11 @@ const GenerationScreen = () => {
                     colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
                     style={styles.actionButtonGradient}
                   >
-                    <Image
-                      source={require('../../full3dicons/images/sparkle.png')}
-                      style={styles.actionIcon}
-                      resizeMode="contain"
+                    <AppIcon
+                      name="sparkle"
+                      size={20}
+                      color={Colors.text.primary}
+                      weight="fill"
                     />
                     <LabelMedium style={styles.actionButtonText}>{t('generation.share')}</LabelMedium>
                   </LinearGradient>
@@ -556,11 +559,14 @@ const GenerationScreen = () => {
                     />
                   </Animated.View>
 
-                  <Animated.Image
-                    source={require('../../full3dicons/images/ai-sparkle.png')}
-                    style={[styles.processingIcon, iconStyle]}
-                    resizeMode="contain"
-                  />
+                  <Animated.View style={[styles.processingIcon, iconStyle]}>
+                    <AppIcon
+                      name="ai-sparkle"
+                      size={48}
+                      color={Colors.accent.primary}
+                      weight="fill"
+                    />
+                  </Animated.View>
                 </View>
               </GlassCard>
             </Animated.View>
